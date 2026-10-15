@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>바오밥 싹 감별 AI</title>
+<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gowun+Dodum&display=swap">
 <style>
@@ -126,10 +127,14 @@ th{white-space:nowrap}
 .redo{border:2px solid var(--bad);background:var(--rose-bg);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px}
 .redo strong{font-family:var(--display);font-size:1.35rem;line-height:1.2}
 .redo p{margin:0}
+.tbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 10px;border:1.5px dashed var(--accent);border-radius:10px;font-size:.85rem;color:var(--muted)}
+.tbar button{font:inherit;font-size:.85rem;padding:5px 10px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.tbar button:disabled{opacity:.5}
 .ask{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px}
 </style>
 
 <div class="wrap">
+  <div class="tbar" id="tbar" hidden><b>선생님 바로가기</b><button data-j="1">1 가르치기</button><button data-j="m">중간 점검 결과</button><button data-j="2">2 AI 시험 결과</button><button data-j="3">3 엉터리 (1)</button><button data-j="4">4 엉터리 (2)</button><button data-j="5">마무리</button><span id="tbarMsg"></span></div>
   <header>
     <h1>바오밥 싹 감별 AI</h1>
     <p class="lead">어린 왕자의 별에서는 바오밥 싹과 장미 싹이 처음엔 아주 비슷해요. AI에게 둘을 구별하는 법을 가르쳐 봐요.</p>
@@ -337,7 +342,7 @@ let myRule="", runId=0, fast=false, skip=false, pending=false, resetArm=0;
 function cellHTML(s,p){const hit=p===(s.kind==="B"?1:0);return `<div class="cell ${hit?"ok":"no"}">${drawSprout(s,1)}<span>${p?"바오밥":"장미"}</span></div>`;}
 const TITLES=["30개를 배운 AI의 시험","틀린 이름표를 배운 AI의 시험","편식한 AI의 시험"];
 async function runTest(isMid){
-  const id=++runId; model=train(); fast=false; skip=false; mid=!!isMid; pending=false; $("retest").disabled=true;
+  const id=++runId; model=train(); fast=false; skip=instant; mid=!!isMid; pending=false; $("retest").disabled=true;
   if(phase===1) done.add(3); if(phase===2) done.add(4);
   const preds=test.map(s=>predict(model,s));
   show(2); $("testTitle").textContent=mid?"중간 점검: 5개만 배운 AI":TITLES[phase];
@@ -418,9 +423,10 @@ $("goNext").onclick=()=>{
   else if(phase===1){phase=2;$("teachBox").hidden=true;$("addSkew").disabled=false;$("toast3").textContent="버튼을 눌러 우리 반 AI를 편식시켜 보세요. 아래 막대 색을 지켜보세요.";show(4);}
   else show(5);
 };
-let tRun=0,tSkip=false;
+let tRun=0,tSkip=false,instant=false;
 /* mode: "wrong" 틀린 이름표 넣기, "remove" 공책에서 빼기, "add" 바르게 넣기 */
 async function teachAnim(items,mode,id){
+  if(instant) tSkip=true;
   const box=$("teachBox"),slot=$("tSlot"),tag=$("tTag"),truth=$("tTruth"),bed=$("tBed"); box.hidden=false; $("tSkip").disabled=false;
   for(let i=0;i<items.length;i++){
     if(id!==tRun) return false;
@@ -476,11 +482,33 @@ $("goTeach").onclick=()=>{const v=$("myRule").value.trim();if(!v){$("ruleErr").t
 $("myRule").oninput=()=>{$("ruleErr").textContent="";};
 $("reset").onclick=()=>{
   if(Date.now()-resetArm>4000){resetArm=Date.now();$("reset").textContent="정말 처음부터 할까요? 한 번 더 누르세요";setTimeout(()=>{$("reset").textContent="처음부터 다시";},4000);return;}
-  resetArm=0;$("reset").textContent="처음부터 다시";tRun++;stopScan();$("teachBox").hidden=true;
+  resetArm=0;$("reset").textContent="처음부터 다시";resetAll();
+  $("toast1").textContent="새로 시작했어요. 시험 문제 20개도 새로 바뀌었어요.";
+};
+function resetAll(){
+  tRun++;stopScan();$("teachBox").hidden=true;
   phase=0;baseTry=0;$("redo").hidden=true;done=new Set();results={};pending=false;$("retest").disabled=true;mid=false;$("teachMore").hidden=true;$("goNext").hidden=false;$("goNext").textContent="엉터리 선생님 (1) 해 보기";
   data=[];round=0;model=null;current=makeSprout();test=Array.from({length:TN},()=>makeSprout(null,true));
   $("log").innerHTML=`<tr><td colspan="4" class="note">아직 시험을 보지 않았어요.</td></tr>`;
-  $("toast1").textContent="새로 시작했어요. 시험 문제 20개도 새로 바뀌었어요.";$("toast3").textContent="";myRule="";$("myRule").value="";$("mineShow").textContent="";show(0);
+  $("toast1").textContent="";$("toast3").textContent="";myRule="";$("myRule").value="";$("mineShow").textContent="";show(0);
+}
+/* 선생님 바로가기: 학생용 주소(github.io)에서는 ?teacher 를 붙였을 때만 보여요 */
+if(!/github\.io$/.test(location.hostname)||/teacher/.test(location.search))$("tbar").hidden=false;
+function teachN(n){for(let i=0;i<n;i++){const s=current;data.push({s,y:s.kind==="B"?1:0,manual:true});current=makeSprout();}}
+$("tbar").onclick=async e=>{
+  const b=e.target.closest("button");if(!b)return;const j=b.dataset.j;
+  $("tbar").querySelectorAll("button").forEach(x=>x.disabled=true);$("tbarMsg").textContent="예시 데이터로 채우는 중…";
+  instant=true;
+  try{
+    resetAll();myRule="줄기가 굵으면 바오밥 싹 (예시)";$("myRule").value=myRule;$("mineShow").textContent="내가 세운 기준: "+myRule;done.add(0);
+    if(j==="1"){show(1);}
+    else{
+      teachN(5);await runTest(true);
+      if(j!=="m"){teachN(25);done.add(1);await runTest(false);
+        if(j!=="2"){$("goNext").click();
+          if(j!=="3"){await $("addWrong").onclick();await runTest(false);$("goNext").click();
+            if(j!=="4"){await $("addSkew").onclick();await runTest(false);$("goNext").click();}}}}}
+  }finally{instant=false;$("tbar").querySelectorAll("button").forEach(x=>x.disabled=false);$("tbarMsg").textContent="";window.scrollTo(0,0);}
 };
 $("lab").hidden=true;
 render1();
