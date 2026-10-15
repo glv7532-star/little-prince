@@ -89,6 +89,20 @@ h1{font-family:var(--display);font-weight:700;font-size:2.1rem;line-height:1.1;m
 .final{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
 .final canvas{width:100%;max-width:320px;aspect-ratio:1;border-radius:10px;border:1px solid var(--line);image-rendering:pixelated}
 .final .t{font-family:var(--display);font-size:2rem;line-height:1.1;word-break:keep-all}
+.code span.cur{background:var(--accent);color:var(--paper)!important;border-radius:3px}
+.guess{display:grid;grid-template-columns:minmax(0,320px) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:620px){.guess{grid-template-columns:1fr}}
+.guess canvas{width:100%;aspect-ratio:1;border-radius:10px;border:1px solid var(--line);image-rendering:pixelated}
+.res{font-family:var(--display);font-size:1.6rem;line-height:1.1}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.choices .btn.no{text-decoration:line-through;opacity:.5}
+.strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.strip figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:4px}
+.strip canvas{width:100%;aspect-ratio:1;border-radius:6px;border:1px solid var(--line);image-rendering:pixelated}
+.strip figcaption{font-size:.85rem;text-align:center;font-variant-numeric:tabular-nums}
+.strip figure.hit canvas{outline:3px solid var(--ok);outline-offset:1px}
+.recs{margin:0;padding-left:1.2em;font-size:.92rem}
+.card h3{font-family:var(--display);font-size:1.3rem;margin:4px 0 0;line-height:1.2}
 .link{background:none;border:none;color:var(--muted);text-decoration:underline;font:inherit;font-size:.88rem;cursor:pointer;padding:0;align-self:flex-start}
 </style>
 </head>
@@ -97,7 +111,7 @@ h1{font-family:var(--display);font-weight:700;font-size:2.1rem;line-height:1.1;m
 <div class="wrap">
   <header>
     <h1>숫자로 그리는 그림</h1>
-    <p class="lead">어른들은 숫자로 말해야 알아듣는대요. 컴퓨터도 마찬가지예요. 그림을 숫자로 바꿔 볼까요?</p>
+    <p class="lead">어른들에게 그림을 보여 주면 모자라고 해요. 하지만 숫자로 말하면 금방 알아듣지요. 컴퓨터도 그래요. 우리 그림을 숫자로 바꿔 볼까요?</p>
   </header>
 
   <nav class="steps" aria-label="단계">
@@ -110,7 +124,7 @@ h1{font-family:var(--display);font-weight:700;font-size:2.1rem;line-height:1.1;m
   <!-- 1단계 -->
   <section class="card" id="step1">
     <h2>숫자만 보고 그림을 완성해요</h2>
-    <p class="note">1은 칠하고 0은 비워 두어요. 위에서부터 한 줄씩 칠해 보세요. 어떤 그림이 숨어 있을까요?</p>
+    <p class="note">소행성 B612처럼, 어른들과 컴퓨터는 숫자를 좋아해요. 1은 칠하고 0은 비워 두어요. 위에서부터 한 줄씩 칠해 보세요. 어떤 그림이 숨어 있을까요?</p>
     <div class="split">
       <div class="grid g8" id="g1" style="grid-template-columns:repeat(8,1fr)"></div>
       <div class="codebox"><p>숨은 그림의 숫자</p><pre class="code big" id="code1"></pre></div>
@@ -120,7 +134,7 @@ h1{font-family:var(--display);font-weight:700;font-size:2.1rem;line-height:1.1;m
       <button class="btn primary" id="check1">다 칠했어요</button>
     </div>
     <p class="toast" id="toast1" role="status"></p>
-    <div class="row" id="next1Row" hidden><button class="btn primary" id="next1">내 그림 그리러 가기</button><button class="btn" id="again1">다른 숨은 그림 하기</button></div>
+    <div class="row" id="next1Row" hidden><button class="btn primary" id="next1">내 그림 그리러 가기</button><button class="btn" id="read1">컴퓨터처럼 읽어 보기</button><button class="btn" id="again1">다른 숨은 그림 하기</button></div>
   </section>
 
   <!-- 2단계 -->
@@ -156,15 +170,30 @@ h1{font-family:var(--display);font-weight:700;font-size:2.1rem;line-height:1.1;m
 
   <!-- 3단계 -->
   <section class="card" id="step3" hidden>
-    <h2>칸 수가 줄어들면?</h2>
-    <p class="note">내 그림을 더 적은 칸으로 바꿔 보았어요. 칸이 적을수록 숫자도 적어져요.</p>
+    <h2>몇 칸이면 알아볼까?</h2>
+    <p class="note">어린 왕자 이야기에 나오는 그림 하나가 숨어 있어요. 처음엔 4×4 칸, 숫자 16개뿐이에요. 무엇인지 알 것 같으면 고르고, 모르겠으면 칸을 늘려 보세요.</p>
+    <div class="guess">
+      <canvas id="gq" width="320" height="320"></canvas>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div><span class="res" id="gRes">4 × 4</span><p class="note">숫자 <b id="gNum">16</b>개로 그린 그림</p></div>
+        <div class="choices" id="gChoices"></div>
+        <button class="btn" id="gMore">칸 늘리기</button>
+        <p class="toast" id="gToast" role="status"></p>
+      </div>
+    </div>
+    <div id="gDone" hidden style="display:flex;flex-direction:column;gap:10px">
+      <div class="strip" id="gStrip"></div>
+      <button class="btn" id="gAgain" style="align-self:flex-start">다른 그림으로 한 번 더</button>
+    </div>
+    <div id="gRecBox" hidden><p class="note" style="margin-bottom:4px">내가 알아본 기록</p><ul class="recs" id="gRecs"></ul></div>
+    <h3>내 그림도 칸을 줄여 보면?</h3>
     <div class="cmp">
       <figure><canvas id="cv16" width="160" height="160"></canvas><figcaption><b>16 × 16</b>숫자 256개</figcaption></figure>
       <figure><canvas id="cv8" width="160" height="160"></canvas><figcaption><b>8 × 8</b>숫자 64개</figcaption></figure>
       <figure><canvas id="cv4" width="160" height="160"></canvas><figcaption><b>4 × 4</b>숫자 16개</figcaption></figure>
     </div>
     <ol class="ask">
-      <li>칸이 줄어들면서 사라진 것은 무엇인가요?</li>
+      <li>몇 칸부터 그림을 알아볼 수 있었나요? 친구와 비교해 보세요.</li>
       <li>칸이 많으면 좋은 점과 불편한 점은 무엇일까요?</li>
     </ol>
     <div class="row">
@@ -202,7 +231,7 @@ h1{font-family:var(--display);font-weight:700;font-size:2.1rem;line-height:1.1;m
       <span class="badge" id="finTopic"></span>
       <canvas id="cvFin" width="320" height="320"></canvas>
       <span class="t" id="finTitle"></span>
-      <p class="note">이 그림은 숫자 256개로 저장되어 있어요. 숫자만 있으면 누구나 똑같은 그림을 다시 그릴 수 있어요.</p>
+      <p class="note">이 그림은 숫자 256개로 저장되어 있어요. 숫자만 있으면 B612에 있는 어린 왕자도 지구에서 보낸 내 그림을 똑같이 볼 수 있어요.</p>
     </div>
     <div class="row"><button class="btn" id="back5">4단계 하기 (선택)</button></div>
   </section>
@@ -238,7 +267,18 @@ function makeGrid(el,n,cells,getColor,onChange,can=()=>true){
   window.addEventListener("pointercancel",()=>{painting=false;});
 }
 function render(el,cells){[...el.children].forEach((c,i)=>{c.className=cells[i]?"v"+cells[i]:"";});}
-function codeHTML(cells,n,colored){let s="";for(let r=0;r<n;r++){s+=cells.slice(r*n,r*n+n).map(v=>v?`<span class="${colored?"k"+v:"d1"}">${v}</span>`:"0").join("")+(r<n-1?"\n":"");}return s;}
+function codeHTML(cells,n,colored){let s="";for(let r=0;r<n;r++){s+=cells.slice(r*n,r*n+n).map(v=>`<span class="${v?(colored?"k"+v:"d1"):""}">${v}</span>`).join("")+(r<n-1?"\n":"");}return s;}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+let animating=false;
+async function readAnim(gridEl,codeEl,cells,n){
+  animating=true;const kids=gridEl.children,spans=codeEl.querySelectorAll("span");
+  if(!reduce){for(const k of kids)k.className="";
+    for(let i=0;i<n*n;i++){if(i)spans[i-1].classList.remove("cur");spans[i].classList.add("cur");kids[i].className=cells[i]?"v"+cells[i]:"";await sleep(i<n?140:45);}
+    spans[n*n-1].classList.remove("cur");}
+  else render(gridEl,cells);
+  animating=false;
+}
 function palette(el,get,set){el.innerHTML=COLORS.map(([k,name,c])=>`<button class="sw" data-k="${k}" aria-pressed="false"><span style="background:${c}"></span>${name} <b>${k}</b></button>`).join("");
   const upd=()=>el.querySelectorAll(".sw").forEach(b=>b.setAttribute("aria-pressed",+b.dataset.k===get()?"true":"false"));
   el.onclick=e=>{const b=e.target.closest(".sw");if(!b)return;set(+b.dataset.k);upd();};upd();}
@@ -252,7 +292,7 @@ let s1=new Array(64).fill(0),answer=null,ansName="",lastName="";
 function newShape(){const pool=NAMES.filter(x=>x!==lastName);ansName=pool[Math.floor(Math.random()*pool.length)];lastName=ansName;answer=SHAPES[ansName].join("").split("").map(Number);
   s1.fill(0);render1();$("code1").innerHTML=codeHTML(answer,8,false);$("toast1").textContent="";$("toast1").className="toast";$("next1Row").hidden=true;$("check1").disabled=false;}
 function render1(){render($("g1"),s1);}
-makeGrid($("g1"),8,s1,()=>1,()=>{render1();[...$("g1").children].forEach(c=>c.classList.remove("wrong"));});
+makeGrid($("g1"),8,s1,()=>1,()=>{render1();[...$("g1").children].forEach(c=>c.classList.remove("wrong"));},()=>!$("check1").disabled&&!animating);
 $("clear1").onclick=()=>{s1.fill(0);render1();$("toast1").textContent="";};
 $("check1").onclick=()=>{
   const wrong=[];for(let i=0;i<64;i++)if(s1[i]!==answer[i])wrong.push(i);
@@ -261,7 +301,8 @@ $("check1").onclick=()=>{
   if(!wrong.length){t.className="toast ok";t.textContent=`정답! 숨은 그림은 '${ansName}'${josa(ansName)}. 숫자 64개만으로 그림이 전해졌어요.`;$("next1Row").hidden=false;$("check1").disabled=true;done.add(1);}
   else{t.className="toast bad";t.textContent=`빨간 테두리 칸 ${wrong.length}개를 숫자와 다시 비교해 보세요.`;}
 };
-$("again1").onclick=newShape;
+$("again1").onclick=()=>{if(!animating)newShape();};
+$("read1").onclick=async()=>{if(animating)return;[...$("g1").children].forEach(c=>c.classList.remove("wrong"));const t=$("toast1");t.className="toast";t.textContent="컴퓨터가 숫자를 한 칸씩 읽고 있어요…";$("read1").disabled=$("again1").disabled=$("next1").disabled=true;await readAnim($("g1"),$("code1"),answer,8);t.className="toast ok";t.textContent="컴퓨터는 이렇게 숫자를 한 칸씩 읽어서 그림을 그려요. 우리가 칠한 것과 똑같지요?";$("read1").disabled=$("again1").disabled=$("next1").disabled=false;};
 $("next1").onclick=()=>show(2);
 
 /* 2단계 */
@@ -279,6 +320,7 @@ $("done2").onclick=()=>{
   done.add(2);
   const s8=shrink(s2,16),s4=shrink(s8,8);
   drawCanvas($("cv16"),s2,16);drawCanvas($("cv8"),s8,8);drawCanvas($("cv4"),s4,4);
+  if(!gName)newGuess();
   show(3);
 };
 $("back3").onclick=()=>show(2);
@@ -286,10 +328,40 @@ $("finish3").onclick=()=>{done.add(3);$("finTopic").textContent="주제: "+topic
 $("go4").onclick=()=>{done.add(3);show(4);};
 $("back5").onclick=()=>show(4);
 
+/* 3단계: 몇 칸이면 알아볼까 */
+const PICS={
+  "장미":c=>{c.fillStyle="#4f9a45";c.fillRect(122,120,12,120);c.beginPath();c.ellipse(96,180,30,13,-0.5,0,7);c.fill();c.beginPath();c.ellipse(160,160,30,13,0.5,0,7);c.fill();c.fillStyle="#d64550";c.beginPath();c.arc(128,90,50,0,7);c.fill();c.strokeStyle="#8f1f2b";c.lineWidth=8;c.beginPath();c.arc(128,90,22,0.5,5.5);c.stroke();},
+  "여우":c=>{c.fillStyle="#e07b2e";c.beginPath();c.moveTo(48,90);c.lineTo(78,18);c.lineTo(112,82);c.lineTo(144,82);c.lineTo(178,18);c.lineTo(208,90);c.lineTo(128,220);c.closePath();c.fill();c.fillStyle="#fbf7ee";c.beginPath();c.moveTo(92,150);c.lineTo(164,150);c.lineTo(128,220);c.closePath();c.fill();c.fillStyle="#2f3a2c";c.beginPath();c.arc(98,118,9,0,7);c.arc(158,118,9,0,7);c.fill();c.beginPath();c.arc(128,208,9,0,7);c.fill();},
+  "왕관":c=>{c.fillStyle="#e8b923";c.beginPath();c.moveTo(40,200);c.lineTo(40,80);c.lineTo(84,130);c.lineTo(128,60);c.lineTo(172,130);c.lineTo(216,80);c.lineTo(216,200);c.closePath();c.fill();c.fillStyle="#d64550";c.beginPath();c.arc(128,160,14,0,7);c.fill();c.fillStyle="#2d5d7b";c.beginPath();c.arc(78,170,10,0,7);c.arc(178,170,10,0,7);c.fill();},
+  "가로등":c=>{c.fillStyle="#f6e08a";c.beginPath();c.arc(128,80,62,0,7);c.fill();c.fillStyle="#3d4a5c";c.fillRect(120,90,16,150);c.fillRect(92,60,72,30);c.fillRect(100,232,56,14);c.fillStyle="#f2c94c";c.fillRect(102,90,52,16);},
+  "보아뱀":c=>{c.fillStyle="#8a5a2b";c.beginPath();c.moveTo(16,200);c.bezierCurveTo(60,190,70,150,96,100);c.bezierCurveTo(120,50,170,60,184,130);c.bezierCurveTo(196,180,230,190,244,200);c.closePath();c.fill();},
+  "양":c=>{c.fillStyle="#ffffff";c.strokeStyle="#9aa39a";c.lineWidth=4;for(const [x,y,r] of [[90,120,34],[130,105,38],[170,122,34],[110,150,34],[155,152,34]]){c.beginPath();c.arc(x,y,r,0,7);c.fill();c.stroke();}c.fillStyle="#2f3a2c";c.beginPath();c.ellipse(208,110,20,26,0,0,7);c.fill();c.fillRect(100,176,12,46);c.fillRect(150,176,12,46);}
+};
+const LV=[4,8,16,32];
+let gName="",gLv=0,gOver=false,gLast="";
+function srcCanvas(name){const c=document.createElement("canvas");c.width=c.height=256;const x=c.getContext("2d");x.fillStyle="#dde8ef";x.fillRect(0,0,256,256);PICS[name](x);return c;}
+function pixelate(cv,src,n){const t=document.createElement("canvas");t.width=t.height=n;const tx=t.getContext("2d");tx.imageSmoothingEnabled=true;tx.imageSmoothingQuality="high";
+  let cur=src;while(cur.width/2>=n*2){const h=document.createElement("canvas");h.width=h.height=cur.width/2;const hx=h.getContext("2d");hx.imageSmoothingQuality="high";hx.drawImage(cur,0,0,h.width,h.height);cur=h;}
+  tx.drawImage(cur,0,0,n,n);const x=cv.getContext("2d");x.imageSmoothingEnabled=false;x.clearRect(0,0,cv.width,cv.height);x.drawImage(t,0,0,cv.width,cv.height);}
+function gDraw(){const n=LV[gLv];pixelate($("gq"),srcCanvas(gName),n);$("gRes").textContent=`${n} × ${n}`;$("gNum").textContent=n*n;$("gMore").disabled=gOver||gLv>=LV.length-1;}
+function newGuess(){const names=Object.keys(PICS).filter(x=>x!==gLast);gName=names[Math.floor(Math.random()*names.length)];gLast=gName;gLv=0;gOver=false;
+  const others=Object.keys(PICS).filter(x=>x!==gName).sort(()=>Math.random()-.5).slice(0,3);const opts=[gName,...others].sort(()=>Math.random()-.5);
+  $("gChoices").innerHTML=opts.map(o=>`<button class="btn" data-o="${o}">${o}</button>`).join("");$("gToast").textContent="";$("gToast").className="toast";$("gDone").hidden=true;gDraw();}
+$("gMore").onclick=()=>{if(gLv<LV.length-1){gLv++;gDraw();$("gToast").className="toast";$("gToast").textContent=`칸이 늘어나서 숫자가 ${LV[gLv]*LV[gLv]}개가 되었어요.`;}};
+$("gChoices").onclick=e=>{const b=e.target.closest(".btn");if(!b||gOver||b.disabled)return;
+  if(b.dataset.o===gName){gOver=true;const n=LV[gLv];$("gToast").className="toast ok";$("gToast").textContent=`정답! ${n}×${n} 칸, 숫자 ${n*n}개로 알아봤어요.`;
+    $("gChoices").querySelectorAll(".btn").forEach(x=>x.disabled=true);$("gMore").disabled=true;
+    $("gStrip").innerHTML=LV.map((k,i)=>`<figure class="${i===gLv?"hit":""}"><canvas width="120" height="120"></canvas><figcaption>${k}×${k}<br>숫자 ${k*k}개</figcaption></figure>`).join("");
+    const src=srcCanvas(gName);$("gStrip").querySelectorAll("canvas").forEach((cv,i)=>pixelate(cv,src,LV[i]));$("gDone").hidden=false;
+    $("gRecs").insertAdjacentHTML("beforeend",`<li>${gName}: ${n}×${n} 칸 (숫자 ${n*n}개)에서 알아봤어요</li>`);$("gRecBox").hidden=false;}
+  else{b.disabled=true;b.classList.add("no");$("gToast").className="toast bad";$("gToast").textContent=gLv<LV.length-1?"아니에요. 칸을 늘리면 더 잘 보일 거예요.":"아니에요. 다른 것을 골라 보세요.";}
+};
+$("gAgain").onclick=newGuess;
+
 /* 4단계 */
 let s4=new Array(64).fill(0),col4=1,role="",hidden4=false;
 palette($("pal4"),()=>col4,v=>{col4=v;});
-makeGrid($("g4"),8,s4,()=>col4,()=>{render($("g4"),s4);$("code4").innerHTML=codeHTML(s4,8,true);},()=>!hidden4);
+makeGrid($("g4"),8,s4,()=>col4,()=>{render($("g4"),s4);$("code4").innerHTML=codeHTML(s4,8,true);},()=>!hidden4&&!animating);
 function setRole(r){
   role=r;hidden4=false;s4.fill(0);render($("g4"),s4);$("g4").classList.remove("hide");$("code4").innerHTML=codeHTML(s4,8,true);
   $("roleS").setAttribute("aria-pressed",r==="S"?"true":"false");$("roleR").setAttribute("aria-pressed",r==="R"?"true":"false");
@@ -299,10 +371,10 @@ function setRole(r){
     $("code4Label").textContent="내 그림의 숫자";
     $("row4").innerHTML=`<button class="btn" id="clr4">모두 지우기</button><button class="btn primary" id="hide4">숫자만 보이기</button>`;
     $("clr4").onclick=()=>{if(hidden4)return;s4.fill(0);render($("g4"),s4);$("code4").innerHTML=codeHTML(s4,8,true);};
-    $("hide4").onclick=()=>{
+    $("hide4").onclick=async()=>{
       if(!hidden4){if(s4.filter(v=>v).length<5){$("toast4").className="toast bad";$("toast4").textContent="칸을 5개 이상 칠해야 보낼 수 있어요.";return;}
         hidden4=true;$("g4").classList.add("hide");$("pal4").hidden=true;$("hide4").textContent="그림 보기";$("toast4").className="toast";$("toast4").textContent="이제 짝에게 숫자를 보여 주거나 불러 주세요. 짝이 다 칠하면 '그림 보기'를 눌러 서로 비교해요.";}
-      else{hidden4=false;$("g4").classList.remove("hide");$("hide4").textContent="숫자만 보이기";$("pal4").hidden=false;$("toast4").className="toast ok";$("toast4").textContent="짝의 그림과 똑같나요? 숫자만으로 그림이 그대로 복제되었어요. 역할을 바꿔 한 번 더 해 보세요.";done.add(4);}
+      else{if(animating)return;$("hide4").disabled=true;$("toast4").className="toast";$("toast4").textContent="숫자를 한 칸씩 읽어서 그림을 되살리는 중…";const g=$("g4");[...g.children].forEach(c=>c.className="");g.classList.remove("hide");await readAnim(g,$("code4"),s4,8);hidden4=false;$("hide4").disabled=false;$("hide4").textContent="숫자만 보이기";$("pal4").hidden=false;$("toast4").className="toast ok";$("toast4").textContent="짝의 그림과 똑같나요? 숫자만으로 그림이 그대로 복제되었어요. 역할을 바꿔 한 번 더 해 보세요.";done.add(4);}
     };
   }else{
     $("guide4").textContent="짝이 보여 주는 숫자를 보고 똑같이 칠해요. 내가 칠한 칸도 오른쪽에서 숫자로 바뀌니, 짝의 숫자와 한 줄씩 비교해 보세요.";
@@ -318,7 +390,7 @@ $("roleS").onclick=()=>setRole("S");$("roleR").onclick=()=>setRole("R");
 let resetArm=0;
 $("reset").onclick=()=>{
   if(Date.now()-resetArm>4000){resetArm=Date.now();$("reset").textContent="정말 처음부터 할까요? 한 번 더 누르세요";setTimeout(()=>{$("reset").textContent="처음부터 다시";},4000);return;}
-  resetArm=0;$("reset").textContent="처음부터 다시";done.clear();
+  resetArm=0;$("reset").textContent="처음부터 다시";done.clear();gName="";$("gRecs").innerHTML="";$("gRecBox").hidden=true;
   s2.fill(0);render($("g2"),s2);$("code2").innerHTML=codeHTML(s2,16,true);topic="";$("title2").value="";$("err2").textContent="";$("drawArea").hidden=true;$("topics").querySelectorAll(".topic").forEach(x=>x.setAttribute("aria-pressed","false"));
   role="";$("area4").hidden=true;$("roleS").setAttribute("aria-pressed","false");$("roleR").setAttribute("aria-pressed","false");
   newShape();show(1);
