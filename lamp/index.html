@@ -150,10 +150,10 @@ th{color:var(--muted);font-weight:400;white-space:nowrap}
   <!-- 2단계 -->
   <section class="card" id="step2" hidden>
     <h2>별이 빨라지면 어떻게 될까?</h2>
-    <p class="note">왼쪽은 정해진 시각마다 켜고 끄는 가로등 켜는 사람(1세대), 오른쪽은 내가 설계한 자동 가로등(2세대)이에요. 하루가 두어 번 지나는 것을 본 다음 '별이 빨라진다'를 눌러 보세요.</p>
+    <p class="note">왼쪽은 '해가 지면 켜고, 해가 뜨면 꺼라'라는 명령을 그대로 지키는 가로등 켜는 사람(1세대), 오른쪽은 내가 설계한 자동 가로등(2세대)이에요. 하루가 두어 번 지나는 것을 본 다음 '별이 빨라진다'를 눌러 보세요.</p>
     <div class="scwrap"><svg class="scene" id="sc2" viewBox="0 0 640 230" role="img" aria-label="두 가로등이 있는 작은 별"></svg><div class="bubble" id="bub2">아, 힘들어… 하지만 1분마다 가로등을 켜고 끄는 게 명령이니 어쩔 수 없지…</div></div>
     <div class="scores">
-      <div class="sc g1"><span>1세대: 가로등 켜는 사람</span><b id="s2a">-</b><i>정해진 시각에 켜고 꺼요</i></div>
+      <div class="sc g1"><span>1세대: 가로등 켜는 사람</span><b id="s2a">-</b><i>명령대로 해가 지면 켜고 해가 뜨면 꺼요</i></div>
       <div class="sc g2"><span>2세대: 내 자동 가로등</span><b id="s2b">-</b><i>빛을 감지해서 켜요</i></div>
     </div>
     <div class="row">
@@ -170,7 +170,7 @@ th{color:var(--muted);font-weight:400;white-space:nowrap}
     <p class="note">3세대 가로등은 날마다 하루의 길이를 재서 배워요. '구름이 지나간다'와 '별이 더 빨라진다'를 눌러 세 가로등을 비교해 보세요.</p>
     <div class="scwrap"><svg class="scene" id="sc3" viewBox="0 0 640 230" role="img" aria-label="세 가로등이 있는 작은 별"></svg><div class="bubble" id="bub3">아, 힘들어… 하지만 1분마다 가로등을 켜고 끄는 게 명령이니 어쩔 수 없지…</div></div>
     <div class="scores">
-      <div class="sc g1"><span>1세대: 가로등 켜는 사람</span><b id="s3a">-</b><i>정해진 시각에 켜고 꺼요</i></div>
+      <div class="sc g1"><span>1세대: 가로등 켜는 사람</span><b id="s3a">-</b><i>명령대로 해가 지면 켜고 해가 뜨면 꺼요</i></div>
       <div class="sc g2"><span>2세대: 내 자동 가로등</span><b id="s3b">-</b><i>빛을 감지해서 켜요</i></div>
       <div class="sc g3"><span>3세대: 배우는 가로등</span><b id="s3c">-</b><i id="s3cState">하루 길이를 알고 있어요</i></div>
     </div>
@@ -189,7 +189,7 @@ th{color:var(--muted);font-weight:400;white-space:nowrap}
     <div class="tablebox"><table>
       <thead><tr><th>세대</th><th>어떻게 일하나요?</th><th>제때 켠 시간</th></tr></thead>
       <tbody>
-        <tr><td>1세대</td><td>정해진 명령대로만 움직여요. 상황이 바뀌어도 그대로예요.</td><td id="f1">-</td></tr>
+        <tr><td>1세대</td><td>주어진 명령대로만 움직여요. 별이 빨라져도 명령을 바꾸지 못해서, 점점 늦어지고 지쳐요.</td><td id="f1">-</td></tr>
         <tr><td>2세대</td><td>센서로 주변을 감지해서 반응해요. 하지만 구름처럼 헷갈리는 상황에는 속기도 해요.</td><td id="f2">-</td></tr>
         <tr><td>3세대</td><td>경험으로 스스로 배워서 판단하고, 상황이 바뀌면 일하는 방법을 바꿔요.</td><td id="f3">-</td></tr>
       </tbody>
@@ -288,7 +288,7 @@ function sensorValue(kind,ph,lightObs,w){
   w.noise+= (Math.random()-.5)*14; w.noise=Math.max(0,Math.min(100,w.noise)); if(Math.random()<.01)w.noise=Math.random()*100; return w.noise;
 }
 function newWorld(n){return {n,t:0,ph:0,day:DAY0,cloudX:null,cloudDay:false,cloudMsg:false,noise:50,ok:[0,0,0],tot:0,days:0,
-  g3:{P:DAY0,anchor:0,lastSunrise:0,changedAt:-1,learning:false},g1clock:0,lastPh:0,running:n!==1,fasted:false,clouded:false,fastDays:0};}
+  g3:{P:DAY0,anchor:0,lastSunrise:0,changedAt:-1,learning:false},on1:false,lag1:0,fat:0,lastPh:0,running:n!==1,fasted:false,clouded:false,fastDays:0};}
 function startWorld(n){cancelAnimationFrame(raf);if(n===4){return;}if(n===3)$("fast3").disabled=false;
   const labels=n===1?["내 자동 가로등"]:n===2?["1세대","2세대"]:["1세대","2세대","3세대"];
   W=newWorld(n);W.S=buildScene($("sc"+n),labels);frame(performance.now(),true);
@@ -302,7 +302,7 @@ function frame(now,first){
   if(cur!==4)raf=requestAnimationFrame(frame);
 }
 function step(dt){
-  W.t+=dt;const prevPh=W.ph;W.ph+=dt/W.day;W.g1clock+=dt/DAY0;
+  W.t+=dt;const prevPh=W.ph;W.ph+=dt/W.day;
   const ph=W.ph%1,light=lightAt(ph);
   /* 구름은 낮이든 밤이든 하늘을 지나가요. 하늘을 덮고 있는 동안만 빛을 가려요 */
   if(W.cloudX!=null){W.cloudX+=dt*230;if(W.cloudX>760)W.cloudX=null;}
@@ -318,7 +318,10 @@ function step(dt){
     const g=W.g3,measured=W.t-g.lastSunrise;
     if(g.lastSunrise>0&&g.changedAt>=0&&g.lastSunrise>=g.changedAt){g.P=measured;g.learning=false;g.changedAt=-1;}
     g.lastSunrise=W.t;g.anchor=W.t;}
-  const on1=lightAt(W.g1clock%1)<NEED;
+  /* 1세대: 사람이 하늘을 보고 명령대로 켜고 꺼요. 다만 막대를 들기까지 시간이 걸리고, 지칠수록 더 늦어요 */
+  const want1=light<NEED;if(want1!==W.on1){W.lag1+=dt;if(W.lag1>=0.15+W.fat){W.on1=want1;W.lag1=0;if(W.day<DAY0-0.01)W.fat=Math.min(0.55,W.fat+0.05);}}else W.lag1=0;
+  if(W.day>=DAY0-0.01)W.fat=Math.max(0,W.fat-dt*0.05);
+  const on1=W.on1;
   if(W.prevOn1!==undefined&&on1!==W.prevOn1){W.armT=0;if(W.day<DAY0-0.01){W.tog=(W.tog||0)+1;if(W.tog%3===1)W.bubT=2.2;}}W.prevOn1=on1;W.armT=(W.armT??9)+dt;
   const v=sensorValue(W.n===1?sensor:"light",ph,obs,W);
   const on2=v<thr;
@@ -333,7 +336,7 @@ function draw(){
   paint(W.S,v.light,v.ph,v.cloudK,v.ons,v.real,v.cloudX);
   const P=W.S.person;if(P){const t=W.armT??9,k=t<0.5?Math.sin(Math.PI*t/0.5):0,ang=-12+(P.reach+12)*k;
     P.arm.setAttribute("transform",`translate(${P.sx} ${P.sy}) rotate(${ang})`);
-    P.sweat.setAttribute("opacity",W.day<DAY0-0.01?1:0);const bob=Math.abs(Math.sin(W.t*7))*2;P.sweat.setAttribute("transform",`translate(${bob} ${-bob})`);
+    P.sweat.setAttribute("opacity",W.fat>0.1?1:0);const bob=Math.abs(Math.sin(W.t*7))*2;P.sweat.setAttribute("transform",`translate(${bob} ${-bob})`);
     const bub=$("bub"+W.n);if(bub){if(W.bubT>0){W.bubT-=1/60;bub.classList.add("on");bub.style.left=`${(P.px-14)/640*100}%`;}else bub.classList.remove("on");}}
   const pct=i=>W.tot>0?Math.round(W.ok[i]/W.tot*100)+"%":"-";
   if(W.n===1){$("m1Val").textContent=v.v==null?"-":Math.round(v.v);$("m1Lamp").textContent=v.ons[0]?"켜짐":"꺼짐";
@@ -341,7 +344,7 @@ function draw(){
     $("m1Score").textContent=pct(0);$("m1Day").textContent=`${Math.min(3,W.days)} / 3`;}
   if(W.n===2){$("s2a").textContent=pct(0);$("s2b").textContent=pct(1);
     $("hint2").textContent=!W.fasted?"'별이 빨라진다'를 누르면 다음 단계로 갈 수 있어요.":W.fastDays<2?`별이 빨라진 뒤 하루가 두 번 지나면 넘어갈 수 있어요. (${W.fastDays} / 2)`:"";
-    if(W.fasted&&W.fastDays>=2&&$("next2").disabled){$("next2").disabled=false;done.add(2);$("toast2").textContent="1세대는 명령이 그대로라 낮에 켜고 밤에 꺼요. 2세대는 빛을 감지해서 별이 빨라져도 제때 켜져요.";}}
+    if(W.fasted&&W.fastDays>=2&&$("next2").disabled){$("next2").disabled=false;done.add(2);$("toast2").textContent="1세대는 명령은 잘 지키지만, 별이 빨라질수록 켜고 끄는 일이 잦아져서 점점 늦어지고 지쳐요. 2세대는 지치지 않고 빛을 감지해서 바로 켜고 꺼요.";}}
   if(W.n===3){$("s3a").textContent=pct(0);$("s3b").textContent=pct(1);$("s3c").textContent=pct(2);
     $("s3cState").textContent=W.g3.learning?"배우는 중: 하루 길이를 다시 재는 동안은 빛 센서로 판단해요":"하루 길이를 알고 있어요";
     const mk=b=>b?"✓":"아직";
