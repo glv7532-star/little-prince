@@ -88,6 +88,7 @@ h1{font-family:var(--display);font-weight:700;font-size:2.1rem;line-height:1.1;m
 .roles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .final{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
 .final canvas{width:100%;max-width:320px;aspect-ratio:1;border-radius:10px;border:1px solid var(--line);image-rendering:pixelated}
+.closing{margin:6px 0 0;padding:14px 16px;border-radius:12px;background:var(--accent-bg);font-family:var(--display);font-size:1.45rem;line-height:1.35;word-break:keep-all}
 .final .t{font-family:var(--display);font-size:2rem;line-height:1.1;word-break:keep-all}
 .code span.cur{background:var(--accent);color:var(--paper)!important;border-radius:3px}
 .guess{display:grid;grid-template-columns:minmax(0,320px) minmax(0,1fr);gap:18px;align-items:start}
@@ -227,6 +228,7 @@ h1{font-family:var(--display);font-weight:700;font-size:2.1rem;line-height:1.1;m
         <div class="capbox" id="cap4" hidden></div>
       </div>
     </div>
+    <div class="row"><button class="btn primary" id="finish4">마치기</button></div>
   </section>
 
   <!-- 마무리 -->
@@ -235,7 +237,8 @@ h1{font-family:var(--display);font-weight:700;font-size:2.1rem;line-height:1.1;m
       <span class="badge" id="finTopic"></span>
       <canvas id="cvFin" width="320" height="320"></canvas>
       <span class="t" id="finTitle"></span>
-      <p class="note">이 그림은 숫자 256개로 저장되어 있어요. 숫자만 있으면 B612에 있는 어린 왕자도 지구에서 보낸 내 그림을 똑같이 볼 수 있어요.</p>
+      <p class="note">이 그림은 숫자 256개로 저장되어 있어요.</p>
+      <p class="closing">숫자만 있으면 B612에 있는 어린 왕자도<br>지구에서 보낸 내 그림을 똑같이 볼 수 있어요.</p>
     </div>
     <div class="row"><button class="btn" id="back5">4단계 하기 (선택)</button></div>
   </section>
@@ -330,7 +333,9 @@ $("done2").onclick=()=>{
   show(3);
 };
 $("back3").onclick=()=>show(2);
-$("finish3").onclick=()=>{done.add(3);$("finTopic").textContent="주제: "+topic;$("finTitle").textContent=$("title2").value.trim();drawCanvas($("cvFin"),s2,16);show(5);};
+function goFinal(from4){$("back5").textContent=from4?"4단계로 돌아가기":"4단계 하기 (선택)";$("finTopic").textContent="주제: "+topic;$("finTitle").textContent=$("title2").value.trim();drawCanvas($("cvFin"),s2,16);show(5);};
+$("finish3").onclick=()=>{done.add(3);goFinal();};
+$("finish4").onclick=()=>{if(animating)return;goFinal(true);};
 $("go4").onclick=()=>{done.add(3);show(4);};
 $("back5").onclick=()=>show(4);
 
