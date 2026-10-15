@@ -151,7 +151,7 @@ th{color:var(--muted);font-weight:400;white-space:nowrap}
   <section class="card" id="step2" hidden>
     <h2>별이 빨라지면 어떻게 될까?</h2>
     <p class="note">왼쪽은 '해가 지면 켜고, 해가 뜨면 꺼라'라는 명령을 그대로 지키는 가로등 켜는 사람(1세대), 오른쪽은 내가 설계한 자동 가로등(2세대)이에요. 하루가 두어 번 지나는 것을 본 다음 '별이 빨라진다'를 눌러 보세요.</p>
-    <div class="scwrap"><svg class="scene" id="sc2" viewBox="0 0 640 230" role="img" aria-label="두 가로등이 있는 작은 별"></svg><div class="bubble" id="bub2">아, 힘들어… 하지만 1분마다 가로등을 켜고 끄는 게 명령이니 어쩔 수 없지…</div></div>
+    <div class="scwrap"><svg class="scene" id="sc2" viewBox="0 0 640 230" role="img" aria-label="두 가로등이 있는 작은 별"></svg><div class="bubble" id="bub2">아, 힘들어… 하지만 명령이니 어쩔 수 없지…</div></div>
     <div class="scores">
       <div class="sc g1"><span>1세대: 가로등 켜는 사람</span><b id="s2a">-</b><i>명령대로 해가 지면 켜고 해가 뜨면 꺼요</i></div>
       <div class="sc g2"><span>2세대: 내 자동 가로등</span><b id="s2b">-</b><i>빛을 감지해서 켜요</i></div>
@@ -168,7 +168,7 @@ th{color:var(--muted);font-weight:400;white-space:nowrap}
   <section class="card" id="step3" hidden>
     <h2>스스로 배우는 3세대 가로등</h2>
     <p class="note">3세대 가로등은 날마다 하루의 길이를 재서 배워요. '구름이 지나간다'와 '별이 더 빨라진다'를 눌러 세 가로등을 비교해 보세요.</p>
-    <div class="scwrap"><svg class="scene" id="sc3" viewBox="0 0 640 230" role="img" aria-label="세 가로등이 있는 작은 별"></svg><div class="bubble" id="bub3">아, 힘들어… 하지만 1분마다 가로등을 켜고 끄는 게 명령이니 어쩔 수 없지…</div></div>
+    <div class="scwrap"><svg class="scene" id="sc3" viewBox="0 0 640 230" role="img" aria-label="세 가로등이 있는 작은 별"></svg><div class="bubble" id="bub3">아, 힘들어… 하지만 명령이니 어쩔 수 없지…</div></div>
     <div class="scores">
       <div class="sc g1"><span>1세대: 가로등 켜는 사람</span><b id="s3a">-</b><i>명령대로 해가 지면 켜고 해가 뜨면 꺼요</i></div>
       <div class="sc g2"><span>2세대: 내 자동 가로등</span><b id="s3b">-</b><i>빛을 감지해서 켜요</i></div>
@@ -322,7 +322,7 @@ function step(dt){
   const want1=light<NEED;if(want1!==W.on1){W.lag1+=dt;if(W.lag1>=0.15+W.fat){W.on1=want1;W.lag1=0;if(W.day<DAY0-0.01)W.fat=Math.min(0.55,W.fat+0.05);}}else W.lag1=0;
   if(W.day>=DAY0-0.01)W.fat=Math.max(0,W.fat-dt*0.05);
   const on1=W.on1;
-  if(W.prevOn1!==undefined&&on1!==W.prevOn1){W.armT=0;if(W.day<DAY0-0.01){W.tog=(W.tog||0)+1;if(W.tog%3===1)W.bubT=2.2;}}W.prevOn1=on1;W.armT=(W.armT??9)+dt;
+  if(W.prevOn1!==undefined&&on1!==W.prevOn1){W.armT=0;if(W.day<DAY0-0.01){W.tog=(W.tog||0)+1;if(W.tog%3===1)W.bubT=Math.max(W.bubT||0,4);}}W.prevOn1=on1;W.armT=(W.armT??9)+dt;if(W.bubT>0)W.bubT-=dt;
   const v=sensorValue(W.n===1?sensor:"light",ph,obs,W);
   const on2=v<thr;
   const g=W.g3,on3=g.learning?on2:lightAt(((W.t-g.anchor)/g.P)%1)<NEED; /* 배우는 동안에는 빛 센서에 기대요 */
@@ -337,7 +337,7 @@ function draw(){
   const P=W.S.person;if(P){const t=W.armT??9,k=t<0.5?Math.sin(Math.PI*t/0.5):0,ang=-12+(P.reach+12)*k;
     P.arm.setAttribute("transform",`translate(${P.sx} ${P.sy}) rotate(${ang})`);
     P.sweat.setAttribute("opacity",W.fat>0.1?1:0);const bob=Math.abs(Math.sin(W.t*7))*2;P.sweat.setAttribute("transform",`translate(${bob} ${-bob})`);
-    const bub=$("bub"+W.n);if(bub){if(W.bubT>0){W.bubT-=1/60;bub.classList.add("on");bub.style.left=`${(P.px-14)/640*100}%`;}else bub.classList.remove("on");}}
+    const bub=$("bub"+W.n);if(bub){if(W.bubT>0){bub.classList.add("on");bub.style.left=`${(P.px-14)/640*100}%`;}else bub.classList.remove("on");}}
   const pct=i=>W.tot>0?Math.round(W.ok[i]/W.tot*100)+"%":"-";
   if(W.n===1){$("m1Val").textContent=v.v==null?"-":Math.round(v.v);$("m1Lamp").textContent=v.ons[0]?"켜짐":"꺼짐";
     $("m1Lamp").className=v.need===undefined?"":(v.ons[0]!==v.need?"bad":"ok");
