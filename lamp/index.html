@@ -221,7 +221,7 @@ function buildScene(svg,labels){
   S.stars=el("g",{opacity:0},svg);[[60,30],[150,60],[260,24],[380,50],[470,30],[580,70],[520,20],[95,90],[430,95],[300,75]].forEach(([x,y])=>el("circle",{cx:x,cy:y,r:1.8,fill:"#f1efe8"},S.stars));
   S.sun=el("g",{},svg);S.rays=el("g",{},S.sun);for(let k=0;k<12;k++){const a=k*Math.PI/6;el("line",{x1:Math.cos(a)*27,y1:Math.sin(a)*27,x2:Math.cos(a)*37,y2:Math.sin(a)*37,stroke:"#EF9F27","stroke-width":4,"stroke-linecap":"round"},S.rays);}S.disc=el("circle",{cx:0,cy:0,r:21,fill:"#FAC775",stroke:"#EF9F27","stroke-width":2},S.sun);
   S.moon=el("g",{opacity:0},svg);el("circle",{cx:0,cy:0,r:15,fill:"#d9dce3",stroke:"#b4b8c2","stroke-width":1.5},S.moon);[[-5,-4,3.5],[5,3,2.6],[-2,7,2],[6,-6,1.8]].forEach(([x,y,r])=>el("circle",{cx:x,cy:y,r,fill:"#b4b8c2"},S.moon));
-  S.cloud=el("g",{opacity:0},svg);[[0,0,30],[30,-12,34],[64,0,28],[28,10,30]].forEach(([x,y,r])=>el("circle",{cx:x,cy:y,r,fill:"#8a94a6"},S.cloud));
+  S.cloud=el("g",{opacity:0,fill:"#8a94a6"},svg);[[0,0,34],[38,-16,40],[80,0,34],[40,12,36],[-34,8,24],[112,10,24]].forEach(([x,y,r])=>el("circle",{cx:x,cy:y,r},S.cloud));
   S.ground=el("ellipse",{cx:320,cy:330,rx:420,ry:140,fill:"#639922"},svg);
   S.lamps=[];const n=labels.length,gap=640/(n+1);
   labels.forEach((lb,i)=>{const x=gap*(i+1),g=el("g",{},svg);
@@ -244,18 +244,19 @@ const SKY=[
 const lerp=(a,b,t)=>a.map((v,i)=>Math.round(v+(b[i]-v)*t));
 function skyAt(e,evening){for(let k=0;k<SKY.length-1;k++){const A=SKY[k],B=SKY[k+1];if(e<=B[0]){const t=(e-A[0])/(B[0]-A[0]);return [lerp(A[1],B[1],t),lerp(A[2],B[2],t),lerp(A[evening?3:4],B[evening?3:4],t)];}}const L=SKY[SKY.length-1];return [L[1],L[2],L[3]];}
 const rgb=c=>`rgb(${c})`,clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-function paint(S,light,phase,cloudK,ons,real){
+function paint(S,light,phase,cloudK,ons,real,cloudX){
   const ang=phase*2*Math.PI,e=Math.sin(ang),evening=phase>0.25&&phase<0.75;
   let [top,mid,hor]=skyAt(e,evening);
   if(cloudK){const g=[120,128,140];top=lerp(top,g,.55);mid=lerp(mid,g,.55);hor=lerp(hor,g,.5);}
   S.top.setAttribute("stop-color",rgb(top));S.mid.setAttribute("stop-color",rgb(mid));S.hor.setAttribute("stop-color",rgb(hor));
   const x=320-Math.cos(ang)*270,y=205-e*165;
-  S.sun.setAttribute("transform",`translate(${x} ${y})`);
+  S.sun.setAttribute("transform",`translate(${x} ${y})`);S.sun.setAttribute("opacity",cloudK?.45:1);
   const low=clamp(e/0.35,0,1);S.disc.setAttribute("fill",rgb(lerp([238,110,60],[250,199,117],low)));S.rays.setAttribute("opacity",clamp(e/0.15,0,1));
   S.moon.setAttribute("transform",`translate(${640-x} ${205+e*165})`);S.moon.setAttribute("opacity",clamp((0.1-e)/0.25,0,1));
   S.stars.setAttribute("opacity",clamp((-e-0.06)/0.2,0,1));
   S.ground.setAttribute("fill",rgb(lerp([28,46,22],[99,153,34],clamp((e+0.2)/0.5,0,1))));
-  S.cloud.setAttribute("opacity",cloudK>0?.95:0);S.cloud.setAttribute("transform",`translate(${x-30} ${y+4})`);
+  const cOn=cloudX!=null;S.cloud.setAttribute("opacity",cOn?.96:0);
+  if(cOn){S.cloud.setAttribute("transform",`translate(${cloudX} 60)`);S.cloud.setAttribute("fill",rgb(lerp([44,50,66],[138,148,166],clamp((e+0.2)/0.4,0,1))));}
   ons.forEach((on,i)=>{const L=S.lamps[i];L.glow.setAttribute("opacity",on?.55:0);L.bulb.setAttribute("fill",on?"#FAC775":"#888780");});
 }
 
@@ -266,7 +267,7 @@ function sensorValue(kind,ph,lightObs,w){
   if(kind==="temp")return 50+45*Math.sin(2*Math.PI*(ph-0.13));
   w.noise+= (Math.random()-.5)*14; w.noise=Math.max(0,Math.min(100,w.noise)); if(Math.random()<.01)w.noise=Math.random()*100; return w.noise;
 }
-function newWorld(n){return {n,t:0,ph:0,day:DAY0,cloudT:0,noise:50,ok:[0,0,0],tot:0,days:0,
+function newWorld(n){return {n,t:0,ph:0,day:DAY0,cloudX:null,cloudDay:false,cloudMsg:false,noise:50,ok:[0,0,0],tot:0,days:0,
   g3:{P:DAY0,anchor:0,lastSunrise:0,changedAt:-1,learning:false},g1clock:0,lastPh:0,running:n!==1,fasted:false,clouded:false,fastDays:0};}
 function startWorld(n){cancelAnimationFrame(raf);if(n===4){return;}
   const labels=n===1?["내 자동 가로등"]:n===2?["1세대","2세대"]:["1세대","2세대","3세대"];
@@ -283,7 +284,13 @@ function frame(now,first){
 function step(dt){
   W.t+=dt;const prevPh=W.ph;W.ph+=dt/W.day;W.g1clock+=dt/DAY0;
   const ph=W.ph%1,light=lightAt(ph);
-  const cloudK=W.cloudT>0&&Math.sin(2*Math.PI*ph)>0.1?1:0;if(W.cloudT>0)W.cloudT-=dt;
+  /* 구름은 낮이든 밤이든 하늘을 지나가요. 하늘을 덮고 있는 동안만 빛을 가려요 */
+  if(W.cloudX!=null){W.cloudX+=dt*230;if(W.cloudX>760)W.cloudX=null;}
+  const covering=W.cloudX!=null&&W.cloudX>-40&&W.cloudX<620,eNow=Math.sin(2*Math.PI*ph);
+  const cloudK=covering?1:0;
+  if(covering&&!W.cloudMsg){W.cloudMsg=true;const t=$("toast3");t.className="toast";
+    if(eNow>0.1){W.cloudDay=true;W.clouded=true;t.textContent="낮에 구름이 하늘을 덮었어요. 2세대는 어두워졌다고 생각해서 켜지지만, 3세대는 아직 낮인 걸 알고 꺼진 채로 있어요.";}
+    else t.textContent="밤에는 구름이 껴도 이미 어두워서 가로등은 그대로예요. 낮에 구름이 끼면 어떻게 될까요?";}
   const obs=cloudK?light*.12:light;
   const need=light<NEED;
   /* 해 뜨는 순간 (3세대가 하루 길이를 잼) */
@@ -297,12 +304,12 @@ function step(dt){
   const g=W.g3,on3=g.learning?on2:lightAt(((W.t-g.anchor)/g.P)%1)<NEED; /* 배우는 동안에는 빛 센서에 기대요 */
   const ons=W.n===1?[on2]:W.n===2?[on1,on2]:[on1,on2,on3];
   ons.forEach((o,i)=>{if(o===need)W.ok[i]+=dt;});W.tot+=dt;
-  W.view={light:obs,real:light,ph,cloudK,ons,v,need};
+  W.view={light:obs,real:light,ph,cloudK:cloudK&&eNow>0.1?1:0,ons,v,need,cloudX:W.cloudX};
   if(W.n===1&&W.days>=3){W.running=false;finish1();}
 }
 function draw(){
   const v=W.view||{light:lightAt(W.ph%1),ph:W.ph%1,cloudK:0,ons:W.n===1?[false]:W.n===2?[false,false]:[false,false,false],v:null};
-  paint(W.S,v.light,v.ph,v.cloudK,v.ons,v.real);
+  paint(W.S,v.light,v.ph,v.cloudK,v.ons,v.real,v.cloudX);
   const pct=i=>W.tot>0?Math.round(W.ok[i]/W.tot*100)+"%":"-";
   if(W.n===1){$("m1Val").textContent=v.v==null?"-":Math.round(v.v);$("m1Lamp").textContent=v.ons[0]?"켜짐":"꺼짐";
     $("m1Lamp").className=v.need===undefined?"":(v.ons[0]!==v.need?"bad":"ok");
@@ -339,7 +346,7 @@ $("fast2").onclick=()=>{if(W.fasted)return;W.fasted=true;W.day=DAY0/3;W.fastDays
 $("next2").onclick=()=>show(3);
 
 /* 3단계 */
-$("cloud3").onclick=()=>{W.cloudT=W.day*0.12;W.clouded=true;$("toast3").className="toast";$("toast3").textContent=Math.sin(2*Math.PI*(W.ph%1))>0.15?"구름이 해를 가렸어요. 2세대는 어두워졌다고 생각해서 켜지지만, 3세대는 아직 낮인 걸 알고 꺼진 채로 있어요.":"지금은 해가 높이 떠 있지 않아요. 한낮에 다시 눌러 보세요.";if(Math.sin(2*Math.PI*(W.ph%1))<=0.15){W.cloudT=0;W.clouded=false;}};
+$("cloud3").onclick=()=>{if(W.cloudX!=null)return;W.cloudX=-160;W.cloudMsg=false;};
 $("fast3").onclick=()=>{const newDay=W.day>DAY0/2?DAY0/3:DAY0/5;W.day=newDay;W.fasted=true;W.g3.learning=true;W.g3.changedAt=W.t;$("toast3").className="toast";$("toast3").textContent="별이 더 빨라졌어요. 3세대는 하루 길이를 다시 재는 동안 빛 센서로 판단하다가, 새 길이를 배우면 스스로 일정을 바꿔요.";};
 $("next3").onclick=()=>{goFinal();};
 function goFinal(){done.add(3);const s=scores3||["-","-","-"];$("f1").textContent=s[0];$("f2").textContent=s[1];$("f3").textContent=s[2];show(4);done.add(4);}
