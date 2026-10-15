@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>저절로 켜지는 가로등</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gowun+Dodum&display=swap">
+<style>
+/* Layout: one column like a notebook page; step strip on top, the drawing grid with its number code beside it (stacked on narrow screens). */
+:root{
+  --bg:#efe8d8; --paper:#fbf7ee; --ink:#2f3a2c; --muted:#6c7462; --line:#d8ceb6;
+  --accent:#2d5d7b; --accent-bg:#dde8ef; --ok:#2f7a3d; --bad:#b23a48; --cell:#ffffff; --on:#2f3a2c;
+  --c1:#f2c94c; --c2:#8a5a2b; --c3:#4f9a45; --c4:#d64550;
+  --display:"Gaegu","Gowun Dodum",cursive; --body:"Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141b26; --paper:#1f2836; --ink:#ece6d6; --muted:#a3a99c; --line:#334156;
+  --accent:#8cc0e0; --accent-bg:#1e3446; --ok:#7fd08c; --bad:#f08b97; --cell:#2a3546; --on:#ece6d6;
+  --c1:#f2c94c; --c2:#c08a52; --c3:#6fb35b; --c4:#f07c86; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141b26; --paper:#1f2836; --ink:#ece6d6; --muted:#a3a99c; --line:#334156;
+  --accent:#8cc0e0; --accent-bg:#1e3446; --ok:#7fd08c; --bad:#f08b97; --cell:#2a3546; --on:#ece6d6;
+  --c1:#f2c94c; --c2:#c08a52; --c3:#6fb35b; --c4:#f07c86; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;margin:0;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+h1{font-family:var(--display);font-weight:700;font-size:2.1rem;line-height:1.1;margin:0}
+.lead{margin:4px 0 0;color:var(--muted);font-size:.95rem}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.stepi{font-size:.9rem;padding:8px 6px;border:1px solid var(--line);background:var(--paper);color:var(--muted);border-radius:8px;text-align:center;word-break:keep-all;line-height:1.25}
+.stepi b{font-family:var(--display);font-size:1.15rem;display:block;line-height:1}
+.stepi[aria-current="step"]{border-color:var(--accent);background:var(--accent-bg);color:var(--ink)}
+.stepi.done{color:var(--ink)} .stepi.done b::after{content:" \2713";font-size:.9rem;color:var(--ok)}
+@media (max-width:480px){.stepi{font-size:.78rem;padding:7px 3px}}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:14px}
+.card h2{font-family:var(--display);font-size:1.5rem;margin:0;line-height:1.2}
+.note{margin:0;color:var(--muted);font-size:.92rem}
+.btn{font:inherit;font-size:1rem;padding:12px 10px;border-radius:10px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--paper)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn:focus-visible,.link:focus-visible,.topic:focus-visible,.sw:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.row .btn{flex:1 1 160px}
+.toast{min-height:1.4em;margin:0;font-size:.95rem;color:var(--accent)}
+.toast.bad{color:var(--bad)} .toast.ok{color:var(--ok)}
+.topics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+@media (max-width:560px){.topics{grid-template-columns:1fr 1fr}}
+.topic{font:inherit;padding:12px 8px;border-radius:12px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;font-family:var(--display);font-size:1.2rem;line-height:1.2;word-break:keep-all}
+.topic[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-bg)}
+.ask{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px}
+.tbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 10px;border:1.5px dashed var(--accent);border-radius:10px;font-size:.85rem;color:var(--muted)}
+.tbar button{font:inherit;font-size:.85rem;padding:5px 10px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.card h3{font-family:var(--display);font-size:1.3rem;margin:4px 0 0;line-height:1.2}
+.link{background:none;border:none;color:var(--muted);text-decoration:underline;font:inherit;font-size:.88rem;cursor:pointer;padding:0;align-self:flex-start}
+.scene{width:100%;height:auto;border-radius:12px;border:1px solid var(--line);display:block}
+.parts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:620px){.parts{grid-template-columns:1fr}}
+.part{border:1.5px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;background:var(--bg)}
+.part h3{margin:0;font-family:var(--display);font-size:1.25rem;line-height:1.1}
+.part h3 small{display:block;font-family:var(--body);font-size:.8rem;color:var(--muted);font-weight:400;margin-top:2px}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opt{font:inherit;text-align:left;padding:8px 10px;border-radius:10px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-bg)}
+.rule{font-size:.95rem;line-height:1.5}
+.rule b{font-family:var(--display);font-size:1.4rem;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.meters{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.meter{background:var(--bg);border-radius:10px;padding:8px 12px}
+.meter span{display:block;font-size:.8rem;color:var(--muted)}
+.meter b{font-family:var(--display);font-size:1.5rem;line-height:1.1;font-variant-numeric:tabular-nums}
+.meter b.bad{color:var(--bad)} .meter b.ok{color:var(--ok)}
+.scores{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.sc{border:1.5px solid var(--line);border-radius:10px;padding:8px 12px;background:var(--bg)}
+.sc span{display:block;font-size:.85rem}
+.sc b{font-family:var(--display);font-size:1.7rem;line-height:1.1;font-variant-numeric:tabular-nums}
+.sc i{display:block;font-style:normal;font-size:.8rem;color:var(--muted);min-height:1.2em}
+.sc.g1{border-color:#b8860b}.sc.g2{border-color:var(--accent)}.sc.g3{border-color:var(--ok)}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:400;white-space:nowrap}
+.tablebox{overflow-x:auto}
+.quote{margin:0;padding:12px 14px;border-left:4px solid var(--accent);background:var(--bg);border-radius:0;font-size:.98rem}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="tbar" id="tbar" hidden><b>선생님 바로가기</b><button data-j="1">1단계</button><button data-j="2">2단계</button><button data-j="3">3단계</button><button data-j="4">마무리</button></div>
+  <header>
+    <h1>저절로 켜지는 가로등</h1>
+    <p class="lead">가로등 켜는 사람은 "명령이야"라며 1분마다 불을 켜고 꺼요. 별이 점점 빨리 도는데 명령은 그대로라서 쉴 틈이 없지요. 이 일을 대신할 가로등을 만들어 볼까요?</p>
+  </header>
+
+  <nav class="steps" aria-label="단계">
+    <div class="stepi" id="tab1" aria-current="step"><b>1</b>가로등 설계하기</div>
+    <div class="stepi" id="tab2"><b>2</b>별이 빨라진다</div>
+    <div class="stepi" id="tab3"><b>3</b>스스로 배우는 가로등</div>
+    <div class="stepi" id="tab4"><b>4</b>마무리</div>
+  </nav>
+
+  <!-- 1단계 -->
+  <section class="card" id="step1">
+    <h2>내 자동 가로등을 설계해요</h2>
+    <p class="note">로봇은 감지 장치(눈, 귀)로 알아채고, 제어 장치(뇌)로 판단하고, 구동 장치(팔다리)로 움직여요. 세 칸을 채운 다음 '작동해 보기'를 눌러 사흘 동안 가로등이 제때 켜지는지 확인해요.</p>
+    <div class="parts">
+      <div class="part">
+        <h3>감지 장치<small>무엇으로 알아챌까?</small></h3>
+        <div class="opts" id="sensors" role="group" aria-label="감지 장치">
+          <button class="opt" data-s="light" aria-pressed="false">빛 센서 (밝기)</button>
+          <button class="opt" data-s="sound" aria-pressed="false">소리 센서 (소리 크기)</button>
+          <button class="opt" data-s="temp" aria-pressed="false">온도 센서 (따뜻한 정도)</button>
+        </div>
+      </div>
+      <div class="part">
+        <h3>제어 장치<small>언제 켤까?</small></h3>
+        <p class="rule" id="ruleText">센서 값이 <b id="thrOut">70</b>보다 작으면 켜요.</p>
+        <input type="range" id="thr" min="0" max="100" step="1" value="70" aria-label="기준 값">
+      </div>
+      <div class="part">
+        <h3>구동 장치<small>무엇을 움직일까?</small></h3>
+        <p class="rule">전구를 켜고 꺼요.</p>
+      </div>
+    </div>
+    <svg class="scene" id="sc1" viewBox="0 0 640 230" role="img" aria-label="가로등이 있는 작은 별"></svg>
+    <div class="meters">
+      <div class="meter"><span id="m1Label">센서 값</span><b id="m1Val">-</b></div>
+      <div class="meter"><span>가로등</span><b id="m1Lamp">-</b></div>
+      <div class="meter"><span>제때 켠 시간</span><b id="m1Score">-</b></div>
+      <div class="meter"><span>지난 날</span><b id="m1Day">0 / 3</b></div>
+    </div>
+    <div class="row">
+      <button class="btn primary" id="run1">작동해 보기</button>
+      <button class="btn" id="next1" disabled>다음 단계로</button>
+    </div>
+    <p class="toast" id="toast1" role="status"></p>
+  </section>
+
+  <!-- 2단계 -->
+  <section class="card" id="step2" hidden>
+    <h2>별이 빨라지면 어떻게 될까?</h2>
+    <p class="note">왼쪽은 정해진 시각마다 켜고 끄는 가로등 켜는 사람(1세대), 오른쪽은 내가 설계한 자동 가로등(2세대)이에요. 하루가 두어 번 지나는 것을 본 다음 '별이 빨라진다'를 눌러 보세요.</p>
+    <svg class="scene" id="sc2" viewBox="0 0 640 230" role="img" aria-label="두 가로등이 있는 작은 별"></svg>
+    <div class="scores">
+      <div class="sc g1"><span>1세대: 가로등 켜는 사람</span><b id="s2a">-</b><i>정해진 시각에 켜고 꺼요</i></div>
+      <div class="sc g2"><span>2세대: 내 자동 가로등</span><b id="s2b">-</b><i>빛을 감지해서 켜요</i></div>
+    </div>
+    <div class="row">
+      <button class="btn" id="fast2">별이 빨라진다</button>
+      <button class="btn primary" id="next2" disabled>다음 단계로</button>
+    </div>
+    <p class="toast" id="toast2" role="status"></p>
+  </section>
+
+  <!-- 3단계 -->
+  <section class="card" id="step3" hidden>
+    <h2>스스로 배우는 3세대 가로등</h2>
+    <p class="note">3세대 가로등은 날마다 하루의 길이를 재서 배워요. '구름이 지나간다'와 '별이 더 빨라진다'를 눌러 세 가로등을 비교해 보세요.</p>
+    <svg class="scene" id="sc3" viewBox="0 0 640 230" role="img" aria-label="세 가로등이 있는 작은 별"></svg>
+    <div class="scores">
+      <div class="sc g1"><span>1세대: 가로등 켜는 사람</span><b id="s3a">-</b><i>정해진 시각에 켜고 꺼요</i></div>
+      <div class="sc g2"><span>2세대: 내 자동 가로등</span><b id="s3b">-</b><i>빛을 감지해서 켜요</i></div>
+      <div class="sc g3"><span>3세대: 배우는 가로등</span><b id="s3c">-</b><i id="s3cState">하루 길이를 알고 있어요</i></div>
+    </div>
+    <div class="row">
+      <button class="btn" id="cloud3">구름이 지나간다</button>
+      <button class="btn" id="fast3">별이 더 빨라진다</button>
+      <button class="btn primary" id="next3" disabled>마무리하기</button>
+    </div>
+    <p class="toast" id="toast3" role="status"></p>
+  </section>
+
+  <!-- 마무리 -->
+  <section class="card" id="step4" hidden>
+    <h2>세 가로등을 비교해요</h2>
+    <div class="tablebox"><table>
+      <thead><tr><th>세대</th><th>어떻게 일하나요?</th><th>제때 켠 시간</th></tr></thead>
+      <tbody>
+        <tr><td>1세대</td><td>정해진 명령대로만 움직여요. 상황이 바뀌어도 그대로예요.</td><td id="f1">-</td></tr>
+        <tr><td>2세대</td><td>센서로 주변을 감지해서 반응해요. 하지만 구름처럼 헷갈리는 상황에는 속기도 해요.</td><td id="f2">-</td></tr>
+        <tr><td>3세대</td><td>경험으로 스스로 배워서 판단하고, 상황이 바뀌면 일하는 방법을 바꿔요.</td><td id="f3">-</td></tr>
+      </tbody>
+    </table></div>
+    <ol class="ask">
+      <li>구름이 지나갈 때 2세대와 3세대 가로등은 어떻게 달랐나요? 왜 그랬을까요?</li>
+      <li>로봇 청소기의 기능 중 '정해진 시간에 청소 시작하기', '벽에 부딪히면 방향 바꾸기', '집 구조를 기억해서 청소 길을 스스로 바꾸기'는 각각 몇 세대의 모습일까요?</li>
+    </ol>
+    <p class="quote">한 로봇 안에도 여러 세대의 기능이 함께 들어 있을 수 있어요. 가로등 켜는 사람의 별에는 어떤 로봇이 필요할지 처방전에 써 보세요.</p>
+  </section>
+
+  <button class="link" id="reset">처음부터 다시</button>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+const DAY0=8;              /* 처음 하루 길이(초) */
+const NEED=25;             /* 밝기가 25보다 어두우면 불이 필요해요 */
+const lightAt=ph=>Math.max(0,Math.sin(2*Math.PI*ph))*100;
+const done=new Set();
+function show(n){
+  for(const i of [1,2,3,4])$("step"+i).hidden=i!==n;
+  for(const i of [1,2,3,4]){const t=$("tab"+i);if(i===n)t.setAttribute("aria-current","step");else t.removeAttribute("aria-current");t.classList.toggle("done",i!==n&&done.has(i));}
+  cur=n;startWorld(n);window.scrollTo({top:0,behavior:"smooth"});
+}
+
+/* 장면 그리기 */
+const NS="http://www.w3.org/2000/svg";
+function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;}
+function buildScene(svg,labels){
+  svg.innerHTML="";const S={};
+  S.sky=el("rect",{x:0,y:0,width:640,height:230,fill:"#85B7EB"},svg);
+  S.stars=el("g",{opacity:0},svg);[[60,30],[150,60],[260,24],[380,50],[470,30],[580,70],[520,20]].forEach(([x,y])=>el("circle",{cx:x,cy:y,r:1.8,fill:"#f1efe8"},S.stars));
+  S.sun=el("circle",{cx:320,cy:60,r:22,fill:"#FAC775"},svg);
+  S.moon=el("circle",{cx:320,cy:60,r:15,fill:"#f1efe8",opacity:0},svg);
+  S.cloud=el("g",{opacity:0},svg);[[0,0,30],[30,-12,34],[64,0,28],[28,10,30]].forEach(([x,y,r])=>el("circle",{cx:x,cy:y,r,fill:"#8a94a6"},S.cloud));
+  el("ellipse",{cx:320,cy:330,rx:420,ry:140,fill:"#639922"},svg);
+  S.lamps=[];const n=labels.length,gap=640/(n+1);
+  labels.forEach((lb,i)=>{const x=gap*(i+1),g=el("g",{},svg);
+    const glow=el("ellipse",{cx:x,cy:118,rx:46,ry:30,fill:"#FAC775",opacity:0},g);
+    el("rect",{x:x-4,y:96,width:8,height:104,fill:"#444441"},g);el("rect",{x:x-20,y:86,width:40,height:13,rx:4,fill:"#444441"},g);
+    const bulb=el("circle",{cx:x,cy:104,r:7,fill:"#888780"},g);
+    const t=el("text",{x,y:222,"text-anchor":"middle","font-size":"15",fill:"#173404","font-family":"Gowun Dodum, sans-serif"},g);t.textContent=lb;
+    S.lamps.push({glow,bulb});});
+  return S;
+}
+function paint(S,light,phase,cloudK,ons,real){
+  if(real===undefined)real=light;const t=(cloudK?real*.55:real)/100,mix=(a,b)=>a.map((v,i)=>Math.round(v+(b[i]-v)*t));
+  S.sky.setAttribute("fill",`rgb(${mix([4,44,83],[133,183,235])})`);
+  const day=Math.sin(2*Math.PI*phase)>0,ang=phase*2*Math.PI;
+  const x=320-Math.cos(ang)*270,y=200-Math.abs(Math.sin(ang))*160;
+  S.sun.setAttribute("cx",x);S.sun.setAttribute("cy",y);S.sun.setAttribute("opacity",day?1:0);
+  S.moon.setAttribute("cx",640-x);S.moon.setAttribute("cy",y);S.moon.setAttribute("opacity",day?0:1);
+  S.stars.setAttribute("opacity",real<20?1:0);
+  S.cloud.setAttribute("opacity",cloudK>0?.95:0);S.cloud.setAttribute("transform",`translate(${x-30} ${y+4})`);
+  ons.forEach((on,i)=>{const L=S.lamps[i];L.glow.setAttribute("opacity",on?.55:0);L.bulb.setAttribute("fill",on?"#FAC775":"#888780");});
+}
+
+/* 시뮬레이션 */
+let cur=1,raf=0,W=null,sensor="",thr=70;
+function sensorValue(kind,ph,lightObs,w){
+  if(kind==="light")return lightObs;
+  if(kind==="temp")return 50+45*Math.sin(2*Math.PI*(ph-0.13));
+  w.noise+= (Math.random()-.5)*14; w.noise=Math.max(0,Math.min(100,w.noise)); if(Math.random()<.01)w.noise=Math.random()*100; return w.noise;
+}
+function newWorld(n){return {n,t:0,ph:0,day:DAY0,cloudT:0,noise:50,ok:[0,0,0],tot:0,days:0,
+  g3:{P:DAY0,anchor:0,lastSunrise:0,changedAt:-1,learning:false},g1clock:0,lastPh:0,running:n!==1,fasted:false,clouded:false,fastDays:0};}
+function startWorld(n){cancelAnimationFrame(raf);if(n===4){return;}
+  const labels=n===1?["내 자동 가로등"]:n===2?["1세대","2세대"]:["1세대","2세대","3세대"];
+  W=newWorld(n);W.S=buildScene($("sc"+n),labels);frame(performance.now(),true);
+  if(n===1){$("m1Day").textContent="0 / 3";$("m1Score").textContent="-";$("m1Score").className="";}
+}
+let last=0;
+function frame(now,first){
+  if(first)last=now;const dt=Math.min(.05,(now-last)/1000);last=now;
+  if(W&&W.running)step(dt);
+  if(W)draw();
+  if(cur!==4)raf=requestAnimationFrame(frame);
+}
+function step(dt){
+  W.t+=dt;const prevPh=W.ph;W.ph+=dt/W.day;W.g1clock+=dt/DAY0;
+  const ph=W.ph%1,light=lightAt(ph);
+  const cloudK=W.cloudT>0&&light>0?1:0;if(W.cloudT>0)W.cloudT-=dt;
+  const obs=cloudK?light*.12:light;
+  const need=light<NEED;
+  /* 해 뜨는 순간 (3세대가 하루 길이를 잼) */
+  if(Math.floor(W.ph)>Math.floor(prevPh)){W.days++;if(W.fasted)W.fastDays++;
+    const g=W.g3,measured=W.t-g.lastSunrise;
+    if(g.lastSunrise>0&&g.changedAt>=0&&g.lastSunrise>=g.changedAt){g.P=measured;g.learning=false;g.changedAt=-1;}
+    g.lastSunrise=W.t;g.anchor=W.t;}
+  const on1=lightAt(W.g1clock%1)<NEED;
+  const v=sensorValue(W.n===1?sensor:"light",ph,obs,W);
+  const on2=v<thr;
+  const g=W.g3,on3=g.learning?on2:lightAt(((W.t-g.anchor)/g.P)%1)<NEED; /* 배우는 동안에는 빛 센서에 기대요 */
+  const ons=W.n===1?[on2]:W.n===2?[on1,on2]:[on1,on2,on3];
+  ons.forEach((o,i)=>{if(o===need)W.ok[i]+=dt;});W.tot+=dt;
+  W.view={light:obs,real:light,ph,cloudK,ons,v,need};
+  if(W.n===1&&W.days>=3){W.running=false;finish1();}
+}
+function draw(){
+  const v=W.view||{light:lightAt(W.ph%1),ph:W.ph%1,cloudK:0,ons:W.n===1?[false]:W.n===2?[false,false]:[false,false,false],v:null};
+  paint(W.S,v.light,v.ph,v.cloudK,v.ons,v.real);
+  const pct=i=>W.tot>0?Math.round(W.ok[i]/W.tot*100)+"%":"-";
+  if(W.n===1){$("m1Val").textContent=v.v==null?"-":Math.round(v.v);$("m1Lamp").textContent=v.ons[0]?"켜짐":"꺼짐";
+    $("m1Lamp").className=v.need===undefined?"":(v.ons[0]!==v.need?"bad":"ok");
+    $("m1Score").textContent=pct(0);$("m1Day").textContent=`${Math.min(3,W.days)} / 3`;}
+  if(W.n===2){$("s2a").textContent=pct(0);$("s2b").textContent=pct(1);
+    if(W.fasted&&W.fastDays>=2&&$("next2").disabled){$("next2").disabled=false;done.add(2);$("toast2").textContent="1세대는 명령이 그대로라 낮에 켜고 밤에 꺼요. 2세대는 빛을 감지해서 별이 빨라져도 제때 켜져요.";}}
+  if(W.n===3){$("s3a").textContent=pct(0);$("s3b").textContent=pct(1);$("s3c").textContent=pct(2);
+    $("s3cState").textContent=W.g3.learning?"배우는 중: 하루 길이를 다시 재는 동안은 빛 센서로 판단해요":"하루 길이를 알고 있어요";
+    if(W.clouded&&W.fasted&&!W.g3.learning&&$("next3").disabled){$("next3").disabled=false;done.add(3);}
+    scores3=[pct(0),pct(1),pct(2)];}
+}
+let scores3=null;
+
+/* 1단계 */
+const SENS={light:["빛 센서 값 (밝기)","밝기가 <b id=\"thrOut\"></b>보다 어두우면 켜요."],sound:["소리 센서 값 (소리 크기)","소리가 <b id=\"thrOut\"></b>보다 작으면 켜요."],temp:["온도 센서 값 (따뜻한 정도)","온도가 <b id=\"thrOut\"></b>보다 낮으면 켜요."]};
+function setRule(){if(sensor){$("ruleText").innerHTML=SENS[sensor][1];$("m1Label").textContent=SENS[sensor][0];}$("thrOut").textContent=thr;}
+$("sensors").onclick=e=>{const b=e.target.closest(".opt");if(!b||(W&&W.running))return;sensor=b.dataset.s;$("sensors").querySelectorAll(".opt").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));setRule();$("toast1").textContent="";};
+$("thr").oninput=()=>{thr=+$("thr").value;setRule();};
+$("run1").onclick=()=>{
+  if(!sensor){$("toast1").className="toast bad";$("toast1").textContent="먼저 감지 장치를 골라 주세요.";return;}
+  startWorld(1);W.running=true;$("run1").disabled=true;$("toast1").className="toast";$("toast1").textContent="사흘 동안 작동하는 중이에요. 가로등이 제때 켜지는지 지켜보세요.";
+};
+function finish1(){
+  $("run1").disabled=false;$("run1").textContent="다시 작동해 보기";
+  const p=Math.round(W.ok[0]/W.tot*100),t=$("toast1");$("m1Score").className=p>=95?"ok":"bad";
+  if(sensor!=="light"){t.className="toast bad";t.textContent=sensor==="sound"?`제때 켠 시간 ${p}%. 소리는 밤낮과 상관없이 커졌다 작아졌다 해요. 어두워진 것을 알아채려면 무엇을 감지해야 할까요?`:`제때 켠 시간 ${p}%. 온도는 해가 진 뒤에도 한참 따뜻하고, 해가 뜬 뒤에도 한동안 차가워요. 어두워진 것을 바로 알아채려면 무엇을 감지해야 할까요?`;return;}
+  if(p>=95){t.className="toast ok";t.textContent=`제때 켠 시간 ${p}%! 내 가로등이 어두워지면 켜지고 밝아지면 꺼져요.`;$("next1").disabled=false;done.add(1);return;}
+  t.className="toast bad";t.textContent=thr>NEED?`제때 켠 시간 ${p}%. 아직 밝은데 너무 일찍 켜져요. 기준 숫자를 조금 낮춰 보세요.`:`제때 켠 시간 ${p}%. 이미 어두운데 너무 늦게 켜져요. 기준 숫자를 조금 높여 보세요.`;
+}
+$("next1").onclick=()=>show(2);
+
+/* 2단계 */
+$("fast2").onclick=()=>{if(W.fasted)return;W.fasted=true;W.day=DAY0/3;W.fastDays=0;$("fast2").disabled=true;$("toast2").className="toast";$("toast2").textContent="별이 세 배 빨리 돌기 시작했어요. 두 가로등을 지켜보세요.";};
+$("next2").onclick=()=>show(3);
+
+/* 3단계 */
+$("cloud3").onclick=()=>{W.cloudT=W.day*0.12;W.clouded=true;$("toast3").className="toast";$("toast3").textContent=lightAt(W.ph%1)>0?"구름이 해를 가렸어요. 2세대는 어두워졌다고 생각해서 켜지지만, 3세대는 아직 낮인 걸 알고 꺼진 채로 있어요.":"지금은 밤이라 구름이 가릴 해가 없어요. 낮에 다시 눌러 보세요.";if(lightAt(W.ph%1)<=0){W.cloudT=0;W.clouded=false;}};
+$("fast3").onclick=()=>{const newDay=W.day>DAY0/2?DAY0/3:DAY0/5;W.day=newDay;W.fasted=true;W.g3.learning=true;W.g3.changedAt=W.t;$("toast3").className="toast";$("toast3").textContent="별이 더 빨라졌어요. 3세대는 하루 길이를 다시 재는 동안 빛 센서로 판단하다가, 새 길이를 배우면 스스로 일정을 바꿔요.";};
+$("next3").onclick=()=>{goFinal();};
+function goFinal(){done.add(3);const s=scores3||["-","-","-"];$("f1").textContent=s[0];$("f2").textContent=s[1];$("f3").textContent=s[2];show(4);done.add(4);}
+
+/* 처음부터 */
+let resetArm=0;
+$("reset").onclick=()=>{
+  if(Date.now()-resetArm>4000){resetArm=Date.now();$("reset").textContent="정말 처음부터 할까요? 한 번 더 누르세요";setTimeout(()=>{$("reset").textContent="처음부터 다시";},4000);return;}
+  resetArm=0;$("reset").textContent="처음부터 다시";resetAll();
+};
+function resetAll(){done.clear();sensor="";thr=70;$("thr").value=70;$("sensors").querySelectorAll(".opt").forEach(x=>x.setAttribute("aria-pressed","false"));$("ruleText").innerHTML='센서 값이 <b id="thrOut">70</b>보다 작으면 켜요.';$("m1Label").textContent="센서 값";
+  $("run1").textContent="작동해 보기";$("run1").disabled=false;$("next1").disabled=true;$("next2").disabled=true;$("next3").disabled=true;$("fast2").disabled=false;["toast1","toast2","toast3"].forEach(i=>{$(i).textContent="";$(i).className="toast";});scores3=null;show(1);}
+
+/* 선생님 바로가기: 학생용 주소(github.io)에서는 ?teacher 를 붙였을 때만 보여요 */
+if(!/github\.io$/.test(location.hostname)||/teacher/.test(location.search))$("tbar").hidden=false;
+$("tbar").onclick=e=>{const b=e.target.closest("button");if(!b)return;const j=b.dataset.j;resetAll();
+  sensor="light";thr=25;$("thr").value=25;$("sensors").querySelector('[data-s="light"]').setAttribute("aria-pressed","true");setRule();
+  if(j==="1")return;done.add(1);$("next1").disabled=false;
+  if(j==="2"){show(2);return;}
+  done.add(2);if(j==="3"){show(3);return;}
+  scores3=["40% (예시)","90% (예시)","98% (예시)"];goFinal();};
+show(1);
+</script>
+</body>
+</html>
