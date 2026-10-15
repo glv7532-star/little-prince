@@ -107,6 +107,8 @@ h1{font-family:var(--display);font-weight:700;font-size:2.1rem;line-height:1.1;m
 .capbox b{font-family:var(--display);font-size:1.25rem}
 .tbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 10px;border:1.5px dashed var(--accent);border-radius:10px;font-size:.85rem;color:var(--muted)}
 .tbar button{font:inherit;font-size:.85rem;padding:5px 10px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.rowcode{display:none;margin:0 0 6px;min-height:1.5em;font-size:.85rem;color:var(--muted)}
+@media (max-width:620px){.rowcode{display:block}}
 .recs{margin:0;padding-left:1.2em;font-size:.92rem}
 .card h3{font-family:var(--display);font-size:1.3rem;margin:4px 0 0;line-height:1.2}
 .link{background:none;border:none;color:var(--muted);text-decoration:underline;font:inherit;font-size:.88rem;cursor:pointer;padding:0;align-self:flex-start}
@@ -159,7 +161,7 @@ h1{font-family:var(--display);font-weight:700;font-size:2.1rem;line-height:1.1;m
         <span class="badge" id="topicBadge"></span>
         <div class="palette" id="pal2" role="group" aria-label="색 고르기"></div>
         <div class="split">
-          <div class="grid g16 color" id="g2" style="grid-template-columns:repeat(16,1fr)"></div>
+          <div><p class="rowcode" id="row2">칸을 칠하면 그 줄의 숫자가 여기에 나와요.</p><div class="grid g16 color" id="g2" style="grid-template-columns:repeat(16,1fr)"></div></div>
           <div class="codebox"><p>내 그림의 숫자 (칸 256개)</p><pre class="code small" id="code2"></pre></div>
         </div>
         <div class="field">
@@ -231,7 +233,8 @@ h1{font-family:var(--display);font-weight:700;font-size:2.1rem;line-height:1.1;m
         <div class="capbox" id="cap4" hidden></div>
       </div>
     </div>
-    <div class="row"><button class="btn primary" id="finish4">마치기</button></div>
+    <div class="row" id="fin4Row" hidden><button class="btn primary" id="finish4">마치기</button></div>
+    <button class="link" id="skip4">건너뛰고 마치기</button>
   </section>
 
   <!-- 마무리 -->
@@ -270,7 +273,7 @@ function show(n){
 function makeGrid(el,n,cells,getColor,onChange,can=()=>true){
   el.innerHTML="";for(let i=0;i<n*n;i++){const c=document.createElement("i");c.dataset.i=i;el.appendChild(c);}
   let painting=false,val=null;
-  const paint=t=>{if(!t||t.parentNode!==el)return;const i=+t.dataset.i;if(cells[i]!==val){cells[i]=val;onChange();}};
+  const paint=t=>{if(!t||t.parentNode!==el)return;const i=+t.dataset.i;if(cells[i]!==val){cells[i]=val;onChange(i);}};
   el.addEventListener("pointerdown",e=>{const t=e.target;if(t.parentNode!==el||!can())return;e.preventDefault();painting=true;const i=+t.dataset.i;const want=getColor();val=(want===1&&!el.classList.contains("color"))?(cells[i]?0:1):want;paint(t);});
   el.addEventListener("pointermove",e=>{if(!painting)return;paint(document.elementFromPoint(e.clientX,e.clientY));});
   window.addEventListener("pointerup",()=>{painting=false;});
@@ -320,7 +323,7 @@ $("next1").onclick=()=>show(2);
 /* 2단계 */
 let s2=new Array(256).fill(0),col2=1,topic="";
 palette($("pal2"),()=>col2,v=>{col2=v;});
-makeGrid($("g2"),16,s2,()=>col2,()=>{render($("g2"),s2);$("code2").innerHTML=codeHTML(s2,16,true);});
+makeGrid($("g2"),16,s2,()=>col2,i=>{render($("g2"),s2);$("code2").innerHTML=codeHTML(s2,16,true);if(i!=null){const r=Math.floor(i/16);$("row2").innerHTML=`${r+1}번째 줄의 숫자 <span class="code small">${s2.slice(r*16,r*16+16).map(v=>`<span class="${v?"k"+v:""}">${v}</span>`).join("")}</span>`;}});
 $("code2").innerHTML=codeHTML(s2,16,true);
 $("topics").onclick=e=>{const b=e.target.closest(".topic");if(!b)return;topic=b.dataset.t;$("topics").querySelectorAll(".topic").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));$("topicBadge").textContent="주제: "+topic;$("drawArea").hidden=false;};
 $("clear2").onclick=()=>{s2.fill(0);render($("g2"),s2);$("code2").innerHTML=codeHTML(s2,16,true);};
@@ -339,6 +342,7 @@ $("back3").onclick=()=>show(2);
 function goFinal(from4){$("back5").textContent=from4?"4단계로 돌아가기":"4단계 하기 (선택)";$("finTopic").textContent="주제: "+topic;$("finTitle").textContent=$("title2").value.trim();drawCanvas($("cvFin"),s2,16);show(5);};
 $("finish3").onclick=()=>{done.add(3);goFinal();};
 $("finish4").onclick=()=>{if(animating)return;goFinal(true);};
+$("skip4").onclick=()=>{if(animating)return;goFinal(true);};
 $("go4").onclick=()=>{done.add(3);show(4);};
 $("back5").onclick=()=>show(4);
 
@@ -382,7 +386,7 @@ makeGrid($("g4"),8,s4,()=>col4,()=>{render($("g4"),s4);$("code4").innerHTML=code
 function setRole(r){
   role=r;hidden4=false;s4.fill(0);render($("g4"),s4);$("g4").classList.remove("hide");$("code4").innerHTML=codeHTML(s4,8,true);
   $("roleS").setAttribute("aria-pressed",r==="S"?"true":"false");$("roleR").setAttribute("aria-pressed",r==="R"?"true":"false");
-  $("area4").hidden=false;$("pal4").hidden=false;$("toast4").textContent="";$("cap4").hidden=true;
+  $("area4").hidden=false;$("fin4Row").hidden=false;$("skip4").hidden=true;$("pal4").hidden=false;$("toast4").textContent="";$("cap4").hidden=true;
   if(r==="S"){
     $("guide4").textContent="8×8 칸에 짝에게 보낼 그림을 색을 넣어 그려요. 다 그리면 '숫자만 보이기'를 눌러 화면을 짝에게 보여 주세요.";
     $("code4Label").textContent="내 그림의 숫자";
@@ -414,7 +418,7 @@ $("reset").onclick=()=>{
 function resetAll(){
   done.clear();p1=0;gName="";gUsed=[];$("gRecs").innerHTML="";$("gRecBox").hidden=true;
   s2.fill(0);render($("g2"),s2);$("code2").innerHTML=codeHTML(s2,16,true);topic="";$("title2").value="";$("err2").textContent="";$("drawArea").hidden=true;$("topics").querySelectorAll(".topic").forEach(x=>x.setAttribute("aria-pressed","false"));
-  role="";$("area4").hidden=true;$("roleS").setAttribute("aria-pressed","false");$("roleR").setAttribute("aria-pressed","false");
+  role="";$("area4").hidden=true;$("fin4Row").hidden=true;$("skip4").hidden=false;$("row2").textContent="칸을 칠하면 그 줄의 숫자가 여기에 나와요.";$("roleS").setAttribute("aria-pressed","false");$("roleR").setAttribute("aria-pressed","false");
   newShape();show(1);
 }
 /* 선생님 바로가기: 학생용 주소(github.io)에서는 ?teacher 를 붙였을 때만 보여요 */

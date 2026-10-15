@@ -30,7 +30,7 @@
 [hidden]{display:none!important}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
-.wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
 h1{font-family:var(--display);font-weight:700;font-size:2.1rem;line-height:1.1;margin:0;text-wrap:balance}
 .lead{margin:4px 0 0;color:var(--muted);font-size:.95rem}
 .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
@@ -66,8 +66,7 @@ h1{font-family:var(--display);font-weight:700;font-size:2.1rem;line-height:1.1;m
 .tally{display:flex;gap:14px;flex-wrap:wrap;font-size:.95rem;font-variant-numeric:tabular-nums}
 .chip{display:inline-flex;gap:6px;align-items:center;padding:2px 10px;border-radius:999px;font-size:.88rem}
 .chip.b{background:var(--baobab-bg);color:var(--ink)} .chip.r{background:var(--rose-bg);color:var(--ink)} .chip.w{background:var(--accent-bg);color:var(--ink)}
-.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
-@media (max-width:480px){.grid{grid-template-columns:repeat(5,1fr)}}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
 .cell{border:1.5px solid var(--line);border-radius:8px;padding:2px;display:flex;flex-direction:column;align-items:center;font-size:.72rem;line-height:1.2}
 .cell svg{width:100%;height:auto}
 .cell.ok{border-color:var(--ok)} .cell.no{border-color:var(--bad);border-style:dashed}
@@ -130,6 +129,7 @@ th{white-space:nowrap}
 .tbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 10px;border:1.5px dashed var(--accent);border-radius:10px;font-size:.85rem;color:var(--muted)}
 .tbar button{font:inherit;font-size:.85rem;padding:5px 10px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
 .tbar button:disabled{opacity:.5}
+.closing{margin:0;padding:14px 16px;border-radius:12px;background:var(--accent-bg);font-family:var(--display);font-size:1.4rem;line-height:1.4;text-align:center;word-break:keep-all}
 .ask{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px}
 </style>
 
@@ -212,7 +212,7 @@ th{white-space:nowrap}
     <div class="grid" id="testGrid"></div>
     <div>
       <p class="mine" id="mineShow"></p>
-      <p class="note" style="margin-bottom:6px">AI는 무엇을 보고 골랐을까?</p>
+      <p class="note" style="margin-bottom:6px">AI는 무엇을 보고 골랐을까? 막대가 길수록 AI가 그것을 중요하게 봤어요. 내 기준과 같은가요?</p>
       <div class="bars" id="bars"></div>
     </div>
     <div class="row">
@@ -245,6 +245,7 @@ th{white-space:nowrap}
       <li>편식한 AI는 장미 싹을 어떻게 판단했나요? 왜 그랬을까요?</li>
       <li>좋은 AI를 만들려면 가르치는 사람은 무엇을 조심해야 할까요?</li>
     </ol>
+    <p class="closing">어린 왕자는 바오밥 싹을 아주 어릴 때 알아보고 뽑아야 했어요.<br>AI에게도 처음부터 바르고 골고루 된 데이터를 가르쳐야 해요.</p>
   </section>
 
   <div id="lab" class="notebook" style="gap:12px">
@@ -265,14 +266,14 @@ th{white-space:nowrap}
     <p class="toast" id="toast3" role="status"></p>
   </div>
 
-  <section class="card" id="logCard">
+  <section class="card" id="logCard" hidden>
     <h2>시험 기록</h2>
     <div class="tablebox"><table>
       <thead><tr><th>회</th><th>실험</th><th>배운 데이터</th><th>정답률</th></tr></thead>
       <tbody id="log"><tr><td colspan="4" class="note">아직 시험을 보지 않았어요.</td></tr></tbody>
     </table></div>
-    <button class="link" id="reset">처음부터 다시</button>
   </section>
+  <button class="link" id="reset">처음부터 다시</button>
 </div>
 
 <script>
@@ -393,7 +394,7 @@ function finishTest(ok){
   const low=!mid&&phase===0&&pct<60;
   $("redo").hidden=!low; $("goNext").hidden=mid||low;
   const row=`<tr${!mid&&phase===0?' data-base':''}><td>${round}</td><td>${kind}</td><td>${desc}</td><td>${pct}%</td></tr>`;
-  const log=$("log");if(round===1)log.innerHTML="";log.insertAdjacentHTML("beforeend",row);
+  const log=$("log");if(round===1)log.innerHTML="";$("logCard").hidden=false;log.insertAdjacentHTML("beforeend",row);
   show(2);
 }
 function renderSummary(){
@@ -489,7 +490,7 @@ function resetAll(){
   tRun++;stopScan();$("teachBox").hidden=true;
   phase=0;baseTry=0;$("redo").hidden=true;done=new Set();results={};pending=false;$("retest").disabled=true;mid=false;$("teachMore").hidden=true;$("goNext").hidden=false;$("goNext").textContent="엉터리 선생님 (1) 해 보기";
   data=[];round=0;model=null;current=makeSprout();test=Array.from({length:TN},()=>makeSprout(null,true));
-  $("log").innerHTML=`<tr><td colspan="4" class="note">아직 시험을 보지 않았어요.</td></tr>`;
+  $("log").innerHTML=`<tr><td colspan="4" class="note">아직 시험을 보지 않았어요.</td></tr>`;$("logCard").hidden=true;
   $("toast1").textContent="";$("toast3").textContent="";myRule="";$("myRule").value="";$("mineShow").textContent="";show(0);
 }
 /* 선생님 바로가기: 학생용 주소(github.io)에서는 ?teacher 를 붙였을 때만 보여요 */
