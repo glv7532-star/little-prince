@@ -133,8 +133,10 @@ th{color:var(--muted);font-weight:400;white-space:nowrap}
       <div class="meter"><span>제때 켠 시간</span><b id="m1Score">-</b></div>
       <div class="meter"><span>지난 날</span><b id="m1Day">0 / 3</b></div>
     </div>
+    <p class="note">'가로등' 칸이 <b style="color:var(--ok)">초록색</b>이면 제때 켜지거나 꺼진 거예요. <b style="color:var(--bad)">빨간색</b>이면 켜지 말아야 할 때 켜졌거나, 켜야 할 때 꺼진 거예요.</p>
     <div class="row">
       <button class="btn primary" id="run1">작동해 보기</button>
+      <button class="btn" id="fast1" disabled>빠르게 (2배)</button>
       <button class="btn" id="next1" disabled>다음 단계로</button>
     </div>
     <p class="toast" id="toast1" role="status"></p>
@@ -153,6 +155,7 @@ th{color:var(--muted);font-weight:400;white-space:nowrap}
       <button class="btn" id="fast2">별이 빨라진다</button>
       <button class="btn primary" id="next2" disabled>다음 단계로</button>
     </div>
+    <p class="note" id="hint2"></p>
     <p class="toast" id="toast2" role="status"></p>
   </section>
 
@@ -171,6 +174,7 @@ th{color:var(--muted);font-weight:400;white-space:nowrap}
       <button class="btn" id="fast3">별이 더 빨라진다</button>
       <button class="btn primary" id="next3" disabled>마무리하기</button>
     </div>
+    <p class="note" id="hint3"></p>
     <p class="toast" id="toast3" role="status"></p>
   </section>
 
@@ -217,6 +221,7 @@ function buildScene(svg,labels){
   svg.innerHTML="";const S={},id="sky"+(++sceneId);
   const defs=el("defs",{},svg),lg=el("linearGradient",{id,x1:0,y1:0,x2:0,y2:1},defs);
   S.top=el("stop",{offset:"0","stop-color":"#3c82d7"},lg);S.mid=el("stop",{offset:"0.6","stop-color":"#7fb3e6"},lg);S.hor=el("stop",{offset:"1","stop-color":"#aad7f5"},lg);
+  const rg=el("radialGradient",{id:id+"g"},defs);el("stop",{offset:"0","stop-color":"#fff4c8","stop-opacity":"0.95"},rg);el("stop",{offset:"0.45","stop-color":"#ffd76a","stop-opacity":"0.55"},rg);el("stop",{offset:"1","stop-color":"#ffd76a","stop-opacity":"0"},rg);
   S.sky=el("rect",{x:0,y:0,width:640,height:230,fill:`url(#${id})`},svg);
   S.stars=el("g",{opacity:0},svg);[[60,30],[150,60],[260,24],[380,50],[470,30],[580,70],[520,20],[95,90],[430,95],[300,75]].forEach(([x,y])=>el("circle",{cx:x,cy:y,r:1.8,fill:"#f1efe8"},S.stars));
   S.sun=el("g",{},svg);S.rays=el("g",{},S.sun);for(let k=0;k<12;k++){const a=k*Math.PI/6;el("line",{x1:Math.cos(a)*27,y1:Math.sin(a)*27,x2:Math.cos(a)*37,y2:Math.sin(a)*37,stroke:"#EF9F27","stroke-width":4,"stroke-linecap":"round"},S.rays);}S.disc=el("circle",{cx:0,cy:0,r:21,fill:"#FAC775",stroke:"#EF9F27","stroke-width":2},S.sun);
@@ -225,10 +230,10 @@ function buildScene(svg,labels){
   S.ground=el("ellipse",{cx:320,cy:330,rx:420,ry:140,fill:"#639922"},svg);
   S.lamps=[];const n=labels.length,gap=640/(n+1);
   labels.forEach((lb,i)=>{const x=gap*(i+1),g=el("g",{},svg);
-    const glow=el("ellipse",{cx:x,cy:118,rx:46,ry:30,fill:"#FAC775",opacity:0},g);
+    const glow=el("ellipse",{cx:x,cy:116,rx:62,ry:44,fill:`url(#${id}g)`,opacity:0},g);
     el("rect",{x:x-4,y:96,width:8,height:104,fill:"#444441"},g);el("rect",{x:x-20,y:86,width:40,height:13,rx:4,fill:"#444441"},g);
     const bulb=el("circle",{cx:x,cy:104,r:7,fill:"#888780"},g);
-    const t=el("text",{x,y:222,"text-anchor":"middle","font-size":"15",fill:"#f1efe8","font-family":"Gowun Dodum, sans-serif"},g);t.textContent=lb;
+    const t=el("text",{x,y:224,"text-anchor":"middle","font-size":"19",fill:"#f1efe8","font-family":"Gowun Dodum, sans-serif"},g);t.textContent=lb;
     S.lamps.push({glow,bulb});});
   return S;
 }
@@ -257,7 +262,7 @@ function paint(S,light,phase,cloudK,ons,real,cloudX){
   S.ground.setAttribute("fill",rgb(lerp([28,46,22],[99,153,34],clamp((e+0.2)/0.5,0,1))));
   const cOn=cloudX!=null;S.cloud.setAttribute("opacity",cOn?.96:0);
   if(cOn){S.cloud.setAttribute("transform",`translate(${cloudX} 60)`);S.cloud.setAttribute("fill",rgb(lerp([44,50,66],[138,148,166],clamp((e+0.2)/0.4,0,1))));}
-  ons.forEach((on,i)=>{const L=S.lamps[i];L.glow.setAttribute("opacity",on?.55:0);L.bulb.setAttribute("fill",on?"#FAC775":"#888780");});
+  ons.forEach((on,i)=>{const L=S.lamps[i];L.glow.setAttribute("opacity",on?1:0);L.bulb.setAttribute("fill",on?"#FAC775":"#888780");});
 }
 
 /* 시뮬레이션 */
@@ -269,7 +274,7 @@ function sensorValue(kind,ph,lightObs,w){
 }
 function newWorld(n){return {n,t:0,ph:0,day:DAY0,cloudX:null,cloudDay:false,cloudMsg:false,noise:50,ok:[0,0,0],tot:0,days:0,
   g3:{P:DAY0,anchor:0,lastSunrise:0,changedAt:-1,learning:false},g1clock:0,lastPh:0,running:n!==1,fasted:false,clouded:false,fastDays:0};}
-function startWorld(n){cancelAnimationFrame(raf);if(n===4){return;}
+function startWorld(n){cancelAnimationFrame(raf);if(n===4){return;}if(n===3)$("fast3").disabled=false;
   const labels=n===1?["내 자동 가로등"]:n===2?["1세대","2세대"]:["1세대","2세대","3세대"];
   W=newWorld(n);W.S=buildScene($("sc"+n),labels);frame(performance.now(),true);
   if(n===1){$("m1Day").textContent="0 / 3";$("m1Score").textContent="-";$("m1Score").className="";}
@@ -277,7 +282,7 @@ function startWorld(n){cancelAnimationFrame(raf);if(n===4){return;}
 let last=0;
 function frame(now,first){
   if(first)last=now;const dt=Math.min(.05,(now-last)/1000);last=now;
-  if(W&&W.running)step(dt);
+  if(W&&W.running){const k=W.mul||1;for(let i=0;i<k&&W.running;i++)step(dt);}
   if(W)draw();
   if(cur!==4)raf=requestAnimationFrame(frame);
 }
@@ -315,9 +320,12 @@ function draw(){
     $("m1Lamp").className=v.need===undefined?"":(v.ons[0]!==v.need?"bad":"ok");
     $("m1Score").textContent=pct(0);$("m1Day").textContent=`${Math.min(3,W.days)} / 3`;}
   if(W.n===2){$("s2a").textContent=pct(0);$("s2b").textContent=pct(1);
+    $("hint2").textContent=!W.fasted?"'별이 빨라진다'를 누르면 다음 단계로 갈 수 있어요.":W.fastDays<2?`별이 빨라진 뒤 하루가 두 번 지나면 넘어갈 수 있어요. (${W.fastDays} / 2)`:"";
     if(W.fasted&&W.fastDays>=2&&$("next2").disabled){$("next2").disabled=false;done.add(2);$("toast2").textContent="1세대는 명령이 그대로라 낮에 켜고 밤에 꺼요. 2세대는 빛을 감지해서 별이 빨라져도 제때 켜져요.";}}
   if(W.n===3){$("s3a").textContent=pct(0);$("s3b").textContent=pct(1);$("s3c").textContent=pct(2);
     $("s3cState").textContent=W.g3.learning?"배우는 중: 하루 길이를 다시 재는 동안은 빛 센서로 판단해요":"하루 길이를 알고 있어요";
+    const mk=b=>b?"✓":"아직";
+    $("hint3").textContent=$("next3").disabled?`마무리하려면 세 가지를 해 봐요. 낮에 구름 끼는 것 보기 ${mk(W.clouded)} · '별이 더 빨라진다' 누르기 ${mk(W.fasted)} · 3세대가 새 하루 길이 배우기 ${mk(W.fasted&&!W.g3.learning)}`:"";
     if(W.clouded&&W.fasted&&!W.g3.learning&&$("next3").disabled){$("next3").disabled=false;done.add(3);}
     scores3=[pct(0),pct(1),pct(2)];}
 }
@@ -330,9 +338,10 @@ $("sensors").onclick=e=>{const b=e.target.closest(".opt");if(!b||(W&&W.running))
 $("thr").oninput=()=>{thr=+$("thr").value;setRule();};
 $("run1").onclick=()=>{
   if(!sensor){$("toast1").className="toast bad";$("toast1").textContent="먼저 감지 장치를 골라 주세요.";return;}
-  startWorld(1);W.running=true;$("run1").disabled=true;$("toast1").className="toast";$("toast1").textContent="사흘 동안 작동하는 중이에요. 가로등이 제때 켜지는지 지켜보세요.";
+  startWorld(1);W.running=true;W.mul=1;$("run1").disabled=true;$("thr").disabled=true;$("fast1").disabled=false;$("fast1").textContent="빠르게 (2배)";$("toast1").className="toast";$("toast1").textContent="사흘 동안 작동하는 중이에요. 가로등이 제때 켜지는지 지켜보세요.";
 };
 function finish1(){
+  $("thr").disabled=false;$("fast1").disabled=true;
   $("run1").disabled=false;$("run1").textContent="다시 작동해 보기";
   const p=Math.round(W.ok[0]/W.tot*100),t=$("toast1");$("m1Score").className=p>=95?"ok":"bad";
   if(sensor!=="light"){t.className="toast bad";t.textContent=sensor==="sound"?`제때 켠 시간 ${p}%. 소리는 밤낮과 상관없이 커졌다 작아졌다 해요. 어두워진 것을 알아채려면 무엇을 감지해야 할까요?`:`제때 켠 시간 ${p}%. 온도는 해가 진 뒤에도 한참 따뜻하고, 해가 뜬 뒤에도 한동안 차가워요. 어두워진 것을 바로 알아채려면 무엇을 감지해야 할까요?`;return;}
@@ -340,6 +349,7 @@ function finish1(){
   t.className="toast bad";t.textContent=thr>NEED?`제때 켠 시간 ${p}%. 아직 밝은데 너무 일찍 켜져요. 기준 숫자를 조금 낮춰 보세요.`:`제때 켠 시간 ${p}%. 이미 어두운데 너무 늦게 켜져요. 기준 숫자를 조금 높여 보세요.`;
 }
 $("next1").onclick=()=>show(2);
+$("fast1").onclick=()=>{if(!W||!W.running)return;W.mul=W.mul===2?1:2;$("fast1").textContent=W.mul===2?"원래 빠르기로":"빠르게 (2배)";};
 
 /* 2단계 */
 $("fast2").onclick=()=>{if(W.fasted)return;W.fasted=true;W.day=DAY0/3;W.fastDays=0;$("fast2").disabled=true;$("toast2").className="toast";$("toast2").textContent="별이 세 배 빨리 돌기 시작했어요. 두 가로등을 지켜보세요.";};
@@ -347,7 +357,7 @@ $("next2").onclick=()=>show(3);
 
 /* 3단계 */
 $("cloud3").onclick=()=>{if(W.cloudX!=null)return;W.cloudX=-160;W.cloudMsg=false;};
-$("fast3").onclick=()=>{const newDay=W.day>DAY0/2?DAY0/3:DAY0/5;W.day=newDay;W.fasted=true;W.g3.learning=true;W.g3.changedAt=W.t;$("toast3").className="toast";$("toast3").textContent="별이 더 빨라졌어요. 3세대는 하루 길이를 다시 재는 동안 빛 센서로 판단하다가, 새 길이를 배우면 스스로 일정을 바꿔요.";};
+$("fast3").onclick=()=>{W.fastCount=(W.fastCount||0)+1;if(W.fastCount>2)return;if(W.fastCount===2)$("fast3").disabled=true;const newDay=W.day>DAY0/2?DAY0/3:DAY0/5;W.day=newDay;W.fasted=true;W.g3.learning=true;W.g3.changedAt=W.t;$("toast3").className="toast";$("toast3").textContent="별이 더 빨라졌어요. 3세대는 하루 길이를 다시 재는 동안 빛 센서로 판단하다가, 새 길이를 배우면 스스로 일정을 바꿔요.";};
 $("next3").onclick=()=>{goFinal();};
 function goFinal(){done.add(3);const s=scores3||["-","-","-"];$("f1").textContent=s[0];$("f2").textContent=s[1];$("f3").textContent=s[2];show(4);done.add(4);}
 
@@ -358,7 +368,7 @@ $("reset").onclick=()=>{
   resetArm=0;$("reset").textContent="처음부터 다시";resetAll();
 };
 function resetAll(){done.clear();sensor="";thr=70;$("thr").value=70;$("sensors").querySelectorAll(".opt").forEach(x=>x.setAttribute("aria-pressed","false"));$("ruleText").innerHTML='센서 값이 <b id="thrOut">70</b>보다 작으면 켜요.';$("m1Label").textContent="센서 값";
-  $("run1").textContent="작동해 보기";$("run1").disabled=false;$("next1").disabled=true;$("next2").disabled=true;$("next3").disabled=true;$("fast2").disabled=false;["toast1","toast2","toast3"].forEach(i=>{$(i).textContent="";$(i).className="toast";});scores3=null;show(1);}
+  $("run1").textContent="작동해 보기";$("run1").disabled=false;$("thr").disabled=false;$("fast1").disabled=true;$("next1").disabled=true;$("next2").disabled=true;$("next3").disabled=true;$("fast2").disabled=false;["toast1","toast2","toast3"].forEach(i=>{$(i).textContent="";$(i).className="toast";});scores3=null;show(1);}
 
 /* 선생님 바로가기: 학생용 주소(github.io)에서는 ?teacher 를 붙였을 때만 보여요 */
 if(!/github\.io$/.test(location.hostname)||/teacher/.test(location.search))$("tbar").hidden=false;
