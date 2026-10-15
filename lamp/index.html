@@ -215,8 +215,8 @@ function buildScene(svg,labels){
   svg.innerHTML="";const S={};
   S.sky=el("rect",{x:0,y:0,width:640,height:230,fill:"#85B7EB"},svg);
   S.stars=el("g",{opacity:0},svg);[[60,30],[150,60],[260,24],[380,50],[470,30],[580,70],[520,20]].forEach(([x,y])=>el("circle",{cx:x,cy:y,r:1.8,fill:"#f1efe8"},S.stars));
-  S.sun=el("circle",{cx:320,cy:60,r:22,fill:"#FAC775"},svg);
-  S.moon=el("circle",{cx:320,cy:60,r:15,fill:"#f1efe8",opacity:0},svg);
+  S.sun=el("g",{},svg);for(let k=0;k<12;k++){const a=k*Math.PI/6;el("line",{x1:Math.cos(a)*27,y1:Math.sin(a)*27,x2:Math.cos(a)*37,y2:Math.sin(a)*37,stroke:"#EF9F27","stroke-width":4,"stroke-linecap":"round"},S.sun);}el("circle",{cx:0,cy:0,r:21,fill:"#FAC775",stroke:"#EF9F27","stroke-width":2},S.sun);
+  S.moon=el("g",{opacity:0},svg);el("circle",{cx:0,cy:0,r:15,fill:"#d9dce3",stroke:"#b4b8c2","stroke-width":1.5},S.moon);[[-5,-4,3.5],[5,3,2.6],[-2,7,2],[6,-6,1.8]].forEach(([x,y,r])=>el("circle",{cx:x,cy:y,r,fill:"#b4b8c2"},S.moon));
   S.cloud=el("g",{opacity:0},svg);[[0,0,30],[30,-12,34],[64,0,28],[28,10,30]].forEach(([x,y,r])=>el("circle",{cx:x,cy:y,r,fill:"#8a94a6"},S.cloud));
   el("ellipse",{cx:320,cy:330,rx:420,ry:140,fill:"#639922"},svg);
   S.lamps=[];const n=labels.length,gap=640/(n+1);
@@ -233,8 +233,8 @@ function paint(S,light,phase,cloudK,ons,real){
   S.sky.setAttribute("fill",`rgb(${mix([4,44,83],[133,183,235])})`);
   const day=Math.sin(2*Math.PI*phase)>0,ang=phase*2*Math.PI;
   const x=320-Math.cos(ang)*270,y=200-Math.abs(Math.sin(ang))*160;
-  S.sun.setAttribute("cx",x);S.sun.setAttribute("cy",y);S.sun.setAttribute("opacity",day?1:0);
-  S.moon.setAttribute("cx",640-x);S.moon.setAttribute("cy",y);S.moon.setAttribute("opacity",day?0:1);
+  S.sun.setAttribute("transform",`translate(${x} ${y})`);S.sun.setAttribute("opacity",day?1:0);
+  S.moon.setAttribute("transform",`translate(${640-x} ${y})`);S.moon.setAttribute("opacity",day?0:1);
   S.stars.setAttribute("opacity",real<20?1:0);
   S.cloud.setAttribute("opacity",cloudK>0?.95:0);S.cloud.setAttribute("transform",`translate(${x-30} ${y+4})`);
   ons.forEach((on,i)=>{const L=S.lamps[i];L.glow.setAttribute("opacity",on?.55:0);L.bulb.setAttribute("fill",on?"#FAC775":"#888780");});
