@@ -200,7 +200,8 @@ const $=id=>document.getElementById(id);
 const reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
 const DAY0=8;              /* 처음 하루 길이(초) */
 const NEED=25;             /* 밝기가 25보다 어두우면 불이 필요해요 */
-const lightAt=ph=>Math.max(0,Math.sin(2*Math.PI*ph))*100;
+/* 밝기: 해가 지평선 아래 조금 있을 때(어스름)도 희미하게 밝아요 */
+const lightAt=ph=>{const e=Math.sin(2*Math.PI*ph);if(e>=0)return 15+85*e;if(e>-0.2)return 15*(1+e/0.2);return 0;};
 const done=new Set();
 function show(n){
   for(const i of [1,2,3,4])$("step"+i).hidden=i!==n;
@@ -211,31 +212,49 @@ function show(n){
 /* 장면 그리기 */
 const NS="http://www.w3.org/2000/svg";
 function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;}
+let sceneId=0;
 function buildScene(svg,labels){
-  svg.innerHTML="";const S={};
-  S.sky=el("rect",{x:0,y:0,width:640,height:230,fill:"#85B7EB"},svg);
-  S.stars=el("g",{opacity:0},svg);[[60,30],[150,60],[260,24],[380,50],[470,30],[580,70],[520,20]].forEach(([x,y])=>el("circle",{cx:x,cy:y,r:1.8,fill:"#f1efe8"},S.stars));
-  S.sun=el("g",{},svg);for(let k=0;k<12;k++){const a=k*Math.PI/6;el("line",{x1:Math.cos(a)*27,y1:Math.sin(a)*27,x2:Math.cos(a)*37,y2:Math.sin(a)*37,stroke:"#EF9F27","stroke-width":4,"stroke-linecap":"round"},S.sun);}el("circle",{cx:0,cy:0,r:21,fill:"#FAC775",stroke:"#EF9F27","stroke-width":2},S.sun);
+  svg.innerHTML="";const S={},id="sky"+(++sceneId);
+  const defs=el("defs",{},svg),lg=el("linearGradient",{id,x1:0,y1:0,x2:0,y2:1},defs);
+  S.top=el("stop",{offset:"0","stop-color":"#3c82d7"},lg);S.mid=el("stop",{offset:"0.6","stop-color":"#7fb3e6"},lg);S.hor=el("stop",{offset:"1","stop-color":"#aad7f5"},lg);
+  S.sky=el("rect",{x:0,y:0,width:640,height:230,fill:`url(#${id})`},svg);
+  S.stars=el("g",{opacity:0},svg);[[60,30],[150,60],[260,24],[380,50],[470,30],[580,70],[520,20],[95,90],[430,95],[300,75]].forEach(([x,y])=>el("circle",{cx:x,cy:y,r:1.8,fill:"#f1efe8"},S.stars));
+  S.sun=el("g",{},svg);S.rays=el("g",{},S.sun);for(let k=0;k<12;k++){const a=k*Math.PI/6;el("line",{x1:Math.cos(a)*27,y1:Math.sin(a)*27,x2:Math.cos(a)*37,y2:Math.sin(a)*37,stroke:"#EF9F27","stroke-width":4,"stroke-linecap":"round"},S.rays);}S.disc=el("circle",{cx:0,cy:0,r:21,fill:"#FAC775",stroke:"#EF9F27","stroke-width":2},S.sun);
   S.moon=el("g",{opacity:0},svg);el("circle",{cx:0,cy:0,r:15,fill:"#d9dce3",stroke:"#b4b8c2","stroke-width":1.5},S.moon);[[-5,-4,3.5],[5,3,2.6],[-2,7,2],[6,-6,1.8]].forEach(([x,y,r])=>el("circle",{cx:x,cy:y,r,fill:"#b4b8c2"},S.moon));
   S.cloud=el("g",{opacity:0},svg);[[0,0,30],[30,-12,34],[64,0,28],[28,10,30]].forEach(([x,y,r])=>el("circle",{cx:x,cy:y,r,fill:"#8a94a6"},S.cloud));
-  el("ellipse",{cx:320,cy:330,rx:420,ry:140,fill:"#639922"},svg);
+  S.ground=el("ellipse",{cx:320,cy:330,rx:420,ry:140,fill:"#639922"},svg);
   S.lamps=[];const n=labels.length,gap=640/(n+1);
   labels.forEach((lb,i)=>{const x=gap*(i+1),g=el("g",{},svg);
     const glow=el("ellipse",{cx:x,cy:118,rx:46,ry:30,fill:"#FAC775",opacity:0},g);
     el("rect",{x:x-4,y:96,width:8,height:104,fill:"#444441"},g);el("rect",{x:x-20,y:86,width:40,height:13,rx:4,fill:"#444441"},g);
     const bulb=el("circle",{cx:x,cy:104,r:7,fill:"#888780"},g);
-    const t=el("text",{x,y:222,"text-anchor":"middle","font-size":"15",fill:"#173404","font-family":"Gowun Dodum, sans-serif"},g);t.textContent=lb;
+    const t=el("text",{x,y:222,"text-anchor":"middle","font-size":"15",fill:"#f1efe8","font-family":"Gowun Dodum, sans-serif"},g);t.textContent=lb;
     S.lamps.push({glow,bulb});});
   return S;
 }
+/* 해의 높이(e)에 따른 하늘 색: [e, 위, 가운데, 지평선(저녁), 지평선(아침)] */
+const SKY=[
+  [-1.00,[5,10,28],[8,15,36],[10,18,42],[10,18,42]],
+  [-0.30,[8,16,42],[12,22,54],[18,28,64],[18,30,68]],
+  [-0.14,[16,26,64],[34,40,88],[86,52,90],[62,64,118]],
+  [-0.04,[40,50,108],[120,82,128],[236,118,78],[238,150,112]],
+  [ 0.06,[78,118,190],[190,150,160],[250,166,104],[250,192,140]],
+  [ 0.30,[62,130,214],[118,174,232],[166,208,242],[166,208,242]],
+  [ 1.00,[52,120,210],[110,170,232],[170,214,246],[170,214,246]]];
+const lerp=(a,b,t)=>a.map((v,i)=>Math.round(v+(b[i]-v)*t));
+function skyAt(e,evening){for(let k=0;k<SKY.length-1;k++){const A=SKY[k],B=SKY[k+1];if(e<=B[0]){const t=(e-A[0])/(B[0]-A[0]);return [lerp(A[1],B[1],t),lerp(A[2],B[2],t),lerp(A[evening?3:4],B[evening?3:4],t)];}}const L=SKY[SKY.length-1];return [L[1],L[2],L[3]];}
+const rgb=c=>`rgb(${c})`,clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 function paint(S,light,phase,cloudK,ons,real){
-  if(real===undefined)real=light;const t=(cloudK?real*.55:real)/100,mix=(a,b)=>a.map((v,i)=>Math.round(v+(b[i]-v)*t));
-  S.sky.setAttribute("fill",`rgb(${mix([4,44,83],[133,183,235])})`);
-  const day=Math.sin(2*Math.PI*phase)>0,ang=phase*2*Math.PI;
-  const x=320-Math.cos(ang)*270,y=200-Math.abs(Math.sin(ang))*160;
-  S.sun.setAttribute("transform",`translate(${x} ${y})`);S.sun.setAttribute("opacity",day?1:0);
-  S.moon.setAttribute("transform",`translate(${640-x} ${y})`);S.moon.setAttribute("opacity",day?0:1);
-  S.stars.setAttribute("opacity",real<20?1:0);
+  const ang=phase*2*Math.PI,e=Math.sin(ang),evening=phase>0.25&&phase<0.75;
+  let [top,mid,hor]=skyAt(e,evening);
+  if(cloudK){const g=[120,128,140];top=lerp(top,g,.55);mid=lerp(mid,g,.55);hor=lerp(hor,g,.5);}
+  S.top.setAttribute("stop-color",rgb(top));S.mid.setAttribute("stop-color",rgb(mid));S.hor.setAttribute("stop-color",rgb(hor));
+  const x=320-Math.cos(ang)*270,y=205-e*165;
+  S.sun.setAttribute("transform",`translate(${x} ${y})`);
+  const low=clamp(e/0.35,0,1);S.disc.setAttribute("fill",rgb(lerp([238,110,60],[250,199,117],low)));S.rays.setAttribute("opacity",clamp(e/0.15,0,1));
+  S.moon.setAttribute("transform",`translate(${640-x} ${205+e*165})`);S.moon.setAttribute("opacity",clamp((0.1-e)/0.25,0,1));
+  S.stars.setAttribute("opacity",clamp((-e-0.06)/0.2,0,1));
+  S.ground.setAttribute("fill",rgb(lerp([28,46,22],[99,153,34],clamp((e+0.2)/0.5,0,1))));
   S.cloud.setAttribute("opacity",cloudK>0?.95:0);S.cloud.setAttribute("transform",`translate(${x-30} ${y+4})`);
   ons.forEach((on,i)=>{const L=S.lamps[i];L.glow.setAttribute("opacity",on?.55:0);L.bulb.setAttribute("fill",on?"#FAC775":"#888780");});
 }
@@ -264,7 +283,7 @@ function frame(now,first){
 function step(dt){
   W.t+=dt;const prevPh=W.ph;W.ph+=dt/W.day;W.g1clock+=dt/DAY0;
   const ph=W.ph%1,light=lightAt(ph);
-  const cloudK=W.cloudT>0&&light>0?1:0;if(W.cloudT>0)W.cloudT-=dt;
+  const cloudK=W.cloudT>0&&Math.sin(2*Math.PI*ph)>0.1?1:0;if(W.cloudT>0)W.cloudT-=dt;
   const obs=cloudK?light*.12:light;
   const need=light<NEED;
   /* 해 뜨는 순간 (3세대가 하루 길이를 잼) */
@@ -320,7 +339,7 @@ $("fast2").onclick=()=>{if(W.fasted)return;W.fasted=true;W.day=DAY0/3;W.fastDays
 $("next2").onclick=()=>show(3);
 
 /* 3단계 */
-$("cloud3").onclick=()=>{W.cloudT=W.day*0.12;W.clouded=true;$("toast3").className="toast";$("toast3").textContent=lightAt(W.ph%1)>0?"구름이 해를 가렸어요. 2세대는 어두워졌다고 생각해서 켜지지만, 3세대는 아직 낮인 걸 알고 꺼진 채로 있어요.":"지금은 밤이라 구름이 가릴 해가 없어요. 낮에 다시 눌러 보세요.";if(lightAt(W.ph%1)<=0){W.cloudT=0;W.clouded=false;}};
+$("cloud3").onclick=()=>{W.cloudT=W.day*0.12;W.clouded=true;$("toast3").className="toast";$("toast3").textContent=Math.sin(2*Math.PI*(W.ph%1))>0.15?"구름이 해를 가렸어요. 2세대는 어두워졌다고 생각해서 켜지지만, 3세대는 아직 낮인 걸 알고 꺼진 채로 있어요.":"지금은 해가 높이 떠 있지 않아요. 한낮에 다시 눌러 보세요.";if(Math.sin(2*Math.PI*(W.ph%1))<=0.15){W.cloudT=0;W.clouded=false;}};
 $("fast3").onclick=()=>{const newDay=W.day>DAY0/2?DAY0/3:DAY0/5;W.day=newDay;W.fasted=true;W.g3.learning=true;W.g3.changedAt=W.t;$("toast3").className="toast";$("toast3").textContent="별이 더 빨라졌어요. 3세대는 하루 길이를 다시 재는 동안 빛 센서로 판단하다가, 새 길이를 배우면 스스로 일정을 바꿔요.";};
 $("next3").onclick=()=>{goFinal();};
 function goFinal(){done.add(3);const s=scores3||["-","-","-"];$("f1").textContent=s[0];$("f2").textContent=s[1];$("f3").textContent=s[2];show(4);done.add(4);}
