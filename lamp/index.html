@@ -235,6 +235,16 @@ function buildScene(svg,labels){
     const bulb=el("circle",{cx:x,cy:104,r:7,fill:"#888780"},g);
     const t=el("text",{x,y:224,"text-anchor":"middle","font-size":"19",fill:"#f1efe8","font-family":"Gowun Dodum, sans-serif"},g);t.textContent=lb;
     S.lamps.push({glow,bulb});});
+  /* 1세대 옆에 가로등 켜는 사람 */
+  if(labels[0]==="1세대"){const lx=gap,px=lx-38,P=el("g",{},svg);
+    el("rect",{x:px-6,y:182,width:5,height:18,rx:2,fill:"#2b2f3a"},P);el("rect",{x:px+1,y:182,width:5,height:18,rx:2,fill:"#2b2f3a"},P);
+    el("rect",{x:px-9,y:156,width:18,height:30,rx:6,fill:"#4a5f8a"},P);
+    el("circle",{cx:px,cy:148,r:8,fill:"#f2d2b0"},P);
+    el("rect",{x:px-9,y:136,width:18,height:7,rx:2,fill:"#3a2f2a"},P);el("rect",{x:px-6,y:128,width:12,height:9,rx:2,fill:"#3a2f2a"},P);
+    const arm=el("g",{},P);el("line",{x1:0,y1:0,x2:0,y2:-16,stroke:"#4a5f8a","stroke-width":5,"stroke-linecap":"round"},arm);
+    el("line",{x1:0,y1:-14,x2:0,y2:-86,stroke:"#8a5a2b","stroke-width":3,"stroke-linecap":"round"},arm);el("circle",{cx:0,cy:-86,r:3,fill:"#EF9F27"},arm);
+    const sweat=el("g",{opacity:0},P);el("path",{d:`M${px+13} 134 q5 8 0 12 q-5 -4 0 -12z`,fill:"#378ADD",stroke:"#f1efe8","stroke-width":1},sweat);el("path",{d:`M${px-15} 140 q4 7 0 10 q-4 -3 0 -10z`,fill:"#378ADD",stroke:"#f1efe8","stroke-width":1},sweat);
+    S.person={arm,sweat,sx:px+8,sy:162,reach:Math.atan2(92-162,lx-(px+8))*180/Math.PI+90};}
   return S;
 }
 /* 해의 높이(e)에 따른 하늘 색: [e, 위, 가운데, 지평선(저녁), 지평선(아침)] */
@@ -304,6 +314,7 @@ function step(dt){
     if(g.lastSunrise>0&&g.changedAt>=0&&g.lastSunrise>=g.changedAt){g.P=measured;g.learning=false;g.changedAt=-1;}
     g.lastSunrise=W.t;g.anchor=W.t;}
   const on1=lightAt(W.g1clock%1)<NEED;
+  if(W.prevOn1!==undefined&&on1!==W.prevOn1)W.armT=0;W.prevOn1=on1;W.armT=(W.armT??9)+dt;
   const v=sensorValue(W.n===1?sensor:"light",ph,obs,W);
   const on2=v<thr;
   const g=W.g3,on3=g.learning?on2:lightAt(((W.t-g.anchor)/g.P)%1)<NEED; /* 배우는 동안에는 빛 센서에 기대요 */
@@ -315,6 +326,9 @@ function step(dt){
 function draw(){
   const v=W.view||{light:lightAt(W.ph%1),ph:W.ph%1,cloudK:0,ons:W.n===1?[false]:W.n===2?[false,false]:[false,false,false],v:null};
   paint(W.S,v.light,v.ph,v.cloudK,v.ons,v.real,v.cloudX);
+  const P=W.S.person;if(P){const t=W.armT??9,k=t<0.5?Math.sin(Math.PI*t/0.5):0,ang=-12+(P.reach+12)*k;
+    P.arm.setAttribute("transform",`translate(${P.sx} ${P.sy}) rotate(${ang})`);
+    P.sweat.setAttribute("opacity",W.day<DAY0-0.01?1:0);P.sweat.setAttribute("transform",`translate(0 ${Math.sin(W.t*8)*1.5})`);}
   const pct=i=>W.tot>0?Math.round(W.ok[i]/W.tot*100)+"%":"-";
   if(W.n===1){$("m1Val").textContent=v.v==null?"-":Math.round(v.v);$("m1Lamp").textContent=v.ons[0]?"켜짐":"꺼짐";
     $("m1Lamp").className=v.need===undefined?"":(v.ons[0]!==v.need?"bad":"ok");
