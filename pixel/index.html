@@ -49,7 +49,7 @@ h1{font-family:var(--display);font-weight:700;font-size:2.1rem;line-height:1.1;m
 .toast{min-height:1.4em;margin:0;font-size:.95rem;color:var(--accent)}
 .toast.bad{color:var(--bad)} .toast.ok{color:var(--ok)}
 .split{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:start}
-@media (max-width:620px){.split{grid-template-columns:1fr}}
+@media (max-width:620px){.split{grid-template-columns:1fr}.split.s8{grid-template-columns:minmax(0,1fr) auto;gap:10px}.split.s8 .code.big{font-size:15px;letter-spacing:.06em}.split.s8 .codebox{padding:8px}}
 .grid{display:grid;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;width:100%;aspect-ratio:1;touch-action:none;user-select:none;-webkit-user-select:none}
 .grid.g8{max-width:360px}.grid.g16{max-width:440px}
 .grid i{display:block;background:var(--cell)}
@@ -125,7 +125,7 @@ h1{font-family:var(--display);font-weight:700;font-size:2.1rem;line-height:1.1;m
   <section class="card" id="step1">
     <h2>숫자만 보고 그림을 완성해요</h2>
     <p class="note">소행성 B612처럼, 어른들과 컴퓨터는 숫자를 좋아해요. 1은 칠하고 0은 비워 두어요. 위에서부터 한 줄씩 칠해 보세요. 어떤 그림이 숨어 있을까요?</p>
-    <div class="split">
+    <div class="split s8">
       <div class="grid g8" id="g1" style="grid-template-columns:repeat(8,1fr)"></div>
       <div class="codebox"><p>숨은 그림의 숫자</p><pre class="code big" id="code1"></pre></div>
     </div>
@@ -142,10 +142,10 @@ h1{font-family:var(--display);font-weight:700;font-size:2.1rem;line-height:1.1;m
     <h2>나만의 그림을 숫자로 그려요</h2>
     <p class="note">이 그림은 어린 왕자에게 보여 줄 거예요. 먼저 무엇을 그릴지 골라요.</p>
     <div class="topics" id="topics" role="group" aria-label="그림 주제">
-      <button class="topic" data-t="상자 속 양">상자 속 양</button>
-      <button class="topic" data-t="나의 작은 별">나의 작은 별</button>
-      <button class="topic" data-t="어린 왕자의 장미">어린 왕자의 장미</button>
       <button class="topic" data-t="코끼리를 삼킨 보아뱀">코끼리를 삼킨 보아뱀</button>
+      <button class="topic" data-t="상자 속 양">상자 속 양</button>
+      <button class="topic" data-t="고장 난 비행기">고장 난 비행기</button>
+      <button class="topic" data-t="소행성 B612">소행성 B612</button>
     </div>
     <div id="drawArea" hidden>
       <div style="display:flex;flex-direction:column;gap:12px">
@@ -171,7 +171,7 @@ h1{font-family:var(--display);font-weight:700;font-size:2.1rem;line-height:1.1;m
   <!-- 3단계 -->
   <section class="card" id="step3" hidden>
     <h2>몇 칸이면 알아볼까?</h2>
-    <p class="note">어린 왕자 이야기에 나오는 그림 하나가 숨어 있어요. 처음엔 4×4 칸, 숫자 16개뿐이에요. 무엇인지 알 것 같으면 고르고, 모르겠으면 칸을 늘려 보세요.</p>
+    <p class="note">지금까지 읽은 이야기에 나온 그림 하나가 숨어 있어요. 처음엔 4×4 칸, 숫자 16개뿐이에요. 칸 크기마다 한 번만 고를 수 있으니, 모양을 잘 보고 골라요. 모르겠으면 고르지 말고 칸을 늘려 보세요.</p>
     <div class="guess">
       <canvas id="gq" width="320" height="320"></canvas>
       <div style="display:flex;flex-direction:column;gap:12px">
@@ -215,7 +215,7 @@ h1{font-family:var(--display);font-weight:700;font-size:2.1rem;line-height:1.1;m
       <div style="display:flex;flex-direction:column;gap:12px">
         <p class="note" id="guide4"></p>
         <div class="palette" id="pal4" role="group" aria-label="색 고르기"></div>
-        <div class="split">
+        <div class="split s8">
           <div class="grid g8 color" id="g4" style="grid-template-columns:repeat(8,1fr)"></div>
           <div class="codebox"><p id="code4Label">숫자</p><pre class="code big" id="code4"></pre></div>
         </div>
@@ -272,7 +272,8 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
 let animating=false;
 async function readAnim(gridEl,codeEl,cells,n){
-  animating=true;const kids=gridEl.children,spans=codeEl.querySelectorAll("span");
+  animating=true;try{gridEl.parentNode.scrollIntoView({block:"center",behavior:reduce?"auto":"smooth"});}catch(e){}
+  const kids=gridEl.children,spans=codeEl.querySelectorAll("span");
   if(!reduce){for(const k of kids)k.className="";
     for(let i=0;i<n*n;i++){if(i)spans[i-1].classList.remove("cur");spans[i].classList.add("cur");kids[i].className=cells[i]?"v"+cells[i]:"";await sleep(i<n?140:45);}
     spans[n*n-1].classList.remove("cur");}
@@ -329,32 +330,35 @@ $("go4").onclick=()=>{done.add(3);show(4);};
 $("back5").onclick=()=>show(4);
 
 /* 3단계: 몇 칸이면 알아볼까 */
+const INK="#33405a",PAPER="#f3eee2";
 const PICS={
-  "장미":c=>{c.fillStyle="#4f9a45";c.fillRect(122,120,12,120);c.beginPath();c.ellipse(96,180,30,13,-0.5,0,7);c.fill();c.beginPath();c.ellipse(160,160,30,13,0.5,0,7);c.fill();c.fillStyle="#d64550";c.beginPath();c.arc(128,90,50,0,7);c.fill();c.strokeStyle="#8f1f2b";c.lineWidth=8;c.beginPath();c.arc(128,90,22,0.5,5.5);c.stroke();},
-  "여우":c=>{c.fillStyle="#e07b2e";c.beginPath();c.moveTo(48,90);c.lineTo(78,18);c.lineTo(112,82);c.lineTo(144,82);c.lineTo(178,18);c.lineTo(208,90);c.lineTo(128,220);c.closePath();c.fill();c.fillStyle="#fbf7ee";c.beginPath();c.moveTo(92,150);c.lineTo(164,150);c.lineTo(128,220);c.closePath();c.fill();c.fillStyle="#2f3a2c";c.beginPath();c.arc(98,118,9,0,7);c.arc(158,118,9,0,7);c.fill();c.beginPath();c.arc(128,208,9,0,7);c.fill();},
-  "왕관":c=>{c.fillStyle="#e8b923";c.beginPath();c.moveTo(40,200);c.lineTo(40,80);c.lineTo(84,130);c.lineTo(128,60);c.lineTo(172,130);c.lineTo(216,80);c.lineTo(216,200);c.closePath();c.fill();c.fillStyle="#d64550";c.beginPath();c.arc(128,160,14,0,7);c.fill();c.fillStyle="#2d5d7b";c.beginPath();c.arc(78,170,10,0,7);c.arc(178,170,10,0,7);c.fill();},
-  "가로등":c=>{c.fillStyle="#f6e08a";c.beginPath();c.arc(128,80,62,0,7);c.fill();c.fillStyle="#3d4a5c";c.fillRect(120,90,16,150);c.fillRect(92,60,72,30);c.fillRect(100,232,56,14);c.fillStyle="#f2c94c";c.fillRect(102,90,52,16);},
-  "보아뱀":c=>{c.fillStyle="#8a5a2b";c.beginPath();c.moveTo(16,200);c.bezierCurveTo(60,190,70,150,96,100);c.bezierCurveTo(120,50,170,60,184,130);c.bezierCurveTo(196,180,230,190,244,200);c.closePath();c.fill();},
-  "양":c=>{c.fillStyle="#ffffff";c.strokeStyle="#9aa39a";c.lineWidth=4;for(const [x,y,r] of [[90,120,34],[130,105,38],[170,122,34],[110,150,34],[155,152,34]]){c.beginPath();c.arc(x,y,r,0,7);c.fill();c.stroke();}c.fillStyle="#2f3a2c";c.beginPath();c.ellipse(208,110,20,26,0,0,7);c.fill();c.fillRect(100,176,12,46);c.fillRect(150,176,12,46);}
+  "양":c=>{c.fillStyle=INK;for(const [x,y,r] of [[86,120,32],[124,104,36],[164,118,32],[104,148,32],[148,150,32]]){c.beginPath();c.arc(x,y,r,0,7);c.fill();}c.beginPath();c.ellipse(204,108,20,25,0,0,7);c.fill();c.fillRect(94,170,14,56);c.fillRect(146,170,14,56);},
+  "코끼리":c=>{c.fillStyle=INK;c.beginPath();c.ellipse(118,136,74,48,0,0,7);c.fill();c.beginPath();c.arc(194,108,34,0,7);c.fill();c.fillRect(62,160,20,64);c.fillRect(96,166,20,58);c.fillRect(140,166,20,58);c.fillRect(170,160,20,64);c.strokeStyle=INK;c.lineCap="round";c.lineWidth=16;c.beginPath();c.moveTo(220,118);c.quadraticCurveTo(244,160,232,212);c.stroke();c.lineWidth=6;c.beginPath();c.moveTo(46,128);c.lineTo(28,170);c.stroke();c.fillStyle=PAPER;c.beginPath();c.arc(202,98,5,0,7);c.fill();},
+  "상자":c=>{c.fillStyle=INK;c.fillRect(46,72,164,120);c.beginPath();c.moveTo(46,72);c.lineTo(80,44);c.lineTo(244,44);c.lineTo(210,72);c.closePath();c.fill();c.beginPath();c.moveTo(210,72);c.lineTo(244,44);c.lineTo(244,164);c.lineTo(210,192);c.closePath();c.fill();c.fillStyle=PAPER;for(const [x,y] of [[96,132],[128,112],[160,132]]){c.beginPath();c.arc(x,y,10,0,7);c.fill();}},
+  "비행기":c=>{c.fillStyle=INK;c.beginPath();c.ellipse(128,128,100,17,0,0,7);c.fill();c.beginPath();c.moveTo(116,124);c.lineTo(140,124);c.lineTo(150,30);c.lineTo(132,30);c.closePath();c.fill();c.beginPath();c.moveTo(116,132);c.lineTo(140,132);c.lineTo(150,226);c.lineTo(132,226);c.closePath();c.fill();c.beginPath();c.moveTo(36,124);c.lineTo(52,124);c.lineTo(42,84);c.lineTo(30,84);c.closePath();c.fill();c.beginPath();c.moveTo(36,132);c.lineTo(52,132);c.lineTo(42,172);c.lineTo(30,172);c.closePath();c.fill();c.fillRect(226,100,8,56);},
+  "보아뱀":c=>{c.fillStyle=INK;c.beginPath();c.moveTo(16,196);c.bezierCurveTo(60,186,70,148,96,100);c.bezierCurveTo(120,50,170,60,184,128);c.bezierCurveTo(196,178,230,188,244,196);c.closePath();c.fill();},
+  "집":c=>{c.fillStyle=INK;c.beginPath();c.moveTo(36,118);c.lineTo(128,40);c.lineTo(220,118);c.closePath();c.fill();c.fillRect(56,116,144,108);c.fillRect(170,52,20,48);c.fillStyle=PAPER;c.fillRect(112,160,32,64);c.fillRect(74,138,26,26);c.fillRect(156,138,26,26);}
 };
 const LV=[4,8,16,32];
-let gName="",gLv=0,gOver=false,gLast="";
-function srcCanvas(name){const c=document.createElement("canvas");c.width=c.height=256;const x=c.getContext("2d");x.fillStyle="#dde8ef";x.fillRect(0,0,256,256);PICS[name](x);return c;}
+let gName="",gLv=0,gOver=false,gLast="",gWrong=0;
+function srcCanvas(name){const c=document.createElement("canvas");c.width=c.height=256;const x=c.getContext("2d");x.fillStyle=PAPER;x.fillRect(0,0,256,256);PICS[name](x);return c;}
 function pixelate(cv,src,n){const t=document.createElement("canvas");t.width=t.height=n;const tx=t.getContext("2d");tx.imageSmoothingEnabled=true;tx.imageSmoothingQuality="high";
   let cur=src;while(cur.width/2>=n*2){const h=document.createElement("canvas");h.width=h.height=cur.width/2;const hx=h.getContext("2d");hx.imageSmoothingQuality="high";hx.drawImage(cur,0,0,h.width,h.height);cur=h;}
   tx.drawImage(cur,0,0,n,n);const x=cv.getContext("2d");x.imageSmoothingEnabled=false;x.clearRect(0,0,cv.width,cv.height);x.drawImage(t,0,0,cv.width,cv.height);}
 function gDraw(){const n=LV[gLv];pixelate($("gq"),srcCanvas(gName),n);$("gRes").textContent=`${n} × ${n}`;$("gNum").textContent=n*n;$("gMore").disabled=gOver||gLv>=LV.length-1;}
-function newGuess(){const names=Object.keys(PICS).filter(x=>x!==gLast);gName=names[Math.floor(Math.random()*names.length)];gLast=gName;gLv=0;gOver=false;
+function newGuess(){const names=Object.keys(PICS).filter(x=>x!==gLast);gName=names[Math.floor(Math.random()*names.length)];gLast=gName;gLv=0;gOver=false;gWrong=0;
   const others=Object.keys(PICS).filter(x=>x!==gName).sort(()=>Math.random()-.5).slice(0,3);const opts=[gName,...others].sort(()=>Math.random()-.5);
   $("gChoices").innerHTML=opts.map(o=>`<button class="btn" data-o="${o}">${o}</button>`).join("");$("gToast").textContent="";$("gToast").className="toast";$("gDone").hidden=true;gDraw();}
 $("gMore").onclick=()=>{if(gLv<LV.length-1){gLv++;gDraw();$("gToast").className="toast";$("gToast").textContent=`칸이 늘어나서 숫자가 ${LV[gLv]*LV[gLv]}개가 되었어요.`;}};
 $("gChoices").onclick=e=>{const b=e.target.closest(".btn");if(!b||gOver||b.disabled)return;
-  if(b.dataset.o===gName){gOver=true;const n=LV[gLv];$("gToast").className="toast ok";$("gToast").textContent=`정답! ${n}×${n} 칸, 숫자 ${n*n}개로 알아봤어요.`;
+  if(b.dataset.o===gName){gOver=true;const n=LV[gLv];$("gToast").className="toast ok";$("gToast").textContent=`정답! ${n}×${n} 칸, 숫자 ${n*n}개로 알아봤어요.`+(gWrong?` (틀린 횟수 ${gWrong}번)`:"");
     $("gChoices").querySelectorAll(".btn").forEach(x=>x.disabled=true);$("gMore").disabled=true;
     $("gStrip").innerHTML=LV.map((k,i)=>`<figure class="${i===gLv?"hit":""}"><canvas width="120" height="120"></canvas><figcaption>${k}×${k}<br>숫자 ${k*k}개</figcaption></figure>`).join("");
     const src=srcCanvas(gName);$("gStrip").querySelectorAll("canvas").forEach((cv,i)=>pixelate(cv,src,LV[i]));$("gDone").hidden=false;
-    $("gRecs").insertAdjacentHTML("beforeend",`<li>${gName}: ${n}×${n} 칸 (숫자 ${n*n}개)에서 알아봤어요</li>`);$("gRecBox").hidden=false;}
-  else{b.disabled=true;b.classList.add("no");$("gToast").className="toast bad";$("gToast").textContent=gLv<LV.length-1?"아니에요. 칸을 늘리면 더 잘 보일 거예요.":"아니에요. 다른 것을 골라 보세요.";}
+    $("gRecs").insertAdjacentHTML("beforeend",`<li>${gName}: ${n}×${n} 칸 (숫자 ${n*n}개)에서 맞힘, 틀린 횟수 ${gWrong}번</li>`);$("gRecBox").hidden=false;}
+  else{gWrong++;b.disabled=true;b.classList.add("no");$("gToast").className="toast bad";
+    if(gLv<LV.length-1){gLv++;gDraw();$("gToast").textContent=`아니에요. 칸이 ${LV[gLv]}×${LV[gLv]}로 늘어났어요. 이번엔 모양을 더 잘 보고 골라요.`;}
+    else $("gToast").textContent="아니에요. 남은 것 중에서 다시 골라 보세요.";}
 };
 $("gAgain").onclick=newGuess;
 
