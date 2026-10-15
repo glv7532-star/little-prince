@@ -57,6 +57,11 @@ h1{font-family:var(--display);font-weight:700;font-size:2.1rem;line-height:1.1;m
 .tbar button{font:inherit;font-size:.85rem;padding:5px 10px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
 .card h3{font-family:var(--display);font-size:1.3rem;margin:4px 0 0;line-height:1.2}
 .link{background:none;border:none;color:var(--muted);text-decoration:underline;font:inherit;font-size:.88rem;cursor:pointer;padding:0;align-self:flex-start}
+.scwrap{position:relative}
+.bubble{position:absolute;top:4%;max-width:min(260px,46%);background:#fffdf6;color:#2f3a2c;border:1.5px solid #6c7462;border-radius:12px;padding:6px 10px;font-size:.85rem;line-height:1.4;word-break:keep-all;pointer-events:none}
+.bubble::after{content:"";position:absolute;left:18px;bottom:-9px;border:8px solid transparent;border-top-color:#6c7462;border-bottom:0}
+.bubble{visibility:hidden}.bubble.on{visibility:visible}
+@media (max-width:480px){.bubble{position:static;max-width:none;margin-top:6px;font-size:.8rem}.bubble::after{display:none}.bubble::before{content:"가로등 켜는 사람: ";font-weight:700}}
 .scene{width:100%;height:auto;border-radius:12px;border:1px solid var(--line);display:block}
 .parts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 @media (max-width:620px){.parts{grid-template-columns:1fr}}
@@ -146,7 +151,7 @@ th{color:var(--muted);font-weight:400;white-space:nowrap}
   <section class="card" id="step2" hidden>
     <h2>별이 빨라지면 어떻게 될까?</h2>
     <p class="note">왼쪽은 정해진 시각마다 켜고 끄는 가로등 켜는 사람(1세대), 오른쪽은 내가 설계한 자동 가로등(2세대)이에요. 하루가 두어 번 지나는 것을 본 다음 '별이 빨라진다'를 눌러 보세요.</p>
-    <svg class="scene" id="sc2" viewBox="0 0 640 230" role="img" aria-label="두 가로등이 있는 작은 별"></svg>
+    <div class="scwrap"><svg class="scene" id="sc2" viewBox="0 0 640 230" role="img" aria-label="두 가로등이 있는 작은 별"></svg><div class="bubble" id="bub2">아, 힘들어… 하지만 1분마다 가로등을 켜고 끄는 게 명령이니 어쩔 수 없지…</div></div>
     <div class="scores">
       <div class="sc g1"><span>1세대: 가로등 켜는 사람</span><b id="s2a">-</b><i>정해진 시각에 켜고 꺼요</i></div>
       <div class="sc g2"><span>2세대: 내 자동 가로등</span><b id="s2b">-</b><i>빛을 감지해서 켜요</i></div>
@@ -163,7 +168,7 @@ th{color:var(--muted);font-weight:400;white-space:nowrap}
   <section class="card" id="step3" hidden>
     <h2>스스로 배우는 3세대 가로등</h2>
     <p class="note">3세대 가로등은 날마다 하루의 길이를 재서 배워요. '구름이 지나간다'와 '별이 더 빨라진다'를 눌러 세 가로등을 비교해 보세요.</p>
-    <svg class="scene" id="sc3" viewBox="0 0 640 230" role="img" aria-label="세 가로등이 있는 작은 별"></svg>
+    <div class="scwrap"><svg class="scene" id="sc3" viewBox="0 0 640 230" role="img" aria-label="세 가로등이 있는 작은 별"></svg><div class="bubble" id="bub3">아, 힘들어… 하지만 1분마다 가로등을 켜고 끄는 게 명령이니 어쩔 수 없지…</div></div>
     <div class="scores">
       <div class="sc g1"><span>1세대: 가로등 켜는 사람</span><b id="s3a">-</b><i>정해진 시각에 켜고 꺼요</i></div>
       <div class="sc g2"><span>2세대: 내 자동 가로등</span><b id="s3b">-</b><i>빛을 감지해서 켜요</i></div>
@@ -236,15 +241,15 @@ function buildScene(svg,labels){
     const t=el("text",{x,y:224,"text-anchor":"middle","font-size":"19",fill:"#f1efe8","font-family":"Gowun Dodum, sans-serif"},g);t.textContent=lb;
     S.lamps.push({glow,bulb});});
   /* 1세대 옆에 가로등 켜는 사람 */
-  if(labels[0]==="1세대"){const lx=gap,px=lx-38,P=el("g",{},svg);
+  if(labels[0]==="1세대"){const lx=gap,px=lx-38,gy=330-140*Math.sqrt(1-((px-320)/420)**2),P=el("g",{transform:`translate(0 ${gy-200+1})`},svg);
     el("rect",{x:px-6,y:182,width:5,height:18,rx:2,fill:"#2b2f3a"},P);el("rect",{x:px+1,y:182,width:5,height:18,rx:2,fill:"#2b2f3a"},P);
     el("rect",{x:px-9,y:156,width:18,height:30,rx:6,fill:"#4a5f8a"},P);
     el("circle",{cx:px,cy:148,r:8,fill:"#f2d2b0"},P);
     el("rect",{x:px-9,y:136,width:18,height:7,rx:2,fill:"#3a2f2a"},P);el("rect",{x:px-6,y:128,width:12,height:9,rx:2,fill:"#3a2f2a"},P);
     const arm=el("g",{},P);el("line",{x1:0,y1:0,x2:0,y2:-16,stroke:"#4a5f8a","stroke-width":5,"stroke-linecap":"round"},arm);
     el("line",{x1:0,y1:-14,x2:0,y2:-86,stroke:"#8a5a2b","stroke-width":3,"stroke-linecap":"round"},arm);el("circle",{cx:0,cy:-86,r:3,fill:"#EF9F27"},arm);
-    const sweat=el("g",{opacity:0},P);el("path",{d:`M${px+13} 134 q5 8 0 12 q-5 -4 0 -12z`,fill:"#378ADD",stroke:"#f1efe8","stroke-width":1},sweat);el("path",{d:`M${px-15} 140 q4 7 0 10 q-4 -3 0 -10z`,fill:"#378ADD",stroke:"#f1efe8","stroke-width":1},sweat);
-    S.person={arm,sweat,sx:px+8,sy:162,reach:Math.atan2(92-162,lx-(px+8))*180/Math.PI+90};}
+    const sweat=el("g",{opacity:0},P);const drop=(x,y,rot,sc)=>el("path",{d:"M0 -7 q6 9 0 13 q-6 -4 0 -13z",fill:"#378ADD",stroke:"#f1efe8","stroke-width":1,transform:`translate(${x} ${y}) rotate(${rot}) scale(${sc})`},sweat);drop(px+13,136,40,1);drop(px+19,128,40,.75);drop(px-13,138,-40,.85);
+    S.person={arm,sweat,sx:px+8,sy:162,reach:Math.atan2(92-162-(gy-200),lx-(px+8))*180/Math.PI+90,px};}
   return S;
 }
 /* 해의 높이(e)에 따른 하늘 색: [e, 위, 가운데, 지평선(저녁), 지평선(아침)] */
@@ -314,7 +319,7 @@ function step(dt){
     if(g.lastSunrise>0&&g.changedAt>=0&&g.lastSunrise>=g.changedAt){g.P=measured;g.learning=false;g.changedAt=-1;}
     g.lastSunrise=W.t;g.anchor=W.t;}
   const on1=lightAt(W.g1clock%1)<NEED;
-  if(W.prevOn1!==undefined&&on1!==W.prevOn1)W.armT=0;W.prevOn1=on1;W.armT=(W.armT??9)+dt;
+  if(W.prevOn1!==undefined&&on1!==W.prevOn1){W.armT=0;if(W.day<DAY0-0.01){W.tog=(W.tog||0)+1;if(W.tog%3===1)W.bubT=2.2;}}W.prevOn1=on1;W.armT=(W.armT??9)+dt;
   const v=sensorValue(W.n===1?sensor:"light",ph,obs,W);
   const on2=v<thr;
   const g=W.g3,on3=g.learning?on2:lightAt(((W.t-g.anchor)/g.P)%1)<NEED; /* 배우는 동안에는 빛 센서에 기대요 */
@@ -328,7 +333,8 @@ function draw(){
   paint(W.S,v.light,v.ph,v.cloudK,v.ons,v.real,v.cloudX);
   const P=W.S.person;if(P){const t=W.armT??9,k=t<0.5?Math.sin(Math.PI*t/0.5):0,ang=-12+(P.reach+12)*k;
     P.arm.setAttribute("transform",`translate(${P.sx} ${P.sy}) rotate(${ang})`);
-    P.sweat.setAttribute("opacity",W.day<DAY0-0.01?1:0);P.sweat.setAttribute("transform",`translate(0 ${Math.sin(W.t*8)*1.5})`);}
+    P.sweat.setAttribute("opacity",W.day<DAY0-0.01?1:0);const bob=Math.abs(Math.sin(W.t*7))*2;P.sweat.setAttribute("transform",`translate(${bob} ${-bob})`);
+    const bub=$("bub"+W.n);if(bub){if(W.bubT>0){W.bubT-=1/60;bub.classList.add("on");bub.style.left=`${(P.px-14)/640*100}%`;}else bub.classList.remove("on");}}
   const pct=i=>W.tot>0?Math.round(W.ok[i]/W.tot*100)+"%":"-";
   if(W.n===1){$("m1Val").textContent=v.v==null?"-":Math.round(v.v);$("m1Lamp").textContent=v.ons[0]?"켜짐":"꺼짐";
     $("m1Lamp").className=v.need===undefined?"":(v.ons[0]!==v.need?"bad":"ok");
