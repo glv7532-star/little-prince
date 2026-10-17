@@ -201,6 +201,16 @@ th{color:var(--muted);font-weight:400;white-space:nowrap}
 .hc.wait{opacity:.4}
 .hc i{font-style:normal;display:block;font-weight:700}
 .hc i.ok{color:var(--ok)}.hc i.no{color:var(--bad)}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:.9rem;color:var(--muted)}
+.field input{font:inherit;padding:10px 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);width:100%}
+.field input:focus-visible{outline:3px solid var(--accent);outline-offset:1px}
+.reflect{display:flex;flex-direction:column;gap:10px}
+.rf{border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--bg);display:flex;flex-direction:column;gap:6px}
+.rf b{font-size:.98rem}
+.rf .mine{margin:0;padding:6px 10px;border-radius:8px;background:var(--paper);font-size:.92rem}
+.rf .mine.empty{color:var(--muted)}
+.rf .ans{margin:0;font-size:.92rem;line-height:1.55}
 .closing{margin:0;padding:14px 16px;border-radius:12px;background:var(--accent-bg);font-family:var(--display);font-size:1.4rem;line-height:1.4;text-align:center;word-break:keep-all}
 </style>
 </head>
@@ -306,9 +316,8 @@ th{color:var(--muted);font-weight:400;white-space:nowrap}
       <div id="stageA"></div>
       <div class="rates" id="rates3" hidden></div>
       <div class="part" id="why3aBox" hidden>
-        <p style="margin:0"><b>점수가 같은데 왜 결과가 갈렸을까요? AI는 왜 이렇게 판단했을까요?</b> 짝과 먼저 이야기해 본 다음 '까닭 보기'를 눌러요.</p>
-        <div class="row"><button class="btn" id="whyBtn3a">까닭 보기</button></div>
-        <p class="echo" id="why3a" hidden>AI는 누가 정말 정원 일을 잘하는지 배운 게 아니라, 예전 면접관이 누구를 뽑았는지를 배웠어요. 그래서 메아리처럼 예전 면접관의 편견을 그대로 따라 했어요.</p>
+        <p style="margin:0"><b>점수가 같은데 왜 결과가 갈렸을까요? AI는 왜 이렇게 판단했을까요?</b> 짝과 이야기해 보고, 내 생각을 짧게 적어 보세요. 까닭은 마무리 단계에서 함께 확인해요.</p>
+        <div class="field"><label for="my3">내 생각 (적지 않아도 넘어갈 수 있어요)</label><input id="my3" type="text" maxlength="80" autocomplete="off" placeholder="예: AI가 ○○을 배워서"></div>
       </div>
       <div class="row"><button class="btn primary" id="next3" hidden>편견을 줄여 보러 가기</button></div>
     </div>
@@ -338,8 +347,8 @@ th{color:var(--muted);font-weight:400;white-space:nowrap}
         <p class="echo" id="predRes4" hidden></p>
         <div class="part" id="why4Box" hidden>
           <p style="margin:0"><b id="why4Q"></b></p>
-          <div class="row"><button class="btn" id="whyBtn4">까닭 보기</button></div>
-          <p class="echo" id="why4" hidden></p>
+          <p class="note" style="margin:0">짝과 이야기해 보고, 내 생각을 짧게 적어 보세요. 까닭은 마무리 단계에서 함께 확인해요.</p>
+          <div class="field"><label for="my4">내 생각 (적지 않아도 넘어갈 수 있어요)</label><input id="my4" type="text" maxlength="80" autocomplete="off"></div>
         </div>
       </div>
     </div>
@@ -358,8 +367,10 @@ th{color:var(--muted);font-weight:400;white-space:nowrap}
       <div class="fbox bad"><b>AI의 편견</b><span id="fl3">AI가 편견을 그대로 배웠어요.</span></div>
     </div>
     <p class="note" id="fixLine"></p>
+    <h3>내 생각과 까닭</h3>
+    <div class="reflect" id="reflect"></div>
+    <h3>더 생각해 봐요</h3>
     <ol class="ask">
-      <li>'기록을 더 모으기'로는 왜 편견이 줄지 않았을까요?</li>
       <li>실제 세상에서 '모자 색' 자리에 들어갈 수 있는 것에는 무엇이 있을까요? (예: 성별, 외모, 사는 곳)</li>
       <li>편견 없는 사회를 만드는 데 AI를 어떻게 쓸 수 있을까요?</li>
       <li>시험 점수는 정말 공정한 기준일까요? 시험 문제를 만든 사람의 생각이 들어가지는 않을까요?</li>
@@ -473,20 +484,22 @@ $("fast2").onclick=()=>{fastLearn=true;};
 $("next2").onclick=()=>{show(3);run3();};
 
 /* 심사대: 한 쌍씩 크게 올려서 심사해요 */
-function stageHTML(p){return `<div class="stage"><div class="stagehead"><b id="${p}No">1번 쌍</b><span class="cnt" id="${p}Cnt">결과가 갈린 쌍: 0 / 10</span></div>
+function stageHTML(p,autoOnly){return `<div class="stage"><div class="stagehead"><b id="${p}No">1번 쌍</b><span class="cnt" id="${p}Cnt">결과가 갈린 쌍: 0 / 10</span></div>
   <div class="desk" id="${p}Desk"><div class="cand r"><span class="hat r"></span><span>빨간 모자</span><span class="sc" id="${p}ScR"></span><span class="stp" id="${p}StR"></span></div>
   <div class="cand b"><span class="hat b"></span><span>파란 모자</span><span class="sc" id="${p}ScB"></span><span class="stp" id="${p}StB"></span></div></div>
-  <div class="row"><button class="btn primary" id="${p}Next">다음 쌍</button><button class="btn" id="${p}Auto">자동으로 보기</button></div>
+  ${autoOnly?`<div class="row"><button class="btn" id="${p}Skip">결과 바로 보기</button></div>`:`<div class="row"><button class="btn primary" id="${p}Next">다음 쌍</button><button class="btn" id="${p}Auto">자동으로 보기</button></div>`}
   <div class="hist" id="${p}Hist"></div></div>`;}
 async function runStage(p,m,tok,opt){const pairs=[];for(let i=0;i<newcomers.length;i+=2)pairs.push([newcomers[i],newcomers[i+1]]);
   const alive=()=>tok===runTok,auto={on:!!opt.auto};
   $(p+"Hist").innerHTML=pairs.map(([r],k)=>`<div class="hc wait" id="${p}H${k}">${k+1}번<br>${r.s}·${r.h}</div>`).join("");
-  $(p+"Auto").onclick=()=>{auto.on=true;$(p+"Auto").disabled=true;if(auto.wake)auto.wake();};$(p+"Auto").disabled=auto.on;
+  const skip={on:false};
+  if($(p+"Auto")){$(p+"Auto").onclick=()=>{auto.on=true;$(p+"Auto").disabled=true;if(auto.wake)auto.wake();};$(p+"Auto").disabled=auto.on;}
+  if($(p+"Skip"))$(p+"Skip").onclick=()=>{skip.on=true;$(p+"Skip").disabled=true;};
   let split=0;
   for(let k=0;k<pairs.length;k++){if(!alive())return -1;const [R,B]=pairs[k],a=judge(m,R.s,R.h,1),b=judge(m,B.s,B.h,0);
     $(p+"No").textContent=`${k+1}번 쌍`;$(p+"ScR").textContent=`구별 ${R.s} · 뽑기 ${R.h}`;$(p+"ScB").textContent=`구별 ${B.s} · 뽑기 ${B.h}`;
     const sR=$(p+"StR"),sB=$(p+"StB");sR.className="stp";sB.className="stp";$(p+"Desk").classList.remove("split");
-    const quick=instant||reduce;const slowMs=opt.fast?(k<2?700:350):(k<3?1000:550);
+    const quick=instant||reduce||skip.on;const slowMs=opt.fast?(k<2?700:350):(k<3?1000:550);
     if(!quick){await sleep(slowMs*.5);if(!alive())return -1;}
     sR.textContent=a?"합격":"불합격";sR.className="stp on "+(a?"ok":"no");if(!quick){await sleep(slowMs);if(!alive())return -1;}
     sB.textContent=b?"합격":"불합격";sB.className="stp on "+(b?"ok":"no");
@@ -494,11 +507,11 @@ async function runStage(p,m,tok,opt){const pairs=[];for(let i=0;i<newcomers.leng
     const hc=$(`${p}H${k}`);hc.classList.remove("wait");if(a!==b)hc.classList.add("split");hc.innerHTML=`${k+1}번<br><i class="${a?"ok":"no"}">${a?"합":"불"}</i><i class="${b?"ok":"no"}">${b?"합":"불"}</i>`;
     $(p+"Cnt").textContent=`결과가 갈린 쌍: ${split} / 10`;
     if(k<pairs.length-1&&!quick){if(auto.on){await sleep(slowMs);}else{await new Promise(res=>{auto.wake=res;$(p+"Next").onclick=()=>res();});auto.wake=null;}if(!alive())return -1;}}
-  $(p+"Next").disabled=true;$(p+"Auto").disabled=true;$(p+"No").textContent="심사 끝";return split;}
+  ["Next","Auto","Skip"].forEach(x=>{if($(p+x))$(p+x).disabled=true;});$(p+"No").textContent="심사 끝";return split;}
 
 /* 3단계 */
 async function run3(){const tok=++runTok,alive=()=>tok===runTok;
-  $("pair3p").innerHTML=pairCards(null,null);$("predMsg3").textContent="";$("judge3Box").hidden=true;$("rates3").hidden=true;$("why3aBox").hidden=true;$("why3a").hidden=true;$("next3").hidden=true;
+  $("pair3p").innerHTML=pairCards(null,null);$("predMsg3").textContent="";$("judge3Box").hidden=true;$("rates3").hidden=true;$("why3aBox").hidden=true;$("next3").hidden=true;
   const a=judge(model,4,4,1),b=judge(model,4,4,0),real=pairKind(a,b);
   const pick=await choose($("pred3p"),"red");if(!alive())return;
   $("pair3p").innerHTML=pairCards(a,b);
@@ -507,7 +520,10 @@ async function run3(){const tok=++runTok,alive=()=>tok===runTok;
   $("stageA").innerHTML=stageHTML("A");$("judge3Box").hidden=false;
   const split=await runStage("A",model,tok,{auto:instant});if(!alive()||split<0)return;
   $("rates3").innerHTML=ratesHTML(results.base.r);$("rates3").hidden=false;$("why3aBox").hidden=false;$("next3").hidden=false;done.add(3);}
-$("whyBtn3a").onclick=()=>{$("why3a").hidden=false;};
+const WHY0="AI는 누가 정말 정원 일을 잘하는지 배운 게 아니라, 예전 면접관이 누구를 뽑았는지를 배웠어요. 그래서 메아리처럼 예전 면접관의 편견을 그대로 따라 했어요.";
+const WHYQ0="점수가 같은데 왜 결과가 갈렸을까요?";
+let thoughts={};
+$("my3").oninput=()=>{thoughts.base=$("my3").value.trim();};
 $("next3").onclick=()=>{drawBoard();show(4);};
 
 /* 4단계 */
@@ -534,27 +550,31 @@ async function showData(m,data,tok){const alive=()=>tok===runTok;const box=$("mi
 let busy=false;
 $("methods").onclick=async e=>{const b=e.target.closest(".method");if(!b)return;const tok=++runTok,alive=()=>tok===runTok;busy=true;const m=b.dataset.m;
   $("methods").querySelectorAll(".method").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));
-  $("m4").hidden=false;$("data4Box").hidden=true;$("study4Box").hidden=true;$("out4").hidden=true;$("why4").hidden=true;$("predRes4").hidden=true;$("why4Box").hidden=true;
+  $("m4").hidden=false;$("data4Box").hidden=true;$("study4Box").hidden=true;$("out4").hidden=true;curM="";$("predRes4").hidden=true;$("why4Box").hidden=true;
   $("pred4Q").textContent=`'${MNAME[m]}'로 AI의 편견이 줄어들까요? 먼저 예상해 보세요.`;
   const pick=await choose($("pred4"),m==="more"?"no":"yes");if(!alive())return;
   const data=m==="more"?recs.concat(makeRecords(80,false)):m==="fair"?recs.map(r=>({...r,ok:fairOk(r.s,r.h)})):recs;
   await showData(m,data,tok);if(!alive())return;
   $("study4Box").hidden=false;$("study4Msg").textContent=`AI가 바뀐 기록 ${data.length}개를 다시 공부하는 중…`;await study($("study4Bar"),1200);if(!alive())return;$("study4Msg").textContent="공부를 마쳤어요.";
-  const mdl=train(data,m==="blind");$("bars4").innerHTML=barsHTML(mdl);$("stageB").innerHTML=stageHTML("B");$("out4").hidden=false;
+  const mdl=train(data,m==="blind");$("bars4").innerHTML=barsHTML(mdl);$("stageB").innerHTML=stageHTML("B",true);$("out4").hidden=false;
   const split=await runStage("B",mdl,tok,{auto:true,fast:true});if(!alive()||split<0)return;
   const r=ratesOf(mdl),gap=Math.abs(r[0]-r[1]),worked=split===0&&gap<=10;
   results[m]={r,p:[judge(mdl,4,4,1),judge(mdl,4,4,0)]};drawBoard(m);
   const pr=$("predRes4");pr.textContent=`내 예상: ${pick==="yes"?"효과 있음":"효과 없음"} → 실제: ${worked?"효과 있음":"효과 없음"}. `+(pick===(worked?"yes":"no")?"예상이 맞았어요!":"예상이 빗나갔어요.")+` 빨간 모자 합격률 ${r[0]}%, 파란 모자 ${r[1]}%예요.`;pr.hidden=false;
-  $("why4Q").textContent=WHYQ[m];$("why4").textContent=WHYA[m];$("why4").hidden=!instant;$("why4Box").hidden=false;
+  $("why4Q").textContent=WHYQ[m];curM=m;$("my4").value=thoughts[m]||"";$("why4Box").hidden=false;
   b.classList.add("tried");tried.add(m);
   if(tried.size>=2){$("next4").disabled=false;$("hint4").textContent=tried.size<3?"남은 방법도 해 보면 더 좋아요.":"";done.add(4);}
   busy=false;};
-$("whyBtn4").onclick=()=>{$("why4").hidden=false;};
+let curM="";
+$("my4").oninput=()=>{if(curM)thoughts[curM]=$("my4").value.trim();};
 $("next4").onclick=()=>{goFinal();};
 function goFinal(){const b=results.base;
   if(b){$("fl2").textContent=`지난 기록: 빨간 모자 합격률 ${rate(recs.filter(r=>r.red))}%, 파란 모자 ${rate(recs.filter(r=>!r.red))}%`;$("fl3").textContent=`새 지원자 합격률: 빨간 모자 ${b.r[0]}%, 파란 모자 ${b.r[1]}%. 같은 점수인데 결과가 달랐어요.`;}
   const fx=["blind","fair"].filter(k=>results[k]).map(k=>`${MNAME[k]}: 빨간 모자 ${results[k].r[0]}%, 파란 모자 ${results[k].r[1]}%`);
   $("fixLine").textContent=fx.length?"편견을 줄인 방법 → "+fx.join(" / "):"";
+  const esc=t=>t.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const item=(q,k,a)=>`<div class="rf"><b>${q}</b><p class="mine ${thoughts[k]?"":"empty"}">내 생각: ${thoughts[k]?esc(thoughts[k]):"(적지 않았어요)"}</p><p class="ans"><b>까닭</b> ${a}</p></div>`;
+  $("reflect").innerHTML=item(WHYQ0,"base",WHY0)+["more","blind","fair"].filter(k=>tried.has(k)).map(k=>item(WHYQ[k],k,WHYA[k])).join("");
   done.add(5);show(5);}
 
 /* 처음부터 */
@@ -562,7 +582,7 @@ let resetArm=0;
 $("reset").onclick=()=>{
   if(Date.now()-resetArm>4000){resetArm=Date.now();$("reset").textContent="정말 처음부터 할까요? 한 번 더 누르세요";setTimeout(()=>{$("reset").textContent="처음부터 다시";},4000);return;}
   resetArm=0;$("reset").textContent="처음부터 다시";resetAll();};
-function resetAll(){runTok++;learnTok++;done.clear();tried.clear();results={};model=null;busy=false;$("m4").hidden=true;["pred3p","pred4","q2"].forEach(i=>$(i).onclick=null);
+function resetAll(){runTok++;learnTok++;done.clear();thoughts={};curM="";$("my3").value="";$("my4").value="";tried.clear();results={};model=null;busy=false;$("m4").hidden=true;["pred3p","pred4","q2"].forEach(i=>$(i).onclick=null);
   $("methods").querySelectorAll(".method").forEach(x=>{x.setAttribute("aria-pressed","false");x.classList.remove("tried");});$("next4").disabled=true;$("hint4").textContent="두 가지 이상의 방법을 끝까지 해 보면 마무리할 수 있어요.";init1();show(1);}
 
 /* 선생님 바로가기: 학생용 주소(github.io)에서는 ?teacher 를 붙였을 때만 보여요 */
