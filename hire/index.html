@@ -88,7 +88,7 @@ th{color:var(--muted);font-weight:400;white-space:nowrap}
 .chk{font:inherit;padding:8px 14px;border-radius:999px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
 .chk[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-bg)}
 .bars{display:flex;flex-direction:column;gap:6px;font-size:.95rem}
-.bar{display:grid;grid-template-columns:5.5em 1fr;gap:8px;align-items:center}
+.bar{display:grid;grid-template-columns:7em 1fr;gap:8px;align-items:center}
 .bar i{display:block;height:12px;border-radius:6px;background:var(--accent);transition:width .5s}
 .bar.bad i{background:var(--red)}
 .pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -120,6 +120,14 @@ th{color:var(--muted);font-weight:400;white-space:nowrap}
 .fbox span{font-size:.88rem;color:var(--muted)}
 .fbox.bad{border-color:var(--red)}
 .arr{align-self:center;font-size:1.6rem;color:var(--muted)}
+.lines{display:flex;flex-direction:column;gap:6px}
+.line{display:grid;grid-template-columns:4.2em 1fr;gap:8px;align-items:start}
+.line>span{font-family:var(--display);font-size:1.1rem;padding-top:6px}
+.line .cards{grid-template-columns:repeat(auto-fill,minmax(64px,1fr))}
+.line.mixed{background:rgba(242,201,76,.28);border-radius:10px;padding:4px}
+.chk.no{text-decoration:line-through;opacity:.5}
+@keyframes blink{0%,100%{transform:scale(1)}50%{transform:scale(1.35)}}
+.blink .hat{animation:blink .9s ease-in-out infinite}
 .closing{margin:0;padding:14px 16px;border-radius:12px;background:var(--accent-bg);font-family:var(--display);font-size:1.4rem;line-height:1.4;text-align:center;word-break:keep-all}
 </style>
 </head>
@@ -142,18 +150,32 @@ th{color:var(--muted);font-weight:400;white-space:nowrap}
   <!-- 1단계 -->
   <section class="card" id="step1">
     <h2>예전 면접관은 누구를 뽑았을까?</h2>
-    <p class="note">예전에는 사람 면접관이 별 정원사를 뽑았어요. 지원자 카드에는 성실함과 손재주(1~5점), 그리고 모자 색이 적혀 있어요. 초록 테두리는 합격한 사람이에요.</p>
+    <p class="note">예전에는 사람 면접관이 별 정원사를 뽑았어요. 지원자는 두 가지 시험을 봤어요. <b>싹 구별 시험</b>(바오밥 싹과 장미 싹 사진 5장 중 맞힌 개수)과 <b>싹 뽑기 실습</b>(10분 동안 뽑아낸 바오밥 싹 개수)이에요. 카드에는 두 점수와 모자 색이 적혀 있어요. 초록 테두리는 합격한 사람이에요.</p>
     <div class="cards" id="recs"></div>
     <div class="part" style="border-color:var(--accent)">
       <p style="margin:0">예전 면접관은 무엇을 보고 뽑은 것 같나요? 해당하는 것을 모두 골라 보세요.</p>
       <div class="checks" id="guess" role="group" aria-label="내 생각">
-        <button class="chk" data-g="s" aria-pressed="false">성실함</button>
-        <button class="chk" data-g="h" aria-pressed="false">손재주</button>
+        <button class="chk" data-g="s" aria-pressed="false">싹 구별 시험</button>
+        <button class="chk" data-g="h" aria-pressed="false">싹 뽑기 실습</button>
         <button class="chk" data-g="c" aria-pressed="false">모자 색</button>
       </div>
       <p class="toast" id="err1" role="alert"></p>
     </div>
-    <div class="row"><button class="btn primary" id="split1">모자 색별로 나눠 보기</button></div>
+    <div class="row"><button class="btn primary" id="sort1">점수 순서로 줄 세우기</button></div>
+    <div id="sortBox" hidden style="display:flex;flex-direction:column;gap:12px">
+      <p class="note">두 시험 점수를 더한 합계로 줄을 세웠어요. 점수대로만 뽑았다면, 점수가 높은 줄만 초록 테두리(합격)여야 하겠죠?</p>
+      <div class="lines" id="lines"></div>
+      <div class="part" style="border-color:var(--accent)" id="whyBox">
+        <p style="margin:0"><b>같은 점수인데 누구는 합격하고 누구는 불합격이에요. 왜 결과가 다를까요?</b></p>
+        <div class="checks" id="why" role="group" aria-label="까닭 고르기">
+          <button class="chk" data-w="s">싹 구별 시험 점수가 달라서</button>
+          <button class="chk" data-w="h">싹 뽑기 실습 점수가 달라서</button>
+          <button class="chk" data-w="c">모자 색이 달라서</button>
+          <button class="chk" data-w="l">그냥 운이 나빠서</button>
+        </div>
+        <p class="toast" id="whyMsg" role="status"></p>
+      </div>
+    </div>
     <div id="splitBox" hidden style="display:flex;flex-direction:column;gap:12px">
       <div class="groups">
         <div class="grp r"><h3>빨간 모자</h3><span>합격률 <b class="rate" id="rateR"></b></span><div class="cards" id="grpR"></div></div>
@@ -171,8 +193,8 @@ th{color:var(--muted);font-weight:400;white-space:nowrap}
     <div id="studyBox"><p class="note" id="studyMsg">AI가 지난 기록을 공부하는 중…</p><div class="study"><i id="studyBar"></i></div></div>
     <div id="res2" hidden style="display:flex;flex-direction:column;gap:14px">
       <div><p class="note" style="margin-bottom:6px">AI는 무엇을 보고 골랐을까? 막대가 길수록 중요하게 봤어요.</p><div class="bars" id="bars2"></div></div>
-      <div><p class="note" style="margin-bottom:6px">실력이 똑같은 새 지원자 두 명을 AI가 심사했어요.</p><div class="pair" id="pair2"></div></div>
-      <div><p class="note" style="margin-bottom:6px">새 지원자 20명 심사 결과 (빨간 모자 10명, 파란 모자 10명, 두 모둠의 실력은 똑같아요)</p><div class="rates" id="rates2"></div></div>
+      <div><p class="note" style="margin-bottom:6px">시험 점수가 똑같은 새 지원자 두 명을 AI가 심사했어요.</p><div class="pair" id="pair2"></div></div>
+      <div><p class="note" style="margin-bottom:6px">새 지원자 20명 심사 결과 (빨간 모자 10명, 파란 모자 10명, 두 모둠의 시험 점수는 똑같아요)</p><div class="rates" id="rates2"></div></div>
       <p class="echo">AI가 메아리처럼 예전 면접관의 편견을 그대로 따라 했어요. AI는 누가 정말 정원 일을 잘하는지 배운 게 아니라, 예전 면접관이 누구를 뽑았는지를 배웠기 때문이에요.</p>
       <div class="row"><button class="btn primary" id="next2">편견을 줄여 보러 가기</button></div>
     </div>
@@ -184,8 +206,8 @@ th{color:var(--muted);font-weight:400;white-space:nowrap}
     <p class="note">세 가지 방법 중 하나를 골라 AI를 다시 가르쳐 보세요. 어떤 방법이 효과가 있을까요?</p>
     <div class="methods" id="methods">
       <button class="method" data-m="more" aria-pressed="false"><b>기록을 더 모으기</b><small>예전 면접관의 기록을 80개 더 모아서, 120개로 가르쳐요.</small></button>
-      <button class="method" data-m="blind" aria-pressed="false"><b>모자 색 칸 지우기</b><small>기록에서 모자 색 칸을 지우고 실력만 보여 줘요.</small></button>
-      <button class="method" data-m="fair" aria-pressed="false"><b>공정한 기록으로 바꾸기</b><small>실력만 보고 공정하게 뽑은 기록 40개로 가르쳐요.</small></button>
+      <button class="method" data-m="blind" aria-pressed="false"><b>모자 색 칸 지우기</b><small>기록에서 모자 색 칸을 지우고 시험 점수만 보여 줘요.</small></button>
+      <button class="method" data-m="fair" aria-pressed="false"><b>공정한 기록으로 바꾸기</b><small>시험 점수만 보고 공정하게 뽑은 기록 40개로 가르쳐요.</small></button>
     </div>
     <div id="studyBox3" hidden><p class="note" id="studyMsg3"></p><div class="study"><i id="studyBar3"></i></div></div>
     <div id="res3" hidden style="display:flex;flex-direction:column;gap:14px">
@@ -195,7 +217,7 @@ th{color:var(--muted);font-weight:400;white-space:nowrap}
       <p class="echo" id="msg3"></p>
     </div>
     <div class="tablebox" id="logBox" hidden><table>
-      <thead><tr><th>방법</th><th>빨간 모자 합격률</th><th>파란 모자 합격률</th><th>같은 실력 두 사람</th></tr></thead>
+      <thead><tr><th>방법</th><th>빨간 모자 합격률</th><th>파란 모자 합격률</th><th>같은 점수 두 사람</th></tr></thead>
       <tbody id="log"></tbody>
     </table></div>
     <div class="row"><button class="btn primary" id="next3" disabled>마무리하기</button></div>
@@ -217,6 +239,7 @@ th{color:var(--muted);font-weight:400;white-space:nowrap}
       <li>'기록을 더 모으기'로는 왜 편견이 줄지 않았을까요?</li>
       <li>실제 세상에서 '모자 색' 자리에 들어갈 수 있는 것에는 무엇이 있을까요? (예: 성별, 외모, 사는 곳)</li>
       <li>편견 없는 사회를 만드는 데 AI를 어떻게 쓸 수 있을까요?</li>
+      <li>시험 점수는 정말 공정한 기준일까요? 시험 문제를 만든 사람의 생각이 들어가지는 않을까요?</li>
     </ol>
     <p class="closing">메아리는 우리가 한 말을 그대로 돌려줘요.<br>AI에게 공정한 기록을 들려주면, AI도 공정하게 돌려줘요.</p>
   </section>
@@ -246,28 +269,41 @@ const judge=(m,s,h,red)=>{const x=[(s-3)/2,(h-3)/2,m.blind?0:red*2-1];let z=m.b;
 /* 새 지원자 20명: 실력이 같은 사람끼리 짝지어 빨간 모자 10명, 파란 모자 10명 */
 function makeNew(){const a=[];for(let i=0;i<10;i++){const s=rnd(5),h=rnd(5);a.push({s,h,red:1},{s,h,red:0});}return a;}
 let recs=[],newcomers=[],model=null,tried=new Set(),results={};
-const card=r=>`<div class="ac ${r.ok?"ok":"no"}"><span class="hat ${r.red?"r":"b"}"></span>성실 ${r.s}<br>손재주 ${r.h}${r.ok===undefined?"":r.ok?'<span class="pass">합격</span>':'<span class="fail">불합격</span>'}</div>`;
+const card=r=>`<div class="ac ${r.ok?"ok":"no"}"><span class="hat ${r.red?"r":"b"}"></span>구별 ${r.s}<br>뽑기 ${r.h}${r.ok===undefined?"":r.ok?'<span class="pass">합격</span>':'<span class="fail">불합격</span>'}</div>`;
 
 /* 1단계 */
-function init1(){recs=goodRecords();newcomers=makeNew();$("recs").innerHTML=recs.map(card).join("");$("recs").hidden=false;$("splitBox").hidden=true;$("split1").disabled=false;
+function init1(){recs=goodRecords();newcomers=makeNew();$("recs").innerHTML=recs.map(card).join("");$("recs").hidden=false;$("splitBox").hidden=true;$("sortBox").hidden=true;$("sort1").disabled=false;wrongWhy=0;
+  $("why").querySelectorAll(".chk").forEach(x=>{x.disabled=false;x.classList.remove("no");});$("whyMsg").textContent="";$("guess").querySelectorAll(".chk").forEach(x=>x.disabled=false);
   $("guess").querySelectorAll(".chk").forEach(b=>b.setAttribute("aria-pressed","false"));$("err1").textContent="";}
 $("guess").onclick=e=>{const b=e.target.closest(".chk");if(!b)return;b.setAttribute("aria-pressed",b.getAttribute("aria-pressed")==="true"?"false":"true");$("err1").textContent="";};
-$("split1").onclick=()=>{
+let wrongWhy=0;
+$("sort1").onclick=()=>{
   const picked=[...$("guess").querySelectorAll('.chk[aria-pressed="true"]')].map(b=>b.dataset.g);
   if(!picked.length){$("err1").className="toast bad";$("err1").textContent="먼저 내 생각을 하나 이상 골라 주세요.";return;}
+  let h="";for(let t=10;t>=2;t--){const g=recs.filter(r=>r.s+r.h===t);if(!g.length)continue;const mixed=g.some(r=>r.ok)&&g.some(r=>!r.ok);
+    h+=`<div class="line ${mixed?"mixed":""}" data-t="${t}"><span>${t}점</span><div class="cards">${g.sort((x,y)=>y.ok-x.ok).map(card).join("")}</div></div>`;}
+  $("lines").innerHTML=h;$("recs").hidden=true;$("sortBox").hidden=false;$("sort1").disabled=true;$("guess").querySelectorAll(".chk").forEach(x=>x.disabled=true);
+};
+$("why").onclick=e=>{const b=e.target.closest(".chk");if(!b||b.disabled)return;const w=b.dataset.w,m=$("whyMsg");
+  if(w==="c"){revealHat(true);return;}
+  b.disabled=true;b.classList.add("no");wrongWhy++;m.className="toast bad";
+  m.textContent=w==="l"?"운일까요? 같은 점수 줄(노란 바탕)을 다시 보세요. 합격한 사람과 불합격한 사람은 무엇이 달라 보이나요?":
+    `같은 점수 줄에서 ${w==="s"?"싹 구별 시험":"싹 뽑기 실습"} 점수가 높은 사람이 늘 합격했나요? 같은 점수 줄(노란 바탕)을 다시 살펴보세요.`;
+  if(wrongWhy>=2){$("lines").querySelectorAll(".line.mixed").forEach(x=>x.classList.add("blink"));m.textContent+=" 힌트: 노란 바탕 줄에서 반짝이는 것을 살펴보세요.";}
+};
+function revealHat(byKid){
   const R=recs.filter(r=>r.red),B=recs.filter(r=>!r.red);
   $("grpR").innerHTML=R.map(card).join("");$("grpB").innerHTML=B.map(card).join("");
   $("rateR").textContent=rate(R)+"%";$("rateB").textContent=rate(B)+"%";
   const mid=a=>a.filter(r=>r.s+r.h>=6&&r.s+r.h<=8),mR=mid(R),mB=mid(B);
-  const guessedHat=picked.includes("c");
-  $("find1").innerHTML=(guessedHat?"맞아요! ":"모자 색도 살펴보세요. ")+`예전 면접관은 실력도 봤지만, 빨간 모자에게 훨씬 너그러웠어요. 실력 합계가 6~8점으로 비슷한 지원자 중 <b>빨간 모자는 ${mR.length}명 중 ${mR.filter(r=>r.ok).length}명</b>이 합격했지만, ${(n=>n?`<b>파란 모자는 ${mB.length}명 중 ${n}명</b>만 합격했어요.`:`<b>파란 모자는 ${mB.length}명 중 한 명도</b> 합격하지 못했어요.`)(mB.filter(r=>r.ok).length)}`;
-  $("recs").hidden=true;$("splitBox").hidden=false;$("split1").disabled=true;done.add(1);
-};
+  $("find1").innerHTML=(byKid?"맞아요! ":"")+`예전 면접관은 시험 점수도 봤지만, 빨간 모자에게 훨씬 너그러웠어요. 점수 합계가 6~8점으로 비슷한 지원자 중 <b>빨간 모자는 ${mR.length}명 중 ${mR.filter(r=>r.ok).length}명</b>이 합격했지만, ${(n=>n?`<b>파란 모자는 ${mB.length}명 중 ${n}명</b>만 합격했어요.`:`<b>파란 모자는 ${mB.length}명 중 한 명도</b> 합격하지 못했어요.`)(mB.filter(r=>r.ok).length)}`;
+  $("sortBox").hidden=true;$("splitBox").hidden=false;done.add(1);
+}
 $("next1").onclick=()=>{show(2);run2();};
 
 /* 결과 그리기 */
-function barsHTML(m){const hatName=m.blind?"모자 색 (지움)":"모자 색";const imp=m.w.map(Math.abs),mx=Math.max(...imp)||1;return [["성실함",0],["손재주",1],[hatName,2]].map(([n,j])=>`<div class="bar ${j===2?"bad":""}"><span>${n}</span><i style="width:${Math.max(3,imp[j]/mx*100)}%"></i></div>`).join("");}
-function pairHTML(m){const a=judge(m,4,4,1),b=judge(m,4,4,0);const one=(red,ok)=>`<div class="ap" style="background:var(${red?"--red-bg":"--blue-bg"})"><span class="hat ${red?"r":"b"}"></span><span>${red?"빨간":"파란"} 모자</span><span class="note">성실함 4 · 손재주 4</span><span class="res ${ok?"ok":"no"}">${ok?"합격":"불합격"}</span></div>`;return {html:one(1,a)+one(0,b),a,b};}
+function barsHTML(m){const hatName=m.blind?"모자 색 (지움)":"모자 색";const imp=m.w.map(Math.abs),mx=Math.max(...imp)||1;return [["싹 구별 시험",0],["싹 뽑기 실습",1],[hatName,2]].map(([n,j])=>`<div class="bar ${j===2?"bad":""}"><span>${n}</span><i style="width:${Math.max(3,imp[j]/mx*100)}%"></i></div>`).join("");}
+function pairHTML(m){const a=judge(m,4,4,1),b=judge(m,4,4,0);const one=(red,ok)=>`<div class="ap" style="background:var(${red?"--red-bg":"--blue-bg"})"><span class="hat ${red?"r":"b"}"></span><span>${red?"빨간":"파란"} 모자</span><span class="note">구별 4 · 뽑기 4</span><span class="res ${ok?"ok":"no"}">${ok?"합격":"불합격"}</span></div>`;return {html:one(1,a)+one(0,b),a,b};}
 function ratesOf(m){const R=newcomers.filter(x=>x.red),B=newcomers.filter(x=>!x.red);const pr=a=>Math.round(a.filter(x=>judge(m,x.s,x.h,x.red)).length/a.length*100);return [pr(R),pr(B)];}
 function ratesHTML(r){return `<div class="rt r"><span>빨간 모자 합격률</span><b>${r[0]}%</b><div class="meterbar"><i style="width:${r[0]}%"></i></div></div><div class="rt b"><span>파란 모자 합격률</span><b>${r[1]}%</b><div class="meterbar"><i style="width:${r[1]}%"></i></div></div>`;}
 async function study(bar,ms){bar.style.transition="none";bar.style.width="0";void bar.offsetWidth;if(instant||reduce){bar.style.width="100%";return;}bar.style.transition=`width ${ms}ms linear`;bar.style.width="100%";await sleep(ms);}
@@ -293,15 +329,15 @@ $("methods").onclick=async e=>{const b=e.target.closest(".method");if(!b||busy)r
   $("bars3").innerHTML=barsHTML(mdl);const p=pairHTML(mdl);$("pair3").innerHTML=p.html;const r=ratesOf(mdl);$("rates3").innerHTML=ratesHTML(r);
   const gap=Math.abs(r[0]-r[1]);
   $("msg3").textContent=m==="more"?`기록을 3배로 늘렸는데도 편견은 그대로예요. 편견이 담긴 기록을 더 많이 배우면, AI는 그 편견을 더 굳게 믿어요. 데이터가 많다고 항상 좋은 건 아니에요.`:
-    m==="blind"?`모자 색 칸을 지우자 AI는 실력만 보고 판단해요. 같은 실력이면 모자 색과 상관없이 같은 결과가 나와요.`+(gap?` (합격률 차이 ${gap}%p)`:""):
-    `실력만 보고 공정하게 뽑은 기록으로 배우자, AI도 공정하게 판단해요.`+(gap?` (합격률 차이 ${gap}%p)`:"");
+    m==="blind"?`모자 색 칸을 지우자 AI는 시험 점수만 보고 판단해요. 같은 점수면 모자 색과 상관없이 같은 결과가 나와요.`+(gap?` (합격률 차이 ${gap}%p)`:""):
+    `시험 점수만 보고 공정하게 뽑은 기록으로 배우자, AI도 공정하게 판단해요.`+(gap?` (합격률 차이 ${gap}%p)`:"");
   $("res3").hidden=false;b.classList.add("tried");tried.add(m);results[m]={r,p:[p.a,p.b]};
   $("log").insertAdjacentHTML("beforeend",`<tr><td>${MNAME[m]}</td><td>${r[0]}%</td><td>${r[1]}%</td><td>${p.a===p.b?"같은 결과":"빨간 모자만 "+(p.a?"합격":"불합격")}</td></tr>`);$("logBox").hidden=false;
   if(tried.size>=2){$("next3").disabled=false;$("hint3").textContent=tried.size<3?"남은 방법도 해 보면 더 좋아요.":"";done.add(3);}
   busy=false;};
 $("next3").onclick=()=>{goFinal();};
 function goFinal(){const b=results.base;
-  if(b){$("fl2").textContent=`지난 기록: 빨간 모자 합격률 ${rate(recs.filter(r=>r.red))}%, 파란 모자 ${rate(recs.filter(r=>!r.red))}%`;$("fl3").textContent=`새 지원자 합격률: 빨간 모자 ${b.r[0]}%, 파란 모자 ${b.r[1]}%. 같은 실력인데 결과가 달랐어요.`;}
+  if(b){$("fl2").textContent=`지난 기록: 빨간 모자 합격률 ${rate(recs.filter(r=>r.red))}%, 파란 모자 ${rate(recs.filter(r=>!r.red))}%`;$("fl3").textContent=`새 지원자 합격률: 빨간 모자 ${b.r[0]}%, 파란 모자 ${b.r[1]}%. 같은 점수인데 결과가 달랐어요.`;}
   const fx=["blind","fair"].filter(k=>results[k]).map(k=>`${MNAME[k]}: 빨간 모자 ${results[k].r[0]}%, 파란 모자 ${results[k].r[1]}%`);
   $("fixLine").textContent=fx.length?"편견을 줄인 방법 → "+fx.join(" / "):"";
   done.add(4);show(4);}
@@ -318,7 +354,7 @@ function resetAll(){done.clear();tried.clear();results={};model=null;busy=false;
 if(!/github\.io$/.test(location.hostname)||/teacher/.test(location.search))$("tbar").hidden=false;
 $("tbar").onclick=async e=>{const b=e.target.closest("button");if(!b||busy)return;const j=b.dataset.j;instant=true;
   try{resetAll();if(j==="1")return;
-    $("guess").querySelector('[data-g="c"]').setAttribute("aria-pressed","true");$("split1").click();show(2);await run2();if(j==="2")return;
+    $("guess").querySelector('[data-g="c"]').setAttribute("aria-pressed","true");$("sort1").click();revealHat(false);show(2);await run2();if(j==="2")return;
     show(3);if(j==="3")return;
     for(const m of ["more","blind","fair"]){await $("methods").onclick({target:$("methods").querySelector(`[data-m="${m}"]`)});}
     goFinal();}finally{instant=false;}};
