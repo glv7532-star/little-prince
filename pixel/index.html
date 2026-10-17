@@ -112,6 +112,7 @@ h1{font-family:var(--display);font-weight:700;font-size:2.1rem;line-height:1.1;m
 .recs{margin:0;padding-left:1.2em;font-size:.92rem}
 .card h3{font-family:var(--display);font-size:1.3rem;margin:4px 0 0;line-height:1.2}
 .link{background:none;border:none;color:var(--muted);text-decoration:underline;font:inherit;font-size:.88rem;cursor:pointer;padding:0;align-self:flex-start}
+html,body{overscroll-behavior-y:contain}
 </style>
 </head>
 <body>
@@ -246,7 +247,8 @@ h1{font-family:var(--display);font-weight:700;font-size:2.1rem;line-height:1.1;m
       <p class="note">이 그림은 숫자 256개로 저장되어 있어요.</p>
       <p class="closing">숫자만 있으면 B612에 있는 어린 왕자도<br>지구에서 보낸 내 그림을 똑같이 볼 수 있어요.</p>
     </div>
-    <div class="row"><button class="btn" id="back5">4단계 하기 (선택)</button></div>
+    <div class="row"><button class="btn primary" id="save5">내 그림 저장하기</button><button class="btn" id="back5">4단계 하기 (선택)</button></div>
+    <p class="toast" id="toast5" role="status"></p>
   </section>
 
   <button class="link" id="reset">처음부터 다시</button>
@@ -345,6 +347,14 @@ $("finish4").onclick=()=>{if(animating)return;goFinal(true);};
 $("skip4").onclick=()=>{if(animating)return;goFinal(true);};
 $("go4").onclick=()=>{done.add(3);show(4);};
 $("back5").onclick=()=>show(4);
+/* 내 그림을 이미지 파일로 저장 (화면이 어두운 모드여도 밝은 색으로 저장) */
+$("save5").onclick=()=>{const W=640,H=720,c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");
+  const LC=["#ffffff","#f2c94c","#8a5a2b","#4f9a45","#d64550"],s=W/16;x.fillStyle="#fbf7ee";x.fillRect(0,0,W,H);
+  for(let i=0;i<256;i++){x.fillStyle=LC[s2[i]];x.fillRect((i%16)*s,Math.floor(i/16)*s,Math.ceil(s),Math.ceil(s));}
+  x.strokeStyle="#d8ceb6";x.lineWidth=1;for(let k=0;k<=16;k++){x.beginPath();x.moveTo(k*s+.5,0);x.lineTo(k*s+.5,W);x.stroke();x.beginPath();x.moveTo(0,k*s+.5);x.lineTo(W,k*s+.5);x.stroke();}
+  const title=$("title2").value.trim()||"내 그림";x.fillStyle="#2f3a2c";x.font='36px "Gaegu","Gowun Dodum",sans-serif';x.textAlign="center";x.textBaseline="middle";x.fillText(title,W/2,W+40);
+  c.toBlob(bl=>{const u=URL.createObjectURL(bl),a=document.createElement("a");a.href=u;a.download=(title.replace(/[\\/:*?"<>|]/g,"")||"내 그림")+".png";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);
+  $("toast5").className="toast ok";$("toast5").textContent="그림을 저장했어요. 태블릿의 '다운로드' 폴더에서 찾을 수 있어요.";},"image/png");};
 
 /* 3단계: 몇 칸이면 알아볼까 */
 const INK="#33405a",PAPER="#f3eee2";
@@ -418,7 +428,7 @@ $("reset").onclick=()=>{
 function resetAll(){
   done.clear();p1=0;gName="";gUsed=[];$("gRecs").innerHTML="";$("gRecBox").hidden=true;
   s2.fill(0);render($("g2"),s2);$("code2").innerHTML=codeHTML(s2,16,true);topic="";$("title2").value="";$("err2").textContent="";$("drawArea").hidden=true;$("topics").querySelectorAll(".topic").forEach(x=>x.setAttribute("aria-pressed","false"));
-  role="";$("area4").hidden=true;$("fin4Row").hidden=true;$("skip4").hidden=false;$("row2").textContent="칸을 칠하면 그 줄의 숫자가 여기에 나와요.";$("roleS").setAttribute("aria-pressed","false");$("roleR").setAttribute("aria-pressed","false");
+  $("toast5").textContent="";role="";$("area4").hidden=true;$("fin4Row").hidden=true;$("skip4").hidden=false;$("row2").textContent="칸을 칠하면 그 줄의 숫자가 여기에 나와요.";$("roleS").setAttribute("aria-pressed","false");$("roleR").setAttribute("aria-pressed","false");
   newShape();show(1);
 }
 /* 선생님 바로가기: 학생용 주소(github.io)에서는 ?teacher 를 붙였을 때만 보여요 */
@@ -441,6 +451,9 @@ $("tbar").onclick=e=>{
   window.scrollTo(0,0);
 };
 newShape();
+/* 수업 중 실수로 새로 고침하거나 나가지 않도록 */
+let touched=false;document.addEventListener("pointerdown",()=>{touched=true;},{once:true,capture:true});
+window.addEventListener("beforeunload",e=>{if(touched){e.preventDefault();e.returnValue="";}});
 </script>
 </body>
 </html>

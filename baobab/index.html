@@ -105,6 +105,7 @@ th,td{text-align:left;padding:6px 4px;border-bottom:1px solid var(--line)} th{co
 .balance .bb{background:var(--baobab)}.balance .rr{background:var(--rose)}
 .notebook{display:flex;flex-direction:column;gap:6px;font-size:.9rem}
 @media (prefers-reduced-motion:no-preference){.stage svg{transition:transform .15s}.stage svg.pop{transform:scale(.94)}}
+html,body{overscroll-behavior-y:contain}
 </style>
 </head>
 <body>
@@ -129,6 +130,9 @@ th{white-space:nowrap}
 .tbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 10px;border:1.5px dashed var(--accent);border-radius:10px;font-size:.85rem;color:var(--muted)}
 .tbar button{font:inherit;font-size:.85rem;padding:5px 10px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
 .tbar button:disabled{opacity:.5}
+.link:disabled{opacity:.4;cursor:default;text-decoration:none}
+.sumc .v.s{font-size:1.45rem;line-height:1.25;word-break:keep-all}
+.cmph{font-family:var(--display);font-size:1.3rem;margin:4px 0 0;line-height:1.2}
 .closing{margin:0;padding:14px 16px;border-radius:12px;background:var(--accent-bg);font-family:var(--display);font-size:1.4rem;line-height:1.4;text-align:center;word-break:keep-all}
 .ask{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px}
 </style>
@@ -181,6 +185,7 @@ th{white-space:nowrap}
       <button class="btn rose" id="pickR">장미 싹</button>
     </div>
     <div class="row" style="justify-content:space-between"><div class="tally" id="tally"></div><span class="note" style="font-variant-numeric:tabular-nums">가르친 싹 <b id="count1">0 / 5</b></span></div>
+    <button class="link" id="undo1" disabled>↶ 방금 붙인 이름표 취소하기</button>
     <div class="row"><button class="btn primary" id="goTest" disabled>중간 점검 하기</button></div>
     <p class="toast" id="toast1" role="status"></p>
   </section>
@@ -239,7 +244,10 @@ th{white-space:nowrap}
     <h2>네 번의 시험을 비교해 봐요</h2>
     <p class="note">같은 20문제로 본 시험이에요. 무엇이 달라졌길래 점수가 바뀌었을까요?</p>
     <div class="sum" id="sum"></div>
+    <h3 class="cmph">처음 세운 내 기준과 비교해 봐요</h3>
+    <div class="sum" id="ruleCmp"></div>
     <ol class="ask">
+      <li>내 기준과 AI가 가장 중요하게 본 것이 같았나요? 다르다면 왜 그럴까요?</li>
       <li>5개만 배웠을 때와 30개를 배웠을 때 무엇이 달랐나요?</li>
       <li>틀린 이름표가 섞였을 때 AI는 왜 헷갈렸을까요?</li>
       <li>편식한 AI는 장미 싹을 어떻게 판단했나요? 왜 그랬을까요?</li>
@@ -329,7 +337,7 @@ function balance(){const b=nB(),t=data.length||1;$("balB").style.width=(b/t*100)
 function tally(el){balance();const w=nW();el.innerHTML=`<span class="chip b">바오밥 ${nB()}</span><span class="chip r">장미 ${nR()}</span>`+(w?`<span class="chip w">틀린 이름표 ${w}</span>`:"");}
 const MAX=30, CHECK=5;
 const lim=()=>results.mid?MAX:CHECK;
-function render1(){const L=lim(),full=data.length>=L;$("stage").innerHTML=drawSprout(current);tally($("tally"));tally($("tally3"));$("goTest").disabled=!full;$("goTest").textContent=results.mid?"AI에게 시험 보게 하기":"중간 점검 하기";$("pickB").disabled=$("pickR").disabled=full;$("count1").textContent=`${data.length} / ${L}`;if(full)$("toast1").textContent=results.mid?`${MAX}개를 모두 가르쳤어요. 이제 AI에게 시험을 보게 해 주세요.`:`${CHECK}개를 가르쳤어요. 5개만 배운 AI는 얼마나 잘할까요? 중간 점검을 해 봐요.`;}
+function render1(){const L=lim(),full=data.length>=L;$("stage").innerHTML=drawSprout(current);tally($("tally"));tally($("tally3"));$("goTest").disabled=!full;$("goTest").textContent=results.mid?"AI에게 시험 보게 하기":"중간 점검 하기";$("pickB").disabled=$("pickR").disabled=full;$("count1").textContent=`${data.length} / ${L}`;$("undo1").disabled=data.length<=(results.mid?CHECK:0);if(full)$("toast1").textContent=results.mid?`${MAX}개를 모두 가르쳤어요. 이제 AI에게 시험을 보게 해 주세요.`:`${CHECK}개를 가르쳤어요. 5개만 배운 AI는 얼마나 잘할까요? 중간 점검을 해 봐요.`;}
 function label(y){
   if(data.length>=lim()) return;
   data.push({s:current,y,manual:true});const svg=$("stage").querySelector("svg");if(svg){svg.classList.add("pop");}
@@ -374,7 +382,7 @@ async function runTest(isMid){
   if(!mid)done.add(2);
   $("teachMore").disabled=$("goNext").disabled=false; $("speedBtn").disabled=$("skipBtn").disabled=true;
   $("teachMore").hidden=!mid; $("goNext").hidden=mid;
-  $("goNext").textContent=["엉터리 선생님 (1) 해 보기","엉터리 선생님 (2) 해 보기","세 번의 시험 비교하기"][phase];
+  $("goNext").textContent=["엉터리 선생님 (1) 해 보기","엉터리 선생님 (2) 해 보기","네 번의 시험 비교하기"][phase];
   finishTest(ok);
 }
 const KIND=["기본","틀린 이름표","편식"];let mid=false, baseTry=0;
@@ -387,7 +395,7 @@ function finishTest(ok){
   const imp=model.w.map(Math.abs),mx=Math.max(...imp)||1;
   $("bars").innerHTML=model.only!==undefined?`<p class="note">한 가지 싹만 배워서 무엇이든 ${model.only?"바오밥":"장미"}라고 답해요.</p>`:FEATS.map((f,j)=>`<div class="bar"><span>${f[1]}</span><i style="width:${Math.max(4,imp[j]/mx*100)}%"></i></div>`).join("");
   const desc=`바오밥 ${nB()}·장미 ${nR()}`+(w?` (틀린 이름표 ${w})`:"");
-  results[mid?"mid":phase]={pct,ok,desc,rs,rw,w,n:data.length};
+  results[mid?"mid":phase]={pct,ok,desc,rs,rw,w,n:data.length,top:model.only!==undefined?-1:imp.indexOf(mx)};
   if(mid)$("scoreNote").textContent=`5개만 배운 AI는 ${TN}개 중 ${ok}개를 맞혔어요. 25개를 더 가르치면 어떻게 될까요?`;
   let kind=mid?"중간 점검":KIND[phase];
   if(!mid&&phase===0){baseTry++;if(baseTry>1)kind=`기본 (${baseTry}차)`;}
@@ -403,6 +411,8 @@ function renderSummary(){
   $("sum").innerHTML=card("① 5개만 배운 AI","mid",m,m?`배운 데이터: ${m.desc}`:"")+card("② 30개를 배운 AI","",a,a?`배운 데이터: ${a.desc}`:"")
     +card("③ 틀린 이름표","wrong",b,b?`틀린 이름표 ${b.w}개가 섞였어요.`:"")
     +card("④ 편식","picky",c,c?`배운 데이터: ${c.desc}. 장미 싹 ${c.rs}개 중 ${c.rw}개를 바오밥이라고 했어요.`:"");
+  const t=a&&a.top>=0?FEATS[a.top][1]:"-";
+  $("ruleCmp").innerHTML=`<div class="sumc"><span class="k">0단계에서 내가 세운 기준</span><span class="v s">${myRule.replace(/[<>&]/g,"")||"-"}</span></div><div class="sumc"><span class="k">② 30개를 배운 AI가 가장 중요하게 본 것</span><span class="v s">${t}</span></div>`;
 }
 function show(n){
   if(n!==2&&$("score").textContent==="검사 중"){stopScan();$("score").textContent="-";$("testGrid").innerHTML="";}
@@ -415,6 +425,7 @@ function show(n){
 $("speedBtn").onclick=()=>{fast=!fast;$("speedBtn").textContent=fast?"천천히":"빠르게";};
 $("skipBtn").onclick=()=>{skip=true;};
 function stopScan(){runId++;$("teachMore").disabled=$("goNext").disabled=false;$("scanSlot").className="slot";$("stamp").hidden=true;$("scanIdx").textContent="대기 중";}
+$("undo1").onclick=()=>{if(data.length<=(results.mid?CHECK:0))return;const d=data.pop();current=d.s;$("toast1").textContent=`방금 붙인 '${d.y?"바오밥":"장미"}' 이름표를 취소했어요. 이 싹을 다시 보고 골라 주세요.`;render1();};
 $("pickB").onclick=()=>label(1);$("pickR").onclick=()=>label(0);
 $("goTest").onclick=()=>{if(results.mid){done.add(1);runTest();}else runTest(true);};
 $("retest").onclick=()=>{if(!pending)return;runTest(false);};
@@ -513,6 +524,9 @@ $("tbar").onclick=async e=>{
 };
 $("lab").hidden=true;
 render1();
+/* 수업 중 실수로 새로 고침하거나 나가지 않도록 */
+let touched=false;document.addEventListener("pointerdown",()=>{touched=true;},{once:true,capture:true});
+window.addEventListener("beforeunload",e=>{if(touched){e.preventDefault();e.returnValue="";}});
 </script>
 </body>
 </html>
