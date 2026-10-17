@@ -321,7 +321,8 @@ const rnd=n=>1+Math.floor(Math.random()*n);
 /* 예전 면접관: 빨간 모자는 실력 합계 6점 이상, 파란 모자는 9점 이상이면 합격 */
 const biasedOk=(s,h,red)=>(s+h)>=(red?6:9)?1:0;
 const fairOk=(s,h)=>(s+h)>=7?1:0;
-function makeRecords(n,fair){const a=[];for(let i=0;i<n;i++){const s=rnd(5),h=rnd(5),red=i%2?1:0;a.push({s,h,red,ok:fair?fairOk(s,h):biasedOk(s,h,red)});}return a.sort(()=>Math.random()-.5);}
+/* 점수가 같은 빨간 모자와 파란 모자를 한 명씩 짝지어 만들어요. 그래야 두 모자의 점수 분포가 똑같아요 */
+function makeRecords(n,fair){const a=[];for(let i=0;i<n/2;i++){const s=rnd(5),h=rnd(5);for(const red of [1,0])a.push({s,h,red,ok:fair?fairOk(s,h):biasedOk(s,h,red)});}return a.sort(()=>Math.random()-.5);}
 function goodRecords(){for(let k=0;k<200;k++){const r=makeRecords(40,false);const rr=rate(r.filter(x=>x.red)),rb=rate(r.filter(x=>!x.red));if(rr-rb>=35&&rb>=5)return r;}return makeRecords(40,false);}
 const rate=a=>a.length?Math.round(a.filter(x=>x.ok).length/a.length*100):0;
 function train(d,blind){let w=[0,0,0],b=0;for(let e=0;e<700;e++){let g=[0,0,0],gb=0;for(const r of d){const x=[(r.s-3)/2,(r.h-3)/2,blind?0:r.red*2-1];let z=b;for(let j=0;j<3;j++)z+=w[j]*x[j];const p=1/(1+Math.exp(-z)),er=p-r.ok;for(let j=0;j<3;j++)g[j]+=er*x[j];gb+=er;}for(let j=0;j<3;j++)w[j]-=.5*(g[j]/d.length+.01*w[j]);b-=.5*gb/d.length;}return {w,b,blind};}
@@ -374,11 +375,12 @@ function choose(el,auto){return new Promise(res=>{el.querySelectorAll(".chk").fo
   el.onclick=e=>{const b=e.target.closest(".chk");if(!b)return;el.onclick=null;b.classList.add("picked");el.querySelectorAll(".chk").forEach(x=>x.disabled=true);res(b.dataset.p);};});}
 /* 짝지은 20명을 한 쌍씩 심사해요 */
 let skipScan=false;
-async function scanPairs(el,countEl,m,fast){
+let runTok=0;
+async function scanPairs(el,countEl,m,fast,tok){
   const pairs=[];for(let i=0;i<newcomers.length;i+=2)pairs.push([newcomers[i],newcomers[i+1]]);
   el.innerHTML=pairs.map(([r],k)=>`<div class="pr" id="${el.id}_${k}"><span>${k+1}번 짝 · 구별 ${r.s} 뽑기 ${r.h}</span><span class="who r"><span class="hat r"></span><span class="stamp wait">?</span></span><span class="who b"><span class="hat b"></span><span class="stamp wait">?</span></span></div>`).join("");
   let split=0;countEl.textContent="결과가 갈린 쌍: 0 / 10";
-  for(let k=0;k<pairs.length;k++){const row=$(`${el.id}_${k}`),[R,B]=pairs[k],a=judge(m,R.s,R.h,1),b=judge(m,B.s,B.h,0);
+  for(let k=0;k<pairs.length;k++){if(tok!==undefined&&tok!==runTok)return -1;const row=$(`${el.id}_${k}`),[R,B]=pairs[k],a=judge(m,R.s,R.h,1),b=judge(m,B.s,B.h,0);
     const slow=!(instant||reduce||skipScan);if(slow){row.classList.add("now");await sleep(fast?120:300);}
     const st=row.querySelectorAll(".stamp");st[0].className="stamp "+(a?"ok":"no");st[0].textContent=a?"합격":"불합격";
     if(slow)await sleep(fast?100:250);
@@ -391,6 +393,8 @@ async function scanPairs(el,countEl,m,fast){
 let instant=false;
 async function run2(){$("res2").hidden=true;$("studyBox").hidden=false;$("studyMsg").textContent="AI가 지난 기록 40개를 공부하는 중…";await study($("studyBar"),1400);
   model=train(recs,false);$("studyMsg").textContent="공부를 마쳤어요.";
+  const splitN=()=>{let c=0;for(let i=0;i<newcomers.length;i+=2)if(judge(model,newcomers[i].s,newcomers[i].h,1)!==judge(model,newcomers[i+1].s,newcomers[i+1].h,0))c++;return c;};
+  for(let k=0;k<50&&splitN()<3;k++)newcomers=makeNew();
   $("bars2").innerHTML=barsHTML(model);$("pair2").innerHTML=pairCards(null,null);$("predMsg2").textContent="";
   $("scan2Box").hidden=true;$("why2Box").hidden=true;$("why2").hidden=true;$("next2").hidden=true;$("rates2").hidden=true;$("scan2").disabled=false;$("skip2").disabled=true;
   $("res2").hidden=false;
@@ -416,29 +420,29 @@ const WHYA={more:"늘어난 기록에도 예전 면접관의 편견이 똑같이
 function drawBoard(cur){$("board").innerHTML=["base","more","blind","fair"].map(k=>{const r=results[k]&&results[k].r;
   return `<div class="bcol ${k===cur?"cur":""}"><b class="t">${MNAME[k]}</b>${r?`<div class="bb r"><span>${r[0]}%</span><i style="width:${Math.max(2,r[0])}%"></i></div><div class="bb b"><span>${r[1]}%</span><i style="width:${Math.max(2,r[1])}%"></i></div><span class="gap">차이 <b>${Math.abs(r[0]-r[1])}</b>%p</span>`:`<span class="gap">아직 안 해 봤어요</span>`}</div>`;}).join("");}
 const mini=(r,hide)=>`<span class="mc ${r.ok?"ok":""}"><i class="${hide?"q":r.red?"r":"b"}">${hide?"?":""}</i></span>`;
-async function showData(m,data){const box=$("minis");$("data3Box").hidden=false;const slow=!(instant||reduce);
+async function showData(m,data,tok){const alive=()=>tok===runTok;const box=$("minis");$("data3Box").hidden=false;const slow=!(instant||reduce);
   const ord=a=>a.map((r,i)=>i).sort((x,y)=>(a[y].red-a[x].red)||(a[y].ok-a[x].ok)),O=ord(recs);
   if(m==="more"){$("data3Msg").textContent="예전 면접관의 기록을 80개 더 모았어요. 빨간 모자부터 차례로 놓았어요. 늘어난 기록에서도 초록(합격)이 어느 모자에 몰려 있는지 살펴보세요.";
     box.innerHTML=O.map(i=>mini(recs[i])).join("");const ex=data.slice(40),E=ord(ex).map(i=>ex[i]);
-    for(let i=0;i<E.length;i+=4){box.insertAdjacentHTML("beforeend",E.slice(i,i+4).map(r=>mini(r).replace('class="mc','class="mc new')).join(""));if(slow)await sleep(45);}}
+    for(let i=0;i<E.length;i+=4){box.insertAdjacentHTML("beforeend",E.slice(i,i+4).map(r=>mini(r).replace('class="mc','class="mc new')).join(""));if(slow)await sleep(45);if(!alive())return;}}
   else if(m==="blind"){$("data3Msg").textContent="기록 40개에서 모자 색 칸을 지우고 있어요. 이제 AI는 시험 점수와 합격 여부만 볼 수 있어요.";
     box.innerHTML=O.map(i=>mini(recs[i])).join("");const kids=box.children;
-    for(let k=0;k<kids.length;k++){kids[k].outerHTML=mini(recs[O[k]],true).replace('class="mc','class="mc flash');if(slow)await sleep(40);}}
+    for(let k=0;k<kids.length;k++){kids[k].outerHTML=mini(recs[O[k]],true).replace('class="mc','class="mc flash');if(slow)await sleep(40);if(!alive())return;}}
   else{$("data3Msg").textContent="같은 지원자 40명을 시험 점수만 보고 다시 뽑았어요. 빨간 모자부터 차례로 놓았어요. 합격 표시가 바뀐 카드가 반짝여요.";
     box.innerHTML=O.map(i=>mini(recs[i])).join("");const kids=box.children;
-    for(let k=0;k<kids.length;k++){const i=O[k],nr=data[i];if(nr.ok!==recs[i].ok){kids[k].outerHTML=mini(nr).replace('class="mc','class="mc flash');if(slow)await sleep(90);}}}
+    for(let k=0;k<kids.length;k++){const i=O[k],nr=data[i];if(nr.ok!==recs[i].ok){kids[k].outerHTML=mini(nr).replace('class="mc','class="mc flash');if(slow)await sleep(90);if(!alive())return;}}}
   if(slow)await sleep(500);}
 let busy=false;
-$("methods").onclick=async e=>{const b=e.target.closest(".method");if(!b||busy)return;busy=true;const m=b.dataset.m;skipScan=false;
+$("methods").onclick=async e=>{const b=e.target.closest(".method");if(!b)return;const tok=++runTok,alive=()=>tok===runTok;busy=true;const m=b.dataset.m;skipScan=false;
   $("methods").querySelectorAll(".method").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));
-  $("m3").hidden=false;$("data3Box").hidden=true;$("studyBox3").hidden=true;$("out3").hidden=true;$("why3").hidden=true;
+  $("m3").hidden=false;$("data3Box").hidden=true;$("studyBox3").hidden=true;$("out3").hidden=true;$("why3").hidden=true;$("predRes3").textContent="";
   $("pred3Q").textContent=`'${MNAME[m]}'로 AI의 편견이 줄어들까요? 먼저 예상해 보세요.`;
-  const pick=await choose($("pred3"),m==="more"?"no":"yes");
+  const pick=await choose($("pred3"),m==="more"?"no":"yes");if(!alive())return;
   const data=m==="more"?recs.concat(makeRecords(80,false)):m==="fair"?recs.map(r=>({...r,ok:fairOk(r.s,r.h)})):recs;
-  await showData(m,data);
-  $("studyBox3").hidden=false;$("studyMsg3").textContent=`AI가 바뀐 기록 ${data.length}개를 공부하는 중…`;await study($("studyBar3"),1200);$("studyMsg3").textContent="공부를 마쳤어요.";
+  await showData(m,data,tok);if(!alive())return;
+  $("studyBox3").hidden=false;$("studyMsg3").textContent=`AI가 바뀐 기록 ${data.length}개를 공부하는 중…`;await study($("studyBar3"),1200);if(!alive())return;$("studyMsg3").textContent="공부를 마쳤어요.";
   const mdl=train(data,m==="blind");$("bars3").innerHTML=barsHTML(mdl);$("out3").hidden=false;
-  const split=await scanPairs($("pairs3"),$("count3"),mdl,true);
+  const split=await scanPairs($("pairs3"),$("count3"),mdl,true,tok);if(!alive())return;
   const r=ratesOf(mdl),gap=Math.abs(r[0]-r[1]),worked=split===0&&gap<=10;
   results[m]={r,p:[judge(mdl,4,4,1),judge(mdl,4,4,0)]};drawBoard(m);
   $("predRes3").textContent=`내 예상: ${pick==="yes"?"효과 있음":"효과 없음"} → 실제: ${worked?"효과 있음":"효과 없음"}. `+(pick===(worked?"yes":"no")?"예상이 맞았어요!":"예상이 빗나갔어요.")+` 빨간 모자 합격률 ${r[0]}%, 파란 모자 ${r[1]}%예요.`;
@@ -459,7 +463,7 @@ let resetArm=0;
 $("reset").onclick=()=>{
   if(Date.now()-resetArm>4000){resetArm=Date.now();$("reset").textContent="정말 처음부터 할까요? 한 번 더 누르세요";setTimeout(()=>{$("reset").textContent="처음부터 다시";},4000);return;}
   resetArm=0;$("reset").textContent="처음부터 다시";resetAll();};
-function resetAll(){done.clear();tried.clear();results={};model=null;busy=false;skipScan=true;$("m3").hidden=true;$("pred2").onclick=null;$("pred3").onclick=null;
+function resetAll(){runTok++;done.clear();tried.clear();results={};model=null;busy=false;skipScan=true;$("m3").hidden=true;$("pred2").onclick=null;$("pred3").onclick=null;
   $("methods").querySelectorAll(".method").forEach(x=>{x.setAttribute("aria-pressed","false");x.classList.remove("tried");});$("next3").disabled=true;$("hint3").textContent="두 가지 이상의 방법을 해 보면 마무리할 수 있어요.";init1();show(1);}
 
 /* 선생님 바로가기: 학생용 주소(github.io)에서는 ?teacher 를 붙였을 때만 보여요 */
