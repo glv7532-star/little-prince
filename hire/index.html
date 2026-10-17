@@ -460,8 +460,13 @@ async function learn(){const tok=++learnTok,alive=()=>tok===learnTok;$("learn2")
   for(let q=0;q<50&&splitN()<3;q++)newcomers=makeNew();
   say("알겠다! 시험 점수도 보고, 모자 색도 보면 되겠구나!");$("fast2").disabled=true;$("q2Box").hidden=false;
   const pick=await choose($("q2"),"c");if(!alive())return;
-  const imp=model.w.map(Math.abs),top=imp[2]>=Math.max(imp[0],imp[1])*0.8?"c":imp[0]>=imp[1]?"s":"h";
-  $("q2Msg").textContent=(pick==="c"?"맞아요. ":"시험 점수도 중요하게 보지만, 모자 색 막대도 길어요. ")+`AI는 시험 점수와 함께 모자 색도 크게 봐요. 일과 아무 상관 없는 모자 색이 생각 노트에 들어간 거예요. 그럼 이 AI는 새 지원자를 어떻게 심사할까요?`;
+  const imp=model.w.map(Math.abs),mx=Math.max(...imp),KEY=["s","h","c"],NM={s:"싹 구별 시험",h:"싹 뽑기 실습",c:"모자 색"};
+  const tops=KEY.filter((k,j)=>imp[j]>=mx*0.92),q=k=>`'${NM[k]}'`,list=tops.map(q).join("과 ");
+  const first=tops.includes(pick)?(tops.length>1?`맞아요! 생각 노트에서 ${list} 막대가 거의 똑같이 가장 길어요.`:`맞아요! 생각 노트에서 ${list} 막대가 가장 길어요.`)
+    :(tops.length>1?`생각 노트를 다시 보세요. 가장 긴 막대는 ${list}이에요. 둘이 거의 똑같아요.`:`생각 노트를 다시 보세요. 가장 긴 막대는 ${list}이에요.`);
+  const hatPct=Math.round(imp[2]/mx*100);
+  const second=tops.includes("c")?" 그런데 모자 색은 정원 일과 아무 상관이 없어요. 그런데도 AI는 모자 색을 시험 점수만큼이나 중요하게 보고 있어요.":` 그런데 눈여겨볼 막대가 하나 더 있어요. 정원 일과 아무 상관 없는 '모자 색' 막대도 꽤 길어요(가장 긴 막대의 약 ${hatPct}%). AI가 일과 상관없는 모자 색까지 따지게 된 거예요.`;
+  $("q2Msg").textContent=first+second+" 그럼 이 AI는 새 지원자를 어떻게 심사할까요?";
   $("q2Msg").hidden=false;$("next2").hidden=false;done.add(2);}
 $("learn2").onclick=()=>{learn();};
 $("fast2").onclick=()=>{fastLearn=true;};
