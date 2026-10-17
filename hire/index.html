@@ -31,7 +31,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16p
 .wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
 h1{font-family:var(--display);font-weight:700;font-size:2.1rem;line-height:1.1;margin:0}
 .lead{margin:4px 0 0;color:var(--muted);font-size:.95rem}
-.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.steps{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
 .stepi{font-size:.9rem;padding:8px 6px;border:1px solid var(--line);background:var(--paper);color:var(--muted);border-radius:8px;text-align:center;word-break:keep-all;line-height:1.25}
 .stepi b{font-family:var(--display);font-size:1.15rem;display:block;line-height:1}
 .stepi[aria-current="step"]{border-color:var(--accent);background:var(--accent-bg);color:var(--ink)}
@@ -160,13 +160,54 @@ th{color:var(--muted);font-weight:400;white-space:nowrap}
 .mc.flash{animation:pop .45s ease-out}
 @keyframes pop{0%{transform:scale(.3);opacity:0}100%{transform:scale(1);opacity:1}}
 .chk.picked{border-color:var(--accent);background:var(--accent-bg)}
+.lab{display:grid;grid-template-columns:1fr 1.3fr;gap:12px;align-items:center;position:relative;min-height:190px;background:var(--bg);border-radius:14px;padding:12px;overflow:hidden}
+.pile{display:flex;flex-direction:column;align-items:center;gap:6px}
+.pl{font-size:.85rem;color:var(--muted)}
+.stack{position:relative;width:76px;height:92px}
+.stack .ac{position:absolute;inset:0;width:76px;box-shadow:0 1px 0 var(--line)}
+.stack .ac.blank{background:var(--paper)}.stack .ac:nth-child(1){transform:translate(8px,8px)}.stack .ac:nth-child(2){transform:translate(4px,4px)}
+.robotbox{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;min-height:170px;justify-content:flex-end}
+.robot{width:120px;height:120px}
+.robot.chomp #mouth{transform:scaleY(2.4);transform-origin:60px 71px;transition:transform .12s}
+.robot #mouth{transition:transform .12s}
+.think{min-height:2.6em;max-width:230px;background:#fffdf6;color:#2f3a2c;border:1.5px solid #6c7462;border-radius:14px;padding:6px 10px;font-size:.88rem;line-height:1.35;word-break:keep-all;visibility:hidden;position:relative}
+.think.on{visibility:visible}
+.think::after{content:"";position:absolute;left:50%;bottom:-9px;border:8px solid transparent;border-top-color:#6c7462;border-bottom:0;transform:translateX(-50%)}
+.flyer{position:absolute;width:76px;left:calc(25% - 38px);top:50%;transform:translateY(-50%);transition:left var(--fly,.6s) ease-in,transform var(--fly,.6s) ease-in,opacity var(--fly,.6s);z-index:3}
+.flyer .ac{width:76px}
+.flyer.go{left:calc(64% - 38px);transform:translateY(-10%) scale(.35) rotate(18deg);opacity:.2}
+.nb{background:var(--bg);border-radius:12px;padding:10px 12px}
+.nbt{margin:0 0 6px;font-family:var(--display);font-size:1.2rem;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.nbt span{font-family:var(--body);font-size:.85rem;color:var(--muted);align-self:center}
+.bar i{transition:width .25s}
+.stage{border:2px solid var(--accent);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px;background:var(--bg)}
+.stagehead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.stagehead b{font-family:var(--display);font-size:1.35rem}
+.stagehead .cnt{font-family:var(--display);font-size:1.2rem}
+.desk{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cand{position:relative;border-radius:12px;padding:12px 8px;min-height:130px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center}
+.cand.r{background:var(--red-bg)}.cand.b{background:var(--blue-bg)}
+.cand .hat{width:40px;height:18px}
+.cand .sc{font-size:.95rem;font-variant-numeric:tabular-nums}
+.cand .stp{margin-top:6px;width:max-content;font-family:var(--display);font-size:1.6rem;padding:2px 12px;border:3px solid currentColor;border-radius:10px;background:var(--paper);transform:rotate(-8deg);visibility:hidden}
+.cand .stp.ok{color:var(--ok)}.cand .stp.no{color:var(--bad)}
+.cand .stp.on{visibility:visible;animation:thump .35s ease-out}
+@keyframes thump{0%{transform:rotate(-8deg) scale(2.2);opacity:0}100%{transform:rotate(-8deg) scale(1);opacity:1}}
+.desk.split{outline:3px solid #e8b923;outline-offset:3px;border-radius:12px}
+.hist{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:4px}
+@media (max-width:480px){.hist{grid-template-columns:repeat(5,minmax(0,1fr))}}
+.hc{border-radius:6px;padding:3px 2px;font-size:.7rem;text-align:center;background:var(--paper);border:1px solid var(--line);line-height:1.3}
+.hc.split{background:rgba(242,201,76,.45);border-color:#e8b923}
+.hc.wait{opacity:.4}
+.hc i{font-style:normal;display:block;font-weight:700}
+.hc i.ok{color:var(--ok)}.hc i.no{color:var(--bad)}
 .closing{margin:0;padding:14px 16px;border-radius:12px;background:var(--accent-bg);font-family:var(--display);font-size:1.4rem;line-height:1.4;text-align:center;word-break:keep-all}
 </style>
 </head>
 <body>
 
 <div class="wrap">
-  <div class="tbar" id="tbar" hidden><b>선생님 바로가기</b><button data-j="1">1단계</button><button data-j="2">2단계</button><button data-j="3">3단계</button><button data-j="4">마무리</button></div>
+  <div class="tbar" id="tbar" hidden><b>선생님 바로가기</b><button data-j="1">1단계</button><button data-j="2">2단계</button><button data-j="3">3단계</button><button data-j="4">4단계</button><button data-j="5">마무리</button></div>
   <header>
     <h1>편견을 배우는 AI 면접관</h1>
     <p class="lead">메아리는 내가 한 말을 그대로 따라 해요. AI도 메아리를 닮았을까요? B612에서 바오밥 싹을 뽑을 '별 정원사'를 뽑는 AI 면접관을 만들어 봐요.</p>
@@ -174,9 +215,10 @@ th{color:var(--muted);font-weight:400;white-space:nowrap}
 
   <nav class="steps" aria-label="단계">
     <div class="stepi" id="tab1" aria-current="step"><b>1</b>지난 기록 살펴보기</div>
-    <div class="stepi" id="tab2"><b>2</b>AI 면접관 가르치기</div>
-    <div class="stepi" id="tab3"><b>3</b>편견 줄이기</div>
-    <div class="stepi" id="tab4"><b>4</b>마무리</div>
+    <div class="stepi" id="tab2"><b>2</b>AI가 공부해요</div>
+    <div class="stepi" id="tab3"><b>3</b>새 지원자 심사</div>
+    <div class="stepi" id="tab4"><b>4</b>편견 줄이기</div>
+    <div class="stepi" id="tab5"><b>5</b>마무리</div>
   </nav>
 
   <!-- 1단계 -->
@@ -220,72 +262,93 @@ th{color:var(--muted);font-weight:400;white-space:nowrap}
 
   <!-- 2단계 -->
   <section class="card" id="step2" hidden>
-    <h2>AI 면접관은 무엇을 배웠을까?</h2>
-    <p class="note">AI 면접관이 지난 기록 40개를 보고 '어떤 사람이 합격하는지' 스스로 규칙을 찾아요.</p>
-    <div id="studyBox"><p class="note" id="studyMsg">AI가 지난 기록을 공부하는 중…</p><div class="study"><i id="studyBar"></i></div></div>
-    <div id="res2" hidden style="display:flex;flex-direction:column;gap:14px">
-      <div><p class="note" style="margin-bottom:6px">AI는 무엇을 보고 골랐을까? 막대가 길수록 중요하게 봤어요.</p><div class="bars" id="bars2"></div></div>
-      <div class="part" style="border-color:var(--accent)">
-        <p style="margin:0"><b>점수가 똑같은 두 사람(구별 4 · 뽑기 4)이 면접을 보러 왔어요. AI는 어떻게 심사할까요?</b></p>
-        <div class="pair" id="pair2"></div>
-        <div class="checks" id="pred2" role="group" aria-label="내 예상">
-          <button class="chk" data-p="both">둘 다 합격</button><button class="chk" data-p="none">둘 다 불합격</button>
-          <button class="chk" data-p="red">빨간 모자만 합격</button><button class="chk" data-p="blue">파란 모자만 합격</button>
-        </div>
-        <p class="toast" id="predMsg2" role="status"></p>
+    <h2>AI 면접관이 공부해요</h2>
+    <p class="note">지난 기록 카드가 한 장씩 AI에게 들어가요. AI는 카드를 한 장 볼 때마다 '어떤 사람이 합격하는지' 생각을 조금씩 고쳐 나가요. 오른쪽 '생각 노트'의 막대가 어떻게 바뀌는지 지켜보세요.</p>
+    <div class="lab" id="lab">
+      <div class="pile"><span class="pl">지난 기록</span><div class="stack" id="stack"></div><span class="pl" id="left2">40장</span></div>
+      <div class="robotbox">
+        <div class="think" id="think" aria-live="polite"></div>
+        <svg class="robot" id="robot" viewBox="0 0 120 120" aria-label="AI 면접관 로봇">
+          <line x1="60" y1="8" x2="60" y2="22" stroke="#6c7462" stroke-width="3"/><circle cx="60" cy="8" r="5" fill="#f2c94c"/>
+          <rect x="20" y="22" width="80" height="62" rx="16" fill="#9fb7cc" stroke="#2d5d7b" stroke-width="3"/>
+          <rect x="30" y="34" width="60" height="28" rx="10" fill="#1f2836"/>
+          <circle id="eyeL" cx="47" cy="48" r="6" fill="#8cf0c8"/><circle id="eyeR" cx="73" cy="48" r="6" fill="#8cf0c8"/>
+          <rect id="mouth" x="46" y="68" width="28" height="6" rx="3" fill="#2d5d7b"/>
+          <rect x="34" y="88" width="52" height="24" rx="8" fill="#9fb7cc" stroke="#2d5d7b" stroke-width="3"/>
+        </svg>
+        <div class="flyer" id="flyer" hidden></div>
       </div>
-      <div id="scan2Box" hidden style="display:flex;flex-direction:column;gap:10px">
-        <p class="note">이번에는 새 지원자 20명이 왔어요. 점수가 같은 빨간 모자와 파란 모자를 한 쌍씩 짝지어 세웠어요. AI가 한 쌍씩 심사해요.</p>
-        <div class="row"><button class="btn primary" id="scan2">심사 시작</button><button class="btn" id="skip2" disabled>결과 바로 보기</button></div>
-        <div class="pairs" id="pairs2"></div>
-        <p class="splitcount" id="count2"></p>
-        <div class="rates" id="rates2" hidden></div>
-      </div>
-      <div class="part" id="why2Box" hidden>
-        <p style="margin:0"><b>점수가 같은데 왜 결과가 갈렸을까요? AI는 왜 이렇게 판단했을까요?</b> 짝과 먼저 이야기해 본 다음 '까닭 보기'를 눌러요.</p>
-        <div class="row"><button class="btn" id="whyBtn2">까닭 보기</button></div>
-        <p class="echo" id="why2" hidden>AI는 누가 정말 정원 일을 잘하는지 배운 게 아니라, 예전 면접관이 누구를 뽑았는지를 배웠어요. 그래서 메아리처럼 예전 면접관의 편견을 그대로 따라 했어요.</p>
-      </div>
-      <div class="row"><button class="btn primary" id="next2" hidden>편견을 줄여 보러 가기</button></div>
     </div>
+    <div class="nb"><p class="nbt">AI의 생각 노트 <span id="seen2">본 카드 0 / 40</span></p><div class="bars" id="bars2"></div></div>
+    <div class="row"><button class="btn primary" id="learn2">공부 시작</button><button class="btn" id="fast2" disabled>빠르게 보기</button></div>
+    <div class="part" id="q2Box" hidden style="border-color:var(--accent)">
+      <p style="margin:0"><b>공부를 마친 AI는 무엇을 가장 중요하게 보는 것 같나요?</b> 생각 노트를 보고 골라 보세요.</p>
+      <div class="checks" id="q2"><button class="chk" data-p="s">싹 구별 시험</button><button class="chk" data-p="h">싹 뽑기 실습</button><button class="chk" data-p="c">모자 색</button></div>
+      <p class="echo" id="q2Msg" hidden></p>
+    </div>
+    <div class="row"><button class="btn primary" id="next2" hidden>새 지원자 심사하러 가기</button></div>
   </section>
 
   <!-- 3단계 -->
   <section class="card" id="step3" hidden>
+    <h2>AI 면접관이 새 지원자를 심사해요</h2>
+    <div class="part" style="border-color:var(--accent)">
+      <p style="margin:0"><b>점수가 똑같은 두 사람(구별 4 · 뽑기 4)이 면접을 보러 왔어요. AI는 어떻게 심사할까요?</b></p>
+      <div class="pair" id="pair3p"></div>
+      <div class="checks" id="pred3p" role="group" aria-label="내 예상">
+        <button class="chk" data-p="both">둘 다 합격</button><button class="chk" data-p="none">둘 다 불합격</button>
+        <button class="chk" data-p="red">빨간 모자만 합격</button><button class="chk" data-p="blue">파란 모자만 합격</button>
+      </div>
+      <p class="toast" id="predMsg3" role="status"></p>
+    </div>
+    <div id="judge3Box" hidden style="display:flex;flex-direction:column;gap:12px">
+      <p class="note">새 지원자 20명이 왔어요. 점수가 같은 빨간 모자와 파란 모자를 한 쌍씩 심사대에 올려요. '다음 쌍'을 눌러 한 쌍씩 보거나, '자동으로 보기'를 눌러요.</p>
+      <div id="stageA"></div>
+      <div class="rates" id="rates3" hidden></div>
+      <div class="part" id="why3aBox" hidden>
+        <p style="margin:0"><b>점수가 같은데 왜 결과가 갈렸을까요? AI는 왜 이렇게 판단했을까요?</b> 짝과 먼저 이야기해 본 다음 '까닭 보기'를 눌러요.</p>
+        <div class="row"><button class="btn" id="whyBtn3a">까닭 보기</button></div>
+        <p class="echo" id="why3a" hidden>AI는 누가 정말 정원 일을 잘하는지 배운 게 아니라, 예전 면접관이 누구를 뽑았는지를 배웠어요. 그래서 메아리처럼 예전 면접관의 편견을 그대로 따라 했어요.</p>
+      </div>
+      <div class="row"><button class="btn primary" id="next3" hidden>편견을 줄여 보러 가기</button></div>
+    </div>
+  </section>
+
+  <!-- 4단계 -->
+  <section class="card" id="step4" hidden>
     <h2>AI 면접관의 편견을 줄여 봐요</h2>
-    <p class="note">세 가지 방법 중 하나를 골라 AI를 다시 가르쳐 보세요. 아래 비교판의 빨간 막대와 파란 막대 길이가 비슷해질수록 편견이 줄어든 거예요.</p>
+    <p class="note">세 가지 방법 중 하나를 골라 AI를 다시 가르쳐 보세요. 아래 비교판의 빨간 막대와 파란 막대 길이가 비슷해질수록 편견이 줄어든 거예요. 하던 중에도 다른 방법을 고를 수 있어요.</p>
     <div class="board" id="board"></div>
     <div class="methods" id="methods">
       <button class="method" data-m="more" aria-pressed="false"><b>기록을 더 모으기</b><small>예전 면접관의 기록을 80개 더 모아서, 120개로 가르쳐요.</small></button>
       <button class="method" data-m="blind" aria-pressed="false"><b>모자 색 칸 지우기</b><small>기록에서 모자 색 칸을 지우고 시험 점수만 보여 줘요.</small></button>
       <button class="method" data-m="fair" aria-pressed="false"><b>공정한 기록으로 바꾸기</b><small>시험 점수만 보고 공정하게 다시 뽑은 기록으로 가르쳐요.</small></button>
     </div>
-    <div id="m3" hidden style="display:flex;flex-direction:column;gap:14px">
-      <div class="part" style="border-color:var(--accent)" id="pred3Box">
-        <p style="margin:0"><b id="pred3Q"></b></p>
-        <div class="checks" id="pred3" role="group" aria-label="내 예상"><button class="chk" data-p="yes">효과가 있을 것 같아요</button><button class="chk" data-p="no">효과가 없을 것 같아요</button></div>
+    <div id="m4" hidden style="display:flex;flex-direction:column;gap:14px">
+      <div class="part" style="border-color:var(--accent)">
+        <p style="margin:0"><b id="pred4Q"></b></p>
+        <div class="checks" id="pred4" role="group" aria-label="내 예상"><button class="chk" data-p="yes">효과가 있을 것 같아요</button><button class="chk" data-p="no">효과가 없을 것 같아요</button></div>
       </div>
-      <div id="data3Box" hidden><p class="note" id="data3Msg" style="margin-bottom:6px"></p><div class="minis" id="minis"></div></div>
-      <div id="studyBox3" hidden><p class="note" id="studyMsg3"></p><div class="study"><i id="studyBar3"></i></div></div>
-      <div id="out3" hidden style="display:flex;flex-direction:column;gap:12px">
-        <div><p class="note" style="margin-bottom:6px">AI는 무엇을 보고 골랐을까?</p><div class="bars" id="bars3"></div></div>
-        <p class="note">새 지원자 20명(점수가 같은 10쌍)을 다시 심사했어요.</p>
-        <div class="pairs" id="pairs3"></div>
-        <p class="splitcount" id="count3"></p>
-        <p class="echo" id="predRes3"></p>
-        <div class="part" id="why3Box">
-          <p style="margin:0"><b id="why3Q"></b></p>
-          <div class="row"><button class="btn" id="whyBtn3">까닭 보기</button></div>
-          <p class="echo" id="why3" hidden></p>
+      <div id="data4Box" hidden><p class="note" id="data4Msg" style="margin-bottom:6px"></p><div class="minis" id="minis"></div></div>
+      <div id="study4Box" hidden><p class="note" id="study4Msg"></p><div class="study"><i id="study4Bar"></i></div></div>
+      <div id="out4" hidden style="display:flex;flex-direction:column;gap:12px">
+        <div><p class="note" style="margin-bottom:6px">다시 공부한 AI의 생각 노트</p><div class="bars" id="bars4"></div></div>
+        <p class="note">같은 새 지원자 20명(점수가 같은 10쌍)을 다시 심사해요.</p>
+        <div id="stageB"></div>
+        <p class="echo" id="predRes4" hidden></p>
+        <div class="part" id="why4Box" hidden>
+          <p style="margin:0"><b id="why4Q"></b></p>
+          <div class="row"><button class="btn" id="whyBtn4">까닭 보기</button></div>
+          <p class="echo" id="why4" hidden></p>
         </div>
       </div>
     </div>
-    <div class="row"><button class="btn primary" id="next3" disabled>마무리하기</button></div>
-    <p class="note" id="hint3">두 가지 이상의 방법을 해 보면 마무리할 수 있어요.</p>
+    <div class="row"><button class="btn primary" id="next4" disabled>마무리하기</button></div>
+    <p class="note" id="hint4">두 가지 이상의 방법을 끝까지 해 보면 마무리할 수 있어요.</p>
   </section>
 
   <!-- 마무리 -->
-  <section class="card" id="step4" hidden>
+  <section class="card" id="step5" hidden>
     <h2>편견은 어떻게 AI에게 옮겨 갔을까?</h2>
     <div class="flow">
       <div class="fbox bad"><b>우리의 편견</b><span>예전 면접관은 빨간 모자에게 더 너그러웠어요.</span></div>
@@ -312,8 +375,8 @@ const $=id=>document.getElementById(id);
 const reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
 const done=new Set();
 function show(n){
-  for(const i of [1,2,3,4])$("step"+i).hidden=i!==n;
-  for(const i of [1,2,3,4]){const t=$("tab"+i);if(i===n)t.setAttribute("aria-current","step");else t.removeAttribute("aria-current");t.classList.toggle("done",i!==n&&done.has(i));}
+  for(const i of [1,2,3,4,5])$("step"+i).hidden=i!==n;
+  for(const i of [1,2,3,4,5]){const t=$("tab"+i);if(i===n)t.setAttribute("aria-current","step");else t.removeAttribute("aria-current");t.classList.toggle("done",i!==n&&done.has(i));}
   window.scrollTo({top:0,behavior:reduce?"auto":"smooth"});
 }
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -363,55 +426,86 @@ function revealHat(byKid){
 $("next1").onclick=()=>{show(2);run2();};
 
 /* 결과 그리기 */
-function barsHTML(m){const hatName=m.blind?"모자 색 (지움)":"모자 색";const imp=m.w.map(Math.abs),mx=Math.max(...imp)||1;return [["싹 구별 시험",0],["싹 뽑기 실습",1],[hatName,2]].map(([n,j])=>`<div class="bar ${j===2?"bad":""}"><span>${n}</span><i style="width:${Math.max(3,imp[j]/mx*100)}%"></i></div>`).join("");}
+function barsHTML(m){const hatName=m.blind?"모자 색 (지움)":"모자 색";const imp=m.w.map(Math.abs),mx=Math.max(...imp,0.6);return [["싹 구별 시험",0],["싹 뽑기 실습",1],[hatName,2]].map(([n,j])=>`<div class="bar ${j===2?"bad":""}"><span>${n}</span><i style="width:${Math.max(2,imp[j]/mx*100)}%"></i></div>`).join("");}
 function pairCards(a,b){const one=(red,ok)=>`<div class="ap" style="background:var(${red?"--red-bg":"--blue-bg"})"><span class="hat ${red?"r":"b"}"></span><span>${red?"빨간":"파란"} 모자</span><span class="note">구별 4 · 뽑기 4</span><span class="res ${ok===null?"q":ok?"ok":"no"}">${ok===null?"?":ok?"합격":"불합격"}</span></div>`;return one(1,a)+one(0,b);}
 const pairKind=(a,b)=>a&&b?"both":!a&&!b?"none":a?"red":"blue";
 const KIND={both:"둘 다 합격",none:"둘 다 불합격",red:"빨간 모자만 합격",blue:"파란 모자만 합격"};
 function ratesOf(m){const R=newcomers.filter(x=>x.red),B=newcomers.filter(x=>!x.red);const pr=a=>Math.round(a.filter(x=>judge(m,x.s,x.h,x.red)).length/a.length*100);return [pr(R),pr(B)];}
 function ratesHTML(r){return `<div class="rt r"><span>빨간 모자 합격률</span><b>${r[0]}%</b><div class="meterbar"><i style="width:${r[0]}%"></i></div></div><div class="rt b"><span>파란 모자 합격률</span><b>${r[1]}%</b><div class="meterbar"><i style="width:${r[1]}%"></i></div></div>`;}
 async function study(bar,ms){bar.style.transition="none";bar.style.width="0";void bar.offsetWidth;if(instant||reduce){bar.style.width="100%";return;}bar.style.transition=`width ${ms}ms linear`;bar.style.width="100%";await sleep(ms);}
-/* 예상 고르기: 누를 때까지 기다려요 */
 function choose(el,auto){return new Promise(res=>{el.querySelectorAll(".chk").forEach(x=>{x.disabled=false;x.classList.remove("picked");});if(instant){res(auto);return;}
   el.onclick=e=>{const b=e.target.closest(".chk");if(!b)return;el.onclick=null;b.classList.add("picked");el.querySelectorAll(".chk").forEach(x=>x.disabled=true);res(b.dataset.p);};});}
-/* 짝지은 20명을 한 쌍씩 심사해요 */
-let skipScan=false;
-let runTok=0;
-async function scanPairs(el,countEl,m,fast,tok){
-  const pairs=[];for(let i=0;i<newcomers.length;i+=2)pairs.push([newcomers[i],newcomers[i+1]]);
-  el.innerHTML=pairs.map(([r],k)=>`<div class="pr" id="${el.id}_${k}"><span>${k+1}번 짝 · 구별 ${r.s} 뽑기 ${r.h}</span><span class="who r"><span class="hat r"></span><span class="stamp wait">?</span></span><span class="who b"><span class="hat b"></span><span class="stamp wait">?</span></span></div>`).join("");
-  let split=0;countEl.textContent="결과가 갈린 쌍: 0 / 10";
-  for(let k=0;k<pairs.length;k++){if(tok!==undefined&&tok!==runTok)return -1;const row=$(`${el.id}_${k}`),[R,B]=pairs[k],a=judge(m,R.s,R.h,1),b=judge(m,B.s,B.h,0);
-    const slow=!(instant||reduce||skipScan);if(slow){row.classList.add("now");await sleep(fast?120:300);}
-    const st=row.querySelectorAll(".stamp");st[0].className="stamp "+(a?"ok":"no");st[0].textContent=a?"합격":"불합격";
-    if(slow)await sleep(fast?100:250);
-    st[1].className="stamp "+(b?"ok":"no");st[1].textContent=b?"합격":"불합격";
-    if(a!==b){split++;row.classList.add("split");}row.classList.remove("now");countEl.textContent=`결과가 갈린 쌍: ${split} / 10`;
-    if(slow)await sleep(fast?80:200);}
-  return split;}
+let instant=false,runTok=0;
 
-/* 2단계 */
-let instant=false;
-async function run2(){$("res2").hidden=true;$("studyBox").hidden=false;$("studyMsg").textContent="AI가 지난 기록 40개를 공부하는 중…";await study($("studyBar"),1400);
-  model=train(recs,false);$("studyMsg").textContent="공부를 마쳤어요.";
+/* 2단계: AI가 카드를 한 장씩 보며 공부해요 */
+let learnTok=0,fastLearn=false;
+function trainQuick(d){let w=[0,0,0],b=0;if(!d.length)return {w,b};for(let e=0;e<300;e++){let g=[0,0,0],gb=0;for(const r of d){const x=[(r.s-3)/2,(r.h-3)/2,r.red*2-1];let z=b;for(let j=0;j<3;j++)z+=w[j]*x[j];const p=1/(1+Math.exp(-z)),er=p-r.ok;for(let j=0;j<3;j++)g[j]+=er*x[j];gb+=er;}for(let j=0;j<3;j++)w[j]-=.5*(g[j]/d.length+.01*w[j]);b-=.5*gb/d.length;}return {w,b};}
+function say(t){const th=$("think");if(!t){th.classList.remove("on");return;}th.textContent=t;th.classList.add("on");}
+function stackHTML(n){if(!n)return "";const top=recs[40-n];return '<div class="ac blank"></div>'.repeat(Math.min(2,n-1))+card(top);}
+function prep2(){learnTok++;fastLearn=false;$("bars2").innerHTML=barsHTML({w:[0,0,0]});$("seen2").textContent="본 카드 0 / 40";$("left2").textContent="40장";$("stack").innerHTML=stackHTML(40);
+  say("기록을 보여 주면 공부를 시작할게요!");$("learn2").disabled=false;$("fast2").disabled=true;$("q2Box").hidden=true;$("q2Msg").hidden=true;$("next2").hidden=true;$("flyer").hidden=true;}
+async function run2(){prep2();if(instant)await learn();}
+async function learn(){const tok=++learnTok,alive=()=>tok===learnTok;$("learn2").disabled=true;$("fast2").disabled=false;
+  const fl=$("flyer"),rb=$("robot");let saidScore=false,saidHat=false;say("음… 어떤 사람이 합격했을까?");
+  for(let k=1;k<=40;k++){if(!alive())return;const r=recs[k-1];const slow=!(instant||reduce||fastLearn);
+    if(slow){const ms=k<=5?700:k<=12?380:200;fl.style.setProperty("--fly",ms+"ms");fl.innerHTML=card(r);fl.classList.remove("go");fl.hidden=false;void fl.offsetWidth;fl.classList.add("go");await sleep(ms);if(!alive())return;
+      rb.classList.add("chomp");setTimeout(()=>rb.classList.remove("chomp"),130);fl.hidden=true;}
+    $("left2").textContent=`${40-k}장`;$("stack").innerHTML=stackHTML(40-k);$("seen2").textContent=`본 카드 ${k} / 40`;
+    const m=trainQuick(recs.slice(0,k)),imp=m.w.map(Math.abs);$("bars2").innerHTML=barsHTML(m);
+    if(!saidScore&&k>=6&&imp[0]+imp[1]>0.6){saidScore=true;say("시험 점수가 높으면 합격이 많네…");if(slow)await sleep(1100);}
+    if(!saidHat&&k>=10&&imp[2]>0.5*Math.max(imp[0],imp[1])&&m.w[2]>0){saidHat=true;say("어? 빨간 모자가 자꾸 합격하네…");if(slow)await sleep(1500);}
+    if(slow)await sleep(k<=5?250:60);}
+  if(!alive())return;model=train(recs,false);$("bars2").innerHTML=barsHTML(model);
   const splitN=()=>{let c=0;for(let i=0;i<newcomers.length;i+=2)if(judge(model,newcomers[i].s,newcomers[i].h,1)!==judge(model,newcomers[i+1].s,newcomers[i+1].h,0))c++;return c;};
-  for(let k=0;k<50&&splitN()<3;k++)newcomers=makeNew();
-  $("bars2").innerHTML=barsHTML(model);$("pair2").innerHTML=pairCards(null,null);$("predMsg2").textContent="";
-  $("scan2Box").hidden=true;$("why2Box").hidden=true;$("why2").hidden=true;$("next2").hidden=true;$("rates2").hidden=true;$("scan2").disabled=false;$("skip2").disabled=true;
-  $("res2").hidden=false;
-  const a=judge(model,4,4,1),b=judge(model,4,4,0),real=pairKind(a,b);
-  const pick=await choose($("pred2"),"red");
-  $("pair2").innerHTML=pairCards(a,b);
-  const m=$("predMsg2");m.className="toast "+(pick===real?"ok":"bad");m.textContent=(pick===real?"예상이 맞았어요! ":`예상은 '${KIND[pick]}'이었는데, `)+`AI는 '${KIND[real]}'으로 심사했어요. 점수가 똑같은데 왜 그럴까요? 다른 지원자들도 살펴봐요.`;
-  results.base={r:ratesOf(model),p:[a,b]};$("scan2Box").hidden=false;
-  if(instant){await scanPairs($("pairs2"),$("count2"),model);finish2();}
-}
-function finish2(){$("rates2").innerHTML=ratesHTML(results.base.r);$("rates2").hidden=false;$("why2Box").hidden=false;$("next2").hidden=false;done.add(2);}
-$("scan2").onclick=async()=>{$("scan2").disabled=true;$("skip2").disabled=false;skipScan=false;await scanPairs($("pairs2"),$("count2"),model);$("skip2").disabled=true;finish2();};
-$("skip2").onclick=()=>{skipScan=true;};
-$("whyBtn2").onclick=()=>{$("why2").hidden=false;};
-$("next2").onclick=()=>{drawBoard();show(3);};
+  for(let q=0;q<50&&splitN()<3;q++)newcomers=makeNew();
+  say("알겠다! 시험 점수도 보고, 모자 색도 보면 되겠구나!");$("fast2").disabled=true;$("q2Box").hidden=false;
+  const pick=await choose($("q2"),"c");if(!alive())return;
+  const imp=model.w.map(Math.abs),top=imp[2]>=Math.max(imp[0],imp[1])*0.8?"c":imp[0]>=imp[1]?"s":"h";
+  $("q2Msg").textContent=(pick==="c"?"맞아요. ":"시험 점수도 중요하게 보지만, 모자 색 막대도 길어요. ")+`AI는 시험 점수와 함께 모자 색도 크게 봐요. 일과 아무 상관 없는 모자 색이 생각 노트에 들어간 거예요. 그럼 이 AI는 새 지원자를 어떻게 심사할까요?`;
+  $("q2Msg").hidden=false;$("next2").hidden=false;done.add(2);}
+$("learn2").onclick=()=>{learn();};
+$("fast2").onclick=()=>{fastLearn=true;};
+$("next2").onclick=()=>{show(3);run3();};
+
+/* 심사대: 한 쌍씩 크게 올려서 심사해요 */
+function stageHTML(p){return `<div class="stage"><div class="stagehead"><b id="${p}No">1번 쌍</b><span class="cnt" id="${p}Cnt">결과가 갈린 쌍: 0 / 10</span></div>
+  <div class="desk" id="${p}Desk"><div class="cand r"><span class="hat r"></span><span>빨간 모자</span><span class="sc" id="${p}ScR"></span><span class="stp" id="${p}StR"></span></div>
+  <div class="cand b"><span class="hat b"></span><span>파란 모자</span><span class="sc" id="${p}ScB"></span><span class="stp" id="${p}StB"></span></div></div>
+  <div class="row"><button class="btn primary" id="${p}Next">다음 쌍</button><button class="btn" id="${p}Auto">자동으로 보기</button></div>
+  <div class="hist" id="${p}Hist"></div></div>`;}
+async function runStage(p,m,tok,opt){const pairs=[];for(let i=0;i<newcomers.length;i+=2)pairs.push([newcomers[i],newcomers[i+1]]);
+  const alive=()=>tok===runTok,auto={on:!!opt.auto};
+  $(p+"Hist").innerHTML=pairs.map(([r],k)=>`<div class="hc wait" id="${p}H${k}">${k+1}번<br>${r.s}·${r.h}</div>`).join("");
+  $(p+"Auto").onclick=()=>{auto.on=true;$(p+"Auto").disabled=true;if(auto.wake)auto.wake();};$(p+"Auto").disabled=auto.on;
+  let split=0;
+  for(let k=0;k<pairs.length;k++){if(!alive())return -1;const [R,B]=pairs[k],a=judge(m,R.s,R.h,1),b=judge(m,B.s,B.h,0);
+    $(p+"No").textContent=`${k+1}번 쌍`;$(p+"ScR").textContent=`구별 ${R.s} · 뽑기 ${R.h}`;$(p+"ScB").textContent=`구별 ${B.s} · 뽑기 ${B.h}`;
+    const sR=$(p+"StR"),sB=$(p+"StB");sR.className="stp";sB.className="stp";$(p+"Desk").classList.remove("split");
+    const quick=instant||reduce;const slowMs=opt.fast?(k<2?700:350):(k<3?1000:550);
+    if(!quick){await sleep(slowMs*.5);if(!alive())return -1;}
+    sR.textContent=a?"합격":"불합격";sR.className="stp on "+(a?"ok":"no");if(!quick){await sleep(slowMs);if(!alive())return -1;}
+    sB.textContent=b?"합격":"불합격";sB.className="stp on "+(b?"ok":"no");
+    if(a!==b){split++;$(p+"Desk").classList.add("split");}
+    const hc=$(`${p}H${k}`);hc.classList.remove("wait");if(a!==b)hc.classList.add("split");hc.innerHTML=`${k+1}번<br><i class="${a?"ok":"no"}">${a?"합":"불"}</i><i class="${b?"ok":"no"}">${b?"합":"불"}</i>`;
+    $(p+"Cnt").textContent=`결과가 갈린 쌍: ${split} / 10`;
+    if(k<pairs.length-1&&!quick){if(auto.on){await sleep(slowMs);}else{await new Promise(res=>{auto.wake=res;$(p+"Next").onclick=()=>res();});auto.wake=null;}if(!alive())return -1;}}
+  $(p+"Next").disabled=true;$(p+"Auto").disabled=true;$(p+"No").textContent="심사 끝";return split;}
 
 /* 3단계 */
+async function run3(){const tok=++runTok,alive=()=>tok===runTok;
+  $("pair3p").innerHTML=pairCards(null,null);$("predMsg3").textContent="";$("judge3Box").hidden=true;$("rates3").hidden=true;$("why3aBox").hidden=true;$("why3a").hidden=true;$("next3").hidden=true;
+  const a=judge(model,4,4,1),b=judge(model,4,4,0),real=pairKind(a,b);
+  const pick=await choose($("pred3p"),"red");if(!alive())return;
+  $("pair3p").innerHTML=pairCards(a,b);
+  const ms=$("predMsg3");ms.className="toast "+(pick===real?"ok":"bad");ms.textContent=(pick===real?"예상이 맞았어요! ":`예상은 '${KIND[pick]}'이었는데, `)+`AI는 '${KIND[real]}'으로 심사했어요. 점수가 똑같은데 왜 그럴까요? 다른 지원자들도 살펴봐요.`;
+  results.base={r:ratesOf(model),p:[a,b]};
+  $("stageA").innerHTML=stageHTML("A");$("judge3Box").hidden=false;
+  const split=await runStage("A",model,tok,{auto:instant});if(!alive()||split<0)return;
+  $("rates3").innerHTML=ratesHTML(results.base.r);$("rates3").hidden=false;$("why3aBox").hidden=false;$("next3").hidden=false;done.add(3);}
+$("whyBtn3a").onclick=()=>{$("why3a").hidden=false;};
+$("next3").onclick=()=>{drawBoard();show(4);};
+
+/* 4단계 */
 const MNAME={base:"처음 AI",more:"기록을 더 모으기",blind:"모자 색 칸 지우기",fair:"공정한 기록으로 바꾸기"};
 const WHYQ={more:"기록을 3배로 늘렸는데 왜 편견이 줄지 않았을까요?",blind:"모자 색 칸을 지웠더니 왜 결과가 달라졌을까요?",fair:"기록을 공정하게 바꿨더니 왜 결과가 달라졌을까요?"};
 const WHYA={more:"늘어난 기록에도 예전 면접관의 편견이 똑같이 담겨 있었기 때문이에요. 편견이 담긴 기록을 더 많이 배우면, AI는 그 편견을 더 굳게 믿어요. 데이터가 많다고 항상 좋은 건 아니에요.",
@@ -420,60 +514,62 @@ const WHYA={more:"늘어난 기록에도 예전 면접관의 편견이 똑같이
 function drawBoard(cur){$("board").innerHTML=["base","more","blind","fair"].map(k=>{const r=results[k]&&results[k].r;
   return `<div class="bcol ${k===cur?"cur":""}"><b class="t">${MNAME[k]}</b>${r?`<div class="bb r"><span>${r[0]}%</span><i style="width:${Math.max(2,r[0])}%"></i></div><div class="bb b"><span>${r[1]}%</span><i style="width:${Math.max(2,r[1])}%"></i></div><span class="gap">차이 <b>${Math.abs(r[0]-r[1])}</b>%p</span>`:`<span class="gap">아직 안 해 봤어요</span>`}</div>`;}).join("");}
 const mini=(r,hide)=>`<span class="mc ${r.ok?"ok":""}"><i class="${hide?"q":r.red?"r":"b"}">${hide?"?":""}</i></span>`;
-async function showData(m,data,tok){const alive=()=>tok===runTok;const box=$("minis");$("data3Box").hidden=false;const slow=!(instant||reduce);
+async function showData(m,data,tok){const alive=()=>tok===runTok;const box=$("minis");$("data4Box").hidden=false;const slow=!(instant||reduce);
   const ord=a=>a.map((r,i)=>i).sort((x,y)=>(a[y].red-a[x].red)||(a[y].ok-a[x].ok)),O=ord(recs);
-  if(m==="more"){$("data3Msg").textContent="예전 면접관의 기록을 80개 더 모았어요. 빨간 모자부터 차례로 놓았어요. 늘어난 기록에서도 초록(합격)이 어느 모자에 몰려 있는지 살펴보세요.";
+  if(m==="more"){$("data4Msg").textContent="예전 면접관의 기록을 80개 더 모았어요. 빨간 모자부터 차례로 놓았어요. 늘어난 기록에서도 초록(합격)이 어느 모자에 몰려 있는지 살펴보세요.";
     box.innerHTML=O.map(i=>mini(recs[i])).join("");const ex=data.slice(40),E=ord(ex).map(i=>ex[i]);
     for(let i=0;i<E.length;i+=4){box.insertAdjacentHTML("beforeend",E.slice(i,i+4).map(r=>mini(r).replace('class="mc','class="mc new')).join(""));if(slow)await sleep(45);if(!alive())return;}}
-  else if(m==="blind"){$("data3Msg").textContent="기록 40개에서 모자 색 칸을 지우고 있어요. 이제 AI는 시험 점수와 합격 여부만 볼 수 있어요.";
+  else if(m==="blind"){$("data4Msg").textContent="기록 40개에서 모자 색 칸을 지우고 있어요. 이제 AI는 시험 점수와 합격 여부만 볼 수 있어요.";
     box.innerHTML=O.map(i=>mini(recs[i])).join("");const kids=box.children;
     for(let k=0;k<kids.length;k++){kids[k].outerHTML=mini(recs[O[k]],true).replace('class="mc','class="mc flash');if(slow)await sleep(40);if(!alive())return;}}
-  else{$("data3Msg").textContent="같은 지원자 40명을 시험 점수만 보고 다시 뽑았어요. 빨간 모자부터 차례로 놓았어요. 합격 표시가 바뀐 카드가 반짝여요.";
+  else{$("data4Msg").textContent="같은 지원자 40명을 시험 점수만 보고 다시 뽑았어요. 빨간 모자부터 차례로 놓았어요. 합격 표시가 바뀐 카드가 반짝여요.";
     box.innerHTML=O.map(i=>mini(recs[i])).join("");const kids=box.children;
     for(let k=0;k<kids.length;k++){const i=O[k],nr=data[i];if(nr.ok!==recs[i].ok){kids[k].outerHTML=mini(nr).replace('class="mc','class="mc flash');if(slow)await sleep(90);if(!alive())return;}}}
   if(slow)await sleep(500);}
 let busy=false;
-$("methods").onclick=async e=>{const b=e.target.closest(".method");if(!b)return;const tok=++runTok,alive=()=>tok===runTok;busy=true;const m=b.dataset.m;skipScan=false;
+$("methods").onclick=async e=>{const b=e.target.closest(".method");if(!b)return;const tok=++runTok,alive=()=>tok===runTok;busy=true;const m=b.dataset.m;
   $("methods").querySelectorAll(".method").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));
-  $("m3").hidden=false;$("data3Box").hidden=true;$("studyBox3").hidden=true;$("out3").hidden=true;$("why3").hidden=true;$("predRes3").textContent="";
-  $("pred3Q").textContent=`'${MNAME[m]}'로 AI의 편견이 줄어들까요? 먼저 예상해 보세요.`;
-  const pick=await choose($("pred3"),m==="more"?"no":"yes");if(!alive())return;
+  $("m4").hidden=false;$("data4Box").hidden=true;$("study4Box").hidden=true;$("out4").hidden=true;$("why4").hidden=true;$("predRes4").hidden=true;$("why4Box").hidden=true;
+  $("pred4Q").textContent=`'${MNAME[m]}'로 AI의 편견이 줄어들까요? 먼저 예상해 보세요.`;
+  const pick=await choose($("pred4"),m==="more"?"no":"yes");if(!alive())return;
   const data=m==="more"?recs.concat(makeRecords(80,false)):m==="fair"?recs.map(r=>({...r,ok:fairOk(r.s,r.h)})):recs;
   await showData(m,data,tok);if(!alive())return;
-  $("studyBox3").hidden=false;$("studyMsg3").textContent=`AI가 바뀐 기록 ${data.length}개를 공부하는 중…`;await study($("studyBar3"),1200);if(!alive())return;$("studyMsg3").textContent="공부를 마쳤어요.";
-  const mdl=train(data,m==="blind");$("bars3").innerHTML=barsHTML(mdl);$("out3").hidden=false;
-  const split=await scanPairs($("pairs3"),$("count3"),mdl,true,tok);if(!alive())return;
+  $("study4Box").hidden=false;$("study4Msg").textContent=`AI가 바뀐 기록 ${data.length}개를 다시 공부하는 중…`;await study($("study4Bar"),1200);if(!alive())return;$("study4Msg").textContent="공부를 마쳤어요.";
+  const mdl=train(data,m==="blind");$("bars4").innerHTML=barsHTML(mdl);$("stageB").innerHTML=stageHTML("B");$("out4").hidden=false;
+  const split=await runStage("B",mdl,tok,{auto:true,fast:true});if(!alive()||split<0)return;
   const r=ratesOf(mdl),gap=Math.abs(r[0]-r[1]),worked=split===0&&gap<=10;
   results[m]={r,p:[judge(mdl,4,4,1),judge(mdl,4,4,0)]};drawBoard(m);
-  $("predRes3").textContent=`내 예상: ${pick==="yes"?"효과 있음":"효과 없음"} → 실제: ${worked?"효과 있음":"효과 없음"}. `+(pick===(worked?"yes":"no")?"예상이 맞았어요!":"예상이 빗나갔어요.")+` 빨간 모자 합격률 ${r[0]}%, 파란 모자 ${r[1]}%예요.`;
-  $("why3Q").textContent=WHYQ[m];$("why3").textContent=WHYA[m];$("why3").hidden=!!instant&&false;if(!instant)$("why3").hidden=true;
+  const pr=$("predRes4");pr.textContent=`내 예상: ${pick==="yes"?"효과 있음":"효과 없음"} → 실제: ${worked?"효과 있음":"효과 없음"}. `+(pick===(worked?"yes":"no")?"예상이 맞았어요!":"예상이 빗나갔어요.")+` 빨간 모자 합격률 ${r[0]}%, 파란 모자 ${r[1]}%예요.`;pr.hidden=false;
+  $("why4Q").textContent=WHYQ[m];$("why4").textContent=WHYA[m];$("why4").hidden=!instant;$("why4Box").hidden=false;
   b.classList.add("tried");tried.add(m);
-  if(tried.size>=2){$("next3").disabled=false;$("hint3").textContent=tried.size<3?"남은 방법도 해 보면 더 좋아요.":"";done.add(3);}
+  if(tried.size>=2){$("next4").disabled=false;$("hint4").textContent=tried.size<3?"남은 방법도 해 보면 더 좋아요.":"";done.add(4);}
   busy=false;};
-$("whyBtn3").onclick=()=>{$("why3").hidden=false;};
-$("next3").onclick=()=>{goFinal();};
+$("whyBtn4").onclick=()=>{$("why4").hidden=false;};
+$("next4").onclick=()=>{goFinal();};
 function goFinal(){const b=results.base;
   if(b){$("fl2").textContent=`지난 기록: 빨간 모자 합격률 ${rate(recs.filter(r=>r.red))}%, 파란 모자 ${rate(recs.filter(r=>!r.red))}%`;$("fl3").textContent=`새 지원자 합격률: 빨간 모자 ${b.r[0]}%, 파란 모자 ${b.r[1]}%. 같은 점수인데 결과가 달랐어요.`;}
   const fx=["blind","fair"].filter(k=>results[k]).map(k=>`${MNAME[k]}: 빨간 모자 ${results[k].r[0]}%, 파란 모자 ${results[k].r[1]}%`);
   $("fixLine").textContent=fx.length?"편견을 줄인 방법 → "+fx.join(" / "):"";
-  done.add(4);show(4);}
+  done.add(5);show(5);}
 
 /* 처음부터 */
 let resetArm=0;
 $("reset").onclick=()=>{
   if(Date.now()-resetArm>4000){resetArm=Date.now();$("reset").textContent="정말 처음부터 할까요? 한 번 더 누르세요";setTimeout(()=>{$("reset").textContent="처음부터 다시";},4000);return;}
   resetArm=0;$("reset").textContent="처음부터 다시";resetAll();};
-function resetAll(){runTok++;done.clear();tried.clear();results={};model=null;busy=false;skipScan=true;$("m3").hidden=true;$("pred2").onclick=null;$("pred3").onclick=null;
-  $("methods").querySelectorAll(".method").forEach(x=>{x.setAttribute("aria-pressed","false");x.classList.remove("tried");});$("next3").disabled=true;$("hint3").textContent="두 가지 이상의 방법을 해 보면 마무리할 수 있어요.";init1();show(1);}
+function resetAll(){runTok++;learnTok++;done.clear();tried.clear();results={};model=null;busy=false;$("m4").hidden=true;["pred3p","pred4","q2"].forEach(i=>$(i).onclick=null);
+  $("methods").querySelectorAll(".method").forEach(x=>{x.setAttribute("aria-pressed","false");x.classList.remove("tried");});$("next4").disabled=true;$("hint4").textContent="두 가지 이상의 방법을 끝까지 해 보면 마무리할 수 있어요.";init1();show(1);}
 
 /* 선생님 바로가기: 학생용 주소(github.io)에서는 ?teacher 를 붙였을 때만 보여요 */
 if(!/github\.io$/.test(location.hostname)||/teacher/.test(location.search))$("tbar").hidden=false;
-$("tbar").onclick=async e=>{const b=e.target.closest("button");if(!b||busy)return;const j=b.dataset.j;instant=true;
-  try{resetAll();if(j==="1")return;
-    $("guess").querySelector('[data-g="c"]').setAttribute("aria-pressed","true");$("sort1").click();revealHat(false);show(2);await run2();if(j==="2")return;
-    drawBoard();show(3);if(j==="3")return;
+$("tbar").onclick=async e=>{const b=e.target.closest("button");if(!b)return;const j=b.dataset.j;
+  resetAll();if(j==="1")return;instant=true;
+  try{$("guess").querySelector('[data-g="c"]').setAttribute("aria-pressed","true");$("sort1").click();revealHat(false);show(2);
+    if(j==="2"){instant=false;prep2();return;}
+    prep2();await learn();show(3);if(j==="3"){instant=false;await run3();return;}
+    await run3();drawBoard();show(4);if(j==="4")return;
     for(const m of ["more","blind","fair"]){await $("methods").onclick({target:$("methods").querySelector(`[data-m="${m}"]`)});}
-    goFinal();}finally{instant=false;skipScan=false;}};
+    goFinal();}finally{instant=false;}};
 init1();
 </script>
 </body>
