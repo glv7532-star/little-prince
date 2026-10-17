@@ -353,7 +353,7 @@ th{color:var(--muted);font-weight:400;white-space:nowrap}
       </div>
     </div>
     <div class="row"><button class="btn primary" id="next4" disabled>마무리하기</button></div>
-    <p class="note" id="hint4">두 가지 이상의 방법을 끝까지 해 보면 마무리할 수 있어요.</p>
+    <p class="note" id="hint4">세 가지 방법을 모두 해 보면 마무리할 수 있어요.</p>
   </section>
 
   <!-- 마무리 -->
@@ -563,7 +563,7 @@ $("methods").onclick=async e=>{const b=e.target.closest(".method");if(!b)return;
   const pr=$("predRes4");pr.textContent=`내 예상: ${pick==="yes"?"효과 있음":"효과 없음"} → 실제: ${worked?"효과 있음":"효과 없음"}. `+(pick===(worked?"yes":"no")?"예상이 맞았어요!":"예상이 빗나갔어요.")+` 빨간 모자 합격률 ${r[0]}%, 파란 모자 ${r[1]}%예요.`;pr.hidden=false;
   $("why4Q").textContent=WHYQ[m];curM=m;$("my4").value=thoughts[m]||"";$("why4Box").hidden=false;
   b.classList.add("tried");tried.add(m);
-  if(tried.size>=2){$("next4").disabled=false;$("hint4").textContent=tried.size<3?"남은 방법도 해 보면 더 좋아요.":"";done.add(4);}
+  if(tried.size>=3){$("next4").disabled=false;$("hint4").textContent="";done.add(4);}else $("hint4").textContent=`남은 방법 ${3-tried.size}가지를 더 해 보세요.`;
   busy=false;};
 let curM="";
 $("my4").oninput=()=>{if(curM)thoughts[curM]=$("my4").value.trim();};
@@ -583,7 +583,7 @@ $("reset").onclick=()=>{
   if(Date.now()-resetArm>4000){resetArm=Date.now();$("reset").textContent="정말 처음부터 할까요? 한 번 더 누르세요";setTimeout(()=>{$("reset").textContent="처음부터 다시";},4000);return;}
   resetArm=0;$("reset").textContent="처음부터 다시";resetAll();};
 function resetAll(){runTok++;learnTok++;done.clear();thoughts={};curM="";$("my3").value="";$("my4").value="";tried.clear();results={};model=null;busy=false;$("m4").hidden=true;["pred3p","pred4","q2"].forEach(i=>$(i).onclick=null);
-  $("methods").querySelectorAll(".method").forEach(x=>{x.setAttribute("aria-pressed","false");x.classList.remove("tried");});$("next4").disabled=true;$("hint4").textContent="두 가지 이상의 방법을 끝까지 해 보면 마무리할 수 있어요.";init1();show(1);}
+  $("methods").querySelectorAll(".method").forEach(x=>{x.setAttribute("aria-pressed","false");x.classList.remove("tried");});$("next4").disabled=true;$("hint4").textContent="세 가지 방법을 모두 해 보면 마무리할 수 있어요.";init1();show(1);}
 
 /* 선생님 바로가기: 학생용 주소(github.io)에서는 ?teacher 를 붙였을 때만 보여요 */
 if(!/github\.io$/.test(location.hostname)||/teacher/.test(location.search))$("tbar").hidden=false;
