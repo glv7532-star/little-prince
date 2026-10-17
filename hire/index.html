@@ -205,6 +205,14 @@ th{color:var(--muted);font-weight:400;white-space:nowrap}
 .field label{font-size:.9rem;color:var(--muted)}
 .field input{font:inherit;padding:10px 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);width:100%}
 .field input:focus-visible{outline:3px solid var(--accent);outline-offset:1px}
+.extra{border:2px dashed var(--accent);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.extra p{margin:0}
+.ac .vl{display:block;margin-top:2px;padding:0 4px;border-radius:6px;background:var(--paper);font-size:.68rem}
+.ac .vl.up{color:var(--accent);font-weight:700}
+.board.b3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.bar.vil i{background:#b8860b}
+.vtab{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.vtab div{border-radius:10px;padding:8px 12px;font-size:.92rem}
 .reflect{display:flex;flex-direction:column;gap:10px}
 .rf{border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--bg);display:flex;flex-direction:column;gap:6px}
 .rf b{font-size:.98rem}
@@ -218,7 +226,7 @@ html,body{overscroll-behavior-y:contain}
 <body>
 
 <div class="wrap">
-  <div class="tbar" id="tbar" hidden><b>선생님 바로가기</b><button data-j="1">1단계</button><button data-j="2">2단계</button><button data-j="3">3단계</button><button data-j="4">4단계</button><button data-j="5">마무리</button></div>
+  <div class="tbar" id="tbar" hidden><b>선생님 바로가기</b><button data-j="1">1단계</button><button data-j="2">2단계</button><button data-j="3">3단계</button><button data-j="4">4단계</button><button data-j="5">마무리</button><button data-j="6">더 해 보기</button></div>
   <header>
     <h1>편견을 배우는 AI 면접관</h1>
     <p class="lead">메아리는 내가 한 말을 그대로 따라 해요. AI도 메아리를 닮았을까요? B612에서 바오밥 싹을 뽑을 '별 정원사'를 뽑는 AI 면접관을 만들어 봐요.</p>
@@ -377,6 +385,51 @@ html,body{overscroll-behavior-y:contain}
       <li>시험 점수는 정말 공정한 기준일까요? 시험 문제를 만든 사람의 생각이 들어가지는 않을까요?</li>
     </ol>
     <p class="closing">메아리는 우리가 한 말을 그대로 돌려줘요.<br>AI에게 공정한 기록을 들려주면, AI도 공정하게 돌려줘요.</p>
+    <div class="extra"><p><b>시간이 남았나요?</b> 모자 색 칸만 지우면 정말 편견이 다 사라질까요? 숨은 단서를 찾아봐요.</p><button class="btn primary" id="go6">더 해 보기: 숨은 단서</button></div>
+  </section>
+
+  <!-- 더 해 보기 -->
+  <section class="card" id="step6" hidden>
+    <h2>더 해 보기: 숨은 단서</h2>
+    <p class="note">이번 기록 카드에는 <b>사는 마을</b> 칸이 하나 더 있어요. 이 별에서는 빨간 모자가 대부분 윗마을에, 파란 모자가 대부분 아랫마을에 살아요. 예전 면접관은 여전히 모자 색을 보고 빨간 모자에게 너그러웠어요.</p>
+    <div class="cards" id="recs6"></div>
+    <div class="vtab" id="vtab6"></div>
+    <div class="board b3" id="board6"></div>
+    <div class="part" style="border-color:var(--accent)" id="p6a">
+      <p style="margin:0"><b>모자 색 칸은 지우고, 사는 마을 칸은 그대로 두었어요. 이 기록으로 다시 가르치면 편견이 사라질까요?</b></p>
+      <div class="checks" id="pred6" role="group" aria-label="내 예상"><button class="chk" data-p="yes">편견이 사라질 것 같아요</button><button class="chk" data-p="no">편견이 남아 있을 것 같아요</button></div>
+    </div>
+    <div id="run6a" hidden style="display:flex;flex-direction:column;gap:12px">
+      <div><p class="note" id="study6Msg"></p><div class="study"><i id="study6Bar"></i></div></div>
+      <div id="out6a" hidden style="display:flex;flex-direction:column;gap:12px">
+        <div><p class="note" style="margin-bottom:6px">다시 공부한 AI의 생각 노트</p><div class="bars" id="bars6"></div></div>
+        <p class="note">점수가 같은 새 지원자 10쌍을 심사해요. 점수 옆에 사는 마을도 적혀 있어요.</p>
+        <div id="stageC"></div>
+        <p class="echo" id="res6a" hidden></p>
+        <div class="part" id="why6Box" hidden>
+          <p style="margin:0"><b>모자 색을 지웠는데 왜 편견이 남았을까요?</b> 생각 노트의 막대를 보고, 내 생각을 짧게 적어 보세요.</p>
+          <div class="field"><label for="my6">내 생각 (적지 않아도 괜찮아요)</label><input id="my6" type="text" maxlength="80" autocomplete="off" placeholder="예: AI가 ○○을 보고"></div>
+          <div class="row"><button class="btn" id="ans6">까닭 확인하기</button></div>
+          <p class="echo" id="ans6Text" hidden>AI는 모자 색을 볼 수 없게 되자, 모자 색과 거의 같이 다니는 '사는 마을'을 보고 짐작했어요. 윗마을에 사는 사람은 대부분 빨간 모자였으니까요. 이렇게 편견은 다른 칸에 숨어서 AI에게 들어올 수 있어요.</p>
+        </div>
+      </div>
+    </div>
+    <div id="run6b" hidden style="display:flex;flex-direction:column;gap:12px">
+      <div class="row"><button class="btn primary" id="go6b">마을 칸도 지워 보기</button></div>
+      <div id="out6b" hidden style="display:flex;flex-direction:column;gap:12px">
+        <div><p class="note" style="margin-bottom:6px">다시 공부한 AI의 생각 노트</p><div class="bars" id="bars6b"></div></div>
+        <div id="stageD"></div>
+        <p class="echo" id="res6b" hidden></p>
+      </div>
+    </div>
+    <div id="fin6" hidden style="display:flex;flex-direction:column;gap:12px">
+      <ol class="ask">
+        <li>실제 세상에서 '사는 마을'처럼 숨은 단서가 될 수 있는 것에는 무엇이 있을까요? (예: 사는 동네, 다닌 학교, 이름)</li>
+        <li>칸을 지우는 것 말고, AI가 공정한지 확인하려면 무엇을 해 봐야 할까요?</li>
+      </ol>
+      <p class="closing">편견은 다른 칸에 숨어 들어올 수 있어요.<br>칸을 지우는 것만으로는 부족하고, 결과가 공정한지 늘 확인해야 해요.</p>
+    </div>
+    <div class="row"><button class="btn" id="back6">마무리 화면으로 돌아가기</button></div>
   </section>
 
   <button class="link" id="reset">처음부터 다시</button>
@@ -387,7 +440,7 @@ const $=id=>document.getElementById(id);
 const reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
 const done=new Set();
 function show(n){
-  for(const i of [1,2,3,4,5])$("step"+i).hidden=i!==n;
+  for(const i of [1,2,3,4,5,6])$("step"+i).hidden=i!==n;
   for(const i of [1,2,3,4,5]){const t=$("tab"+i);if(i===n)t.setAttribute("aria-current","step");else t.removeAttribute("aria-current");t.classList.toggle("done",i!==n&&done.has(i));}
   window.scrollTo({top:0,behavior:reduce?"auto":"smooth"});
 }
@@ -490,15 +543,15 @@ function stageHTML(p,autoOnly){return `<div class="stage"><div class="stagehead"
   <div class="cand b"><span class="hat b"></span><span>파란 모자</span><span class="sc" id="${p}ScB"></span><span class="stp" id="${p}StB"></span></div></div>
   ${autoOnly?`<div class="row"><button class="btn" id="${p}Skip">결과 바로 보기</button></div>`:`<div class="row"><button class="btn primary" id="${p}Next">다음 쌍</button><button class="btn" id="${p}Auto">자동으로 보기</button></div>`}
   <div class="hist" id="${p}Hist"></div></div>`;}
-async function runStage(p,m,tok,opt){const pairs=[];for(let i=0;i<newcomers.length;i+=2)pairs.push([newcomers[i],newcomers[i+1]]);
+async function runStage(p,m,tok,opt){const ppl=opt.people||newcomers,J=opt.j||((x,red)=>judge(m,x.s,x.h,red)),sub=opt.sub||(()=>"");const pairs=[];for(let i=0;i<ppl.length;i+=2)pairs.push([ppl[i],ppl[i+1]]);
   const alive=()=>tok===runTok,auto={on:!!opt.auto};
   $(p+"Hist").innerHTML=pairs.map(([r],k)=>`<div class="hc wait" id="${p}H${k}">${k+1}번<br>${r.s}·${r.h}</div>`).join("");
   const skip={on:false};
   if($(p+"Auto")){$(p+"Auto").onclick=()=>{auto.on=true;$(p+"Auto").disabled=true;if(auto.wake)auto.wake();};$(p+"Auto").disabled=auto.on;}
   if($(p+"Skip"))$(p+"Skip").onclick=()=>{skip.on=true;$(p+"Skip").disabled=true;};
   let split=0;
-  for(let k=0;k<pairs.length;k++){if(!alive())return -1;const [R,B]=pairs[k],a=judge(m,R.s,R.h,1),b=judge(m,B.s,B.h,0);
-    $(p+"No").textContent=`${k+1}번 쌍`;$(p+"ScR").textContent=`구별 ${R.s} · 뽑기 ${R.h}`;$(p+"ScB").textContent=`구별 ${B.s} · 뽑기 ${B.h}`;
+  for(let k=0;k<pairs.length;k++){if(!alive())return -1;const [R,B]=pairs[k],a=J(R,1),b=J(B,0);
+    $(p+"No").textContent=`${k+1}번 쌍`;$(p+"ScR").textContent=`구별 ${R.s} · 뽑기 ${R.h}`+sub(R);$(p+"ScB").textContent=`구별 ${B.s} · 뽑기 ${B.h}`+sub(B);
     const sR=$(p+"StR"),sB=$(p+"StB");sR.className="stp";sB.className="stp";$(p+"Desk").classList.remove("split");
     const quick=instant||reduce||skip.on;const slowMs=opt.fast?(k<2?700:350):(k<3?1000:550);
     if(!quick){await sleep(slowMs*.5);if(!alive())return -1;}
@@ -578,12 +631,51 @@ function goFinal(){const b=results.base;
   $("reflect").innerHTML=item(WHYQ0,"base",WHY0)+["more","blind","fair"].filter(k=>tried.has(k)).map(k=>item(WHYQ[k],k,WHYA[k])).join("");
   done.add(5);show(5);}
 
+/* 더 해 보기: 숨은 단서 (사는 마을) */
+const VIL=v=>v?"윗마을":"아랫마을";
+const vil=red=>Math.random()<(red?.85:.15)?1:0;
+function recs6Make(){const a=[];for(let i=0;i<20;i++){const s=rnd(5),h=rnd(5);for(const red of [1,0])a.push({s,h,red,v:vil(red),ok:biasedOk(s,h,red)});}return a.sort(()=>Math.random()-.5);}
+const X6=(r,m)=>[(r.s-3)/2,(r.h-3)/2,m.hat?0:r.red*2-1,m.vil?0:r.v*2-1];
+function train6(d,m){let w=[0,0,0,0],b=0;for(let e=0;e<700;e++){let g=[0,0,0,0],gb=0;for(const r of d){const x=X6(r,m);let z=b;for(let j=0;j<4;j++)z+=w[j]*x[j];const p=1/(1+Math.exp(-z)),er=p-r.ok;for(let j=0;j<4;j++)g[j]+=er*x[j];gb+=er;}for(let j=0;j<4;j++)w[j]-=.5*(g[j]/d.length+.01*w[j]);b-=.5*gb/d.length;}return {w,b,...m};}
+const judge6=(m,r)=>{const x=X6(r,m);let z=m.b;for(let j=0;j<4;j++)z+=m.w[j]*x[j];return z>0?1:0;};
+function new6(){const a=[];for(let i=0;i<10;i++){const s=rnd(5),h=rnd(5);a.push({s,h,red:1,v:vil(1)},{s,h,red:0,v:vil(0)});}return a;}
+const rates6=(m,N)=>{const f=red=>Math.round(N.filter(x=>x.red===red&&judge6(m,x)).length/10*100);return [f(1),f(0)];};
+const splits6=(m,N)=>{let c=0;for(let i=0;i<N.length;i+=2)if(judge6(m,N[i])!==judge6(m,N[i+1]))c++;return c;};
+let st6=null;
+function setup6(){for(let t=0;t<60;t++){const R=recs6Make(),mA=train6(R,{hat:1,vil:0});for(let q=0;q<60;q++){const N=new6(),r=rates6(mA,N);if(splits6(mA,N)>=3&&r[0]-r[1]>=20){return {recs:R,N,m0:train6(R,{hat:0,vil:0}),mA,mB:train6(R,{hat:1,vil:1}),res:{}};}}}
+  const R=recs6Make();return {recs:R,N:new6(),m0:train6(R,{hat:0,vil:0}),mA:train6(R,{hat:1,vil:0}),mB:train6(R,{hat:1,vil:1}),res:{}};}
+const card6=r=>card(r).replace(/<\/div>$/,`<span class="vl ${r.v?"up":""}">${VIL(r.v)}</span></div>`);
+function bars6(m){const imp=m.w.map(Math.abs),mx=Math.max(...imp,0.6);return [["싹 구별 시험",0,""],["싹 뽑기 실습",1,""],[m.hat?"모자 색 (지움)":"모자 색",2,"bad"],[m.vil?"마을 (지움)":"사는 마을",3,"vil"]].map(([n,j,c])=>`<div class="bar ${c}"><span>${n}</span><i style="width:${Math.max(2,imp[j]/mx*100)}%"></i></div>`).join("");}
+const M6={m0:"처음 AI (모든 칸)",mA:"모자 색만 지움",mB:"마을 칸도 지움"};
+function board6(cur){$("board6").innerHTML=["m0","mA","mB"].map(k=>{const r=st6.res[k];return `<div class="bcol ${k===cur?"cur":""}"><b class="t">${M6[k]}</b>${r?`<div class="bb r"><span>${r[0]}%</span><i style="width:${Math.max(2,r[0])}%"></i></div><div class="bb b"><span>${r[1]}%</span><i style="width:${Math.max(2,r[1])}%"></i></div><span class="gap">${r[0]===r[1]?"차이 <b>없음</b>":`차이 <b>${Math.abs(r[0]-r[1])}</b>만큼`}</span>`:`<span class="gap">아직 안 해 봤어요</span>`}</div>`;}).join("");}
+async function run6(){const tok=++runTok,alive=()=>tok===runTok;st6=setup6();const R=st6.recs;
+  $("recs6").innerHTML=R.map(card6).join("");
+  const up=red=>R.filter(r=>r.red===red&&r.v).length;
+  $("vtab6").innerHTML=`<div style="background:var(--red-bg)">빨간 모자 20명 중 <b>윗마을 ${up(1)}명</b>, 아랫마을 ${20-up(1)}명</div><div style="background:var(--blue-bg)">파란 모자 20명 중 <b>윗마을 ${up(0)}명</b>, 아랫마을 ${20-up(0)}명</div>`;
+  st6.res.m0=rates6(st6.m0,st6.N);board6();
+  ["run6a","out6a","why6Box","ans6Text","run6b","out6b","fin6"].forEach(i=>$(i).hidden=true);$("res6a").hidden=true;$("res6b").hidden=true;$("my6").value="";$("go6b").disabled=false;
+  const pick=await choose($("pred6"),"no");if(!alive())return;
+  $("run6a").hidden=false;$("study6Msg").textContent="모자 색 칸을 지운 기록 40개로 AI가 다시 공부하는 중…";await study($("study6Bar"),1200);if(!alive())return;$("study6Msg").textContent="공부를 마쳤어요.";
+  $("bars6").innerHTML=bars6(st6.mA);$("stageC").innerHTML=stageHTML("C",true);$("out6a").hidden=false;
+  const sub=x=>` · ${VIL(x.v)}`;
+  const sp=await runStage("C",st6.mA,tok,{auto:true,fast:true,people:st6.N,j:x=>judge6(st6.mA,x),sub});if(!alive()||sp<0)return;
+  const r=st6.res.mA=rates6(st6.mA,st6.N);board6("mA");
+  $("res6a").textContent=`내 예상: ${pick==="yes"?"편견이 사라짐":"편견이 남음"} → 실제: 편견이 남았어요. `+(pick==="no"?"예상이 맞았어요! ":"예상이 빗나갔어요. ")+`모자 색을 지웠는데도 빨간 모자 합격률 ${r[0]}%, 파란 모자 ${r[1]}%예요.`+(()=>{const g0=Math.abs(st6.res.m0[0]-st6.res.m0[1]),g=Math.abs(r[0]-r[1]);return g<g0?` 처음(차이 ${g0}만큼)보다 줄긴 했지만 아직 ${g}만큼 차이가 나요.`:"";})()+` 생각 노트에서 '사는 마을' 막대를 보세요.`;$("res6a").hidden=false;$("why6Box").hidden=false;$("run6b").hidden=false;}
+$("ans6").onclick=()=>{$("ans6Text").hidden=false;};
+$("go6b").onclick=async()=>{const tok=++runTok,alive=()=>tok===runTok;$("go6b").disabled=true;
+  $("bars6b").innerHTML=bars6(st6.mB);$("stageD").innerHTML=stageHTML("D",true);$("out6b").hidden=false;
+  const sp=await runStage("D",st6.mB,tok,{auto:true,fast:true,people:st6.N,j:x=>judge6(st6.mB,x),sub:x=>` · ${VIL(x.v)}`});if(!alive()||sp<0)return;
+  const r=st6.res.mB=rates6(st6.mB,st6.N);board6("mB");
+  $("res6b").textContent=`마을 칸까지 지우니 빨간 모자 합격률 ${r[0]}%, 파란 모자 ${r[1]}%가 되었어요. 이제 AI는 시험 점수만 보고 판단해요.`;$("res6b").hidden=false;$("fin6").hidden=false;};
+$("go6").onclick=()=>{show(6);if(!st6)run6();};
+$("back6").onclick=()=>show(5);
+
 /* 처음부터 */
 let resetArm=0;
 $("reset").onclick=()=>{
   if(Date.now()-resetArm>4000){resetArm=Date.now();$("reset").textContent="정말 처음부터 할까요? 한 번 더 누르세요";setTimeout(()=>{$("reset").textContent="처음부터 다시";},4000);return;}
   resetArm=0;$("reset").textContent="처음부터 다시";resetAll();};
-function resetAll(){runTok++;learnTok++;done.clear();thoughts={};curM="";$("my3").value="";$("my4").value="";tried.clear();results={};model=null;busy=false;$("m4").hidden=true;["pred3p","pred4","q2"].forEach(i=>$(i).onclick=null);
+function resetAll(){runTok++;st6=null;learnTok++;done.clear();thoughts={};curM="";$("my3").value="";$("my4").value="";tried.clear();results={};model=null;busy=false;$("m4").hidden=true;["pred3p","pred4","q2"].forEach(i=>$(i).onclick=null);
   $("methods").querySelectorAll(".method").forEach(x=>{x.setAttribute("aria-pressed","false");x.classList.remove("tried");});$("next4").disabled=true;$("hint4").textContent="세 가지 방법을 모두 해 보면 마무리할 수 있어요.";init1();show(1);}
 
 /* 선생님 바로가기: 학생용 주소(github.io)에서는 ?teacher 를 붙였을 때만 보여요 */
@@ -595,7 +687,7 @@ $("tbar").onclick=async e=>{const b=e.target.closest("button");if(!b)return;cons
     prep2();await learn();show(3);if(j==="3"){instant=false;await run3();return;}
     await run3();drawBoard();show(4);if(j==="4")return;
     for(const m of ["more","blind","fair"]){await $("methods").onclick({target:$("methods").querySelector(`[data-m="${m}"]`)});}
-    goFinal();}finally{instant=false;}};
+    goFinal();if(j==="6"){instant=false;$("go6").click();}}finally{instant=false;}};
 init1();
 /* 수업 중 실수로 새로 고침하거나 나가지 않도록 */
 let touched=false;document.addEventListener("pointerdown",()=>{touched=true;},{once:true,capture:true});
