@@ -93,6 +93,8 @@ h1{font-family:var(--display);font-weight:700;font-size:2.1rem;line-height:1.1;m
 .code span.cur{background:var(--accent);color:var(--paper)!important;border-radius:3px}
 .guess{display:grid;grid-template-columns:minmax(0,320px) minmax(0,1fr);gap:18px;align-items:start}
 @media (max-width:620px){.guess{grid-template-columns:1fr}}
+.mobonly{display:none}
+@media (max-width:620px){.mobonly{display:inline}#code2box{display:none;margin-top:6px}#code2box.open{display:block}.guess canvas{max-width:260px;margin:0 auto;display:block}}
 .guess canvas{width:100%;aspect-ratio:1;border-radius:10px;border:1px solid var(--line);image-rendering:pixelated}
 .res{font-family:var(--display);font-size:1.6rem;line-height:1.1}
 .choices{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -163,7 +165,7 @@ html,body{overscroll-behavior-y:contain}
         <div class="palette" id="pal2" role="group" aria-label="색 고르기"></div>
         <div class="split">
           <div><p class="rowcode" id="row2">칸을 칠하면 그 줄의 숫자가 여기에 나와요.</p><div class="grid g16 color" id="g2" style="grid-template-columns:repeat(16,1fr)"></div></div>
-          <div class="codebox"><p>내 그림의 숫자 (칸 256개)</p><pre class="code small" id="code2"></pre></div>
+          <div><button class="link mobonly" id="code2tog">숫자 256개 모두 보기</button><div class="codebox" id="code2box"><p>내 그림의 숫자 (칸 256개)</p><pre class="code small" id="code2"></pre></div></div>
         </div>
         <div class="field">
           <label for="title2">내 그림의 제목</label>
@@ -341,6 +343,7 @@ $("done2").onclick=()=>{
   show(3);
 };
 $("back3").onclick=()=>show(2);
+$("code2tog").onclick=()=>{const o=$("code2box").classList.toggle("open");$("code2tog").textContent=o?"숫자 접기":"숫자 256개 모두 보기";};
 function goFinal(from4){$("back5").textContent=from4?"4단계로 돌아가기":"4단계 하기 (선택)";$("finTopic").textContent="주제: "+topic;$("finTitle").textContent=$("title2").value.trim();drawCanvas($("cvFin"),s2,16);show(5);};
 $("finish3").onclick=()=>{done.add(3);goFinal();};
 $("finish4").onclick=()=>{if(animating)return;goFinal(true);};

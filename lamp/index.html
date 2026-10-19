@@ -61,6 +61,7 @@ h1{font-family:var(--display);font-weight:700;font-size:2.1rem;line-height:1.1;m
 .bubble{position:absolute;top:4%;max-width:min(260px,46%);background:#fffdf6;color:#2f3a2c;border:1.5px solid #6c7462;border-radius:12px;padding:6px 10px;font-size:.85rem;line-height:1.4;word-break:keep-all;pointer-events:none}
 .bubble::after{content:"";position:absolute;left:18px;bottom:-9px;border:8px solid transparent;border-top-color:#6c7462;border-bottom:0}
 .bubble{visibility:hidden}.bubble.on{visibility:visible}
+@media (max-width:480px){.bubble{display:none}.bubble.on{display:block}}
 @media (max-width:480px){.bubble{position:static;max-width:none;margin-top:6px;font-size:.8rem}.bubble::after{display:none}.bubble::before{content:"가로등 켜는 사람: ";font-weight:700}}
 .scene{width:100%;height:auto;border-radius:12px;border:1px solid var(--line);display:block}
 .parts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
@@ -80,6 +81,8 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .meter b{font-family:var(--display);font-size:1.5rem;line-height:1.1;font-variant-numeric:tabular-nums}
 .meter b.bad{color:var(--bad)} .meter b.ok{color:var(--ok)}
 .scores{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+@media (max-width:620px){.scores{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:6px}.sc{padding:6px 8px}.sc span{font-size:.72rem;line-height:1.3}.sc b{font-size:1.3rem}.scores .sc i{display:none}.scores .sc i#s3cState{display:block;font-size:.68rem;line-height:1.3}.scores .sc span{font-size:.72rem;line-height:1.3}.scores .sc b{font-size:1.3rem}
+  .opts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}.opt{font-size:.82rem;padding:8px 6px;text-align:center;word-break:keep-all}}
 .sc{border:1.5px solid var(--line);border-radius:10px;padding:8px 12px;background:var(--bg)}
 .sc span{display:block;font-size:.85rem}
 .sc b{font-family:var(--display);font-size:1.7rem;line-height:1.1;font-variant-numeric:tabular-nums}
@@ -363,9 +366,10 @@ const SENS={light:["빛 센서 값 (밝기)","밝기가 <b id=\"thrOut\"></b>보
 function setRule(){if(sensor){$("ruleText").innerHTML=SENS[sensor][1];$("m1Label").textContent=SENS[sensor][0];}$("thrOut").textContent=thr;}
 $("sensors").onclick=e=>{const b=e.target.closest(".opt");if(!b||(W&&W.running))return;sensor=b.dataset.s;$("sensors").querySelectorAll(".opt").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));setRule();$("toast1").textContent="";};
 $("thr").oninput=()=>{thr=+$("thr").value;setRule();};
+const seeIt=el=>{const r=el.getBoundingClientRect();if(r.top<0||r.bottom>innerHeight)el.scrollIntoView({block:"center",behavior:reduce?"auto":"smooth"});};
 $("run1").onclick=()=>{
   if(!sensor){$("toast1").className="toast bad";$("toast1").textContent="먼저 감지 장치를 골라 주세요.";return;}
-  startWorld(1);W.running=true;W.mul=1;$("run1").disabled=true;$("thr").disabled=true;$("fast1").disabled=false;$("fast1").textContent="빠르게 (2배)";$("toast1").className="toast";$("toast1").textContent="사흘 동안 작동하는 중이에요. 가로등이 제때 켜지는지 지켜보세요.";
+  startWorld(1);W.running=true;seeIt($("sc1").parentNode.querySelector(".meters")||$("sc1"));W.mul=1;$("run1").disabled=true;$("thr").disabled=true;$("fast1").disabled=false;$("fast1").textContent="빠르게 (2배)";$("toast1").className="toast";$("toast1").textContent="사흘 동안 작동하는 중이에요. 가로등이 제때 켜지는지 지켜보세요.";
 };
 function finish1(){
   $("thr").disabled=false;$("fast1").disabled=true;

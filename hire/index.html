@@ -445,6 +445,8 @@ function show(n){
   window.scrollTo({top:0,behavior:reduce?"auto":"smooth"});
 }
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const seeIt=el=>{if(typeof instant!=="undefined"&&instant)return;const r=el.getBoundingClientRect();if(r.top<0||r.bottom>innerHeight)el.scrollIntoView({block:r.height>innerHeight*.8?"start":"center",behavior:reduce?"auto":"smooth"});};
+
 const rnd=n=>1+Math.floor(Math.random()*n);
 /* 예전 면접관: 빨간 모자는 실력 합계 6점 이상, 파란 모자는 9점 이상이면 합격 */
 const biasedOk=(s,h,red)=>(s+h)>=(red?6:9)?1:0;
@@ -471,7 +473,7 @@ $("sort1").onclick=()=>{
   if(!picked.length){$("err1").className="toast bad";$("err1").textContent="먼저 내 생각을 하나 이상 골라 주세요.";return;}
   let h="";for(let t=10;t>=2;t--){const g=recs.filter(r=>r.s+r.h===t);if(!g.length)continue;const mixed=g.some(r=>r.ok)&&g.some(r=>!r.ok);
     h+=`<div class="line ${mixed?"mixed":""}" data-t="${t}"><span>${t}점</span><div class="cards">${g.sort((x,y)=>y.ok-x.ok).map(card).join("")}</div></div>`;}
-  $("lines").innerHTML=h;$("recs").hidden=true;$("sortBox").hidden=false;$("sort1").disabled=true;$("guess").querySelectorAll(".chk").forEach(x=>x.disabled=true);
+  $("lines").innerHTML=h;$("recs").hidden=true;$("sortBox").hidden=false;seeIt($("sortBox"));$("sort1").disabled=true;$("guess").querySelectorAll(".chk").forEach(x=>x.disabled=true);
 };
 $("why").onclick=e=>{const b=e.target.closest(".chk");if(!b||b.disabled)return;const w=b.dataset.w,m=$("whyMsg");
   if(w==="c"){revealHat(true);return;}
@@ -486,7 +488,7 @@ function revealHat(byKid){
   $("rateR").textContent=rate(R)+"%";$("rateB").textContent=rate(B)+"%";
   const mid=a=>a.filter(r=>r.s+r.h>=6&&r.s+r.h<=8),mR=mid(R),mB=mid(B);
   $("find1").innerHTML=(byKid?"맞아요! ":"")+`예전 면접관은 시험 점수도 봤지만, 빨간 모자에게 훨씬 너그러웠어요. 점수 합계가 6~8점으로 비슷한 지원자 중 <b>빨간 모자는 ${mR.length}명 중 ${mR.filter(r=>r.ok).length}명</b>이 합격했지만, ${(n=>n?`<b>파란 모자는 ${mB.length}명 중 ${n}명</b>만 합격했어요.`:`<b>파란 모자는 ${mB.length}명 중 한 명도</b> 합격하지 못했어요.`)(mB.filter(r=>r.ok).length)}`;
-  $("sortBox").hidden=true;$("splitBox").hidden=false;done.add(1);
+  $("sortBox").hidden=true;$("splitBox").hidden=false;done.add(1);seeIt($("splitBox"));
 }
 $("next1").onclick=()=>{show(2);run2();};
 
@@ -571,7 +573,7 @@ async function run3(){const tok=++runTok,alive=()=>tok===runTok;
   $("pair3p").innerHTML=pairCards(a,b);
   const ms=$("predMsg3");ms.className="toast "+(pick===real?"ok":"bad");ms.textContent=(pick===real?"예상이 맞았어요! ":`예상은 '${KIND[pick]}'이었는데, `)+`AI는 '${KIND[real]}'으로 심사했어요. 점수가 똑같은데 왜 그럴까요? 다른 지원자들도 살펴봐요.`;
   results.base={r:ratesOf(model),p:[a,b]};
-  $("stageA").innerHTML=stageHTML("A");$("judge3Box").hidden=false;
+  $("stageA").innerHTML=stageHTML("A");$("judge3Box").hidden=false;seeIt($("stageA"));
   const split=await runStage("A",model,tok,{auto:instant});if(!alive()||split<0)return;
   $("rates3").innerHTML=ratesHTML(results.base.r);$("rates3").hidden=false;$("why3aBox").hidden=false;$("next3").hidden=false;done.add(3);}
 const WHY0="AI는 누가 정말 정원 일을 잘하는지 배운 게 아니라, 예전 면접관이 누구를 뽑았는지를 배웠어요. 그래서 메아리처럼 예전 면접관의 편견을 그대로 따라 했어요.";
@@ -604,13 +606,13 @@ async function showData(m,data,tok){const alive=()=>tok===runTok;const box=$("mi
 let busy=false;
 $("methods").onclick=async e=>{const b=e.target.closest(".method");if(!b)return;const tok=++runTok,alive=()=>tok===runTok;busy=true;const m=b.dataset.m;
   $("methods").querySelectorAll(".method").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));
-  $("m4").hidden=false;$("data4Box").hidden=true;$("study4Box").hidden=true;$("out4").hidden=true;curM="";$("predRes4").hidden=true;$("why4Box").hidden=true;
+  $("m4").hidden=false;seeIt($("m4"));$("data4Box").hidden=true;$("study4Box").hidden=true;$("out4").hidden=true;curM="";$("predRes4").hidden=true;$("why4Box").hidden=true;
   $("pred4Q").textContent=`'${MNAME[m]}'로 AI의 편견이 줄어들까요? 먼저 예상해 보세요.`;
   const pick=await choose($("pred4"),m==="more"?"no":"yes");if(!alive())return;
   const data=m==="more"?recs.concat(makeRecords(80,false)):m==="fair"?recs.map(r=>({...r,ok:fairOk(r.s,r.h)})):recs;
   await showData(m,data,tok);if(!alive())return;
   $("study4Box").hidden=false;$("study4Msg").textContent=`AI가 바뀐 기록 ${data.length}개를 다시 공부하는 중…`;await study($("study4Bar"),1200);if(!alive())return;$("study4Msg").textContent="공부를 마쳤어요.";
-  const mdl=train(data,m==="blind");$("bars4").innerHTML=barsHTML(mdl);$("stageB").innerHTML=stageHTML("B",true);$("out4").hidden=false;
+  const mdl=train(data,m==="blind");$("bars4").innerHTML=barsHTML(mdl);$("stageB").innerHTML=stageHTML("B",true);$("out4").hidden=false;seeIt($("stageB"));
   const split=await runStage("B",mdl,tok,{auto:true,fast:true});if(!alive()||split<0)return;
   const r=ratesOf(mdl),gap=Math.abs(r[0]-r[1]),worked=split===0&&gap<=10;
   results[m]={r,p:[judge(mdl,4,4,1),judge(mdl,4,4,0)]};drawBoard(m);
@@ -655,7 +657,7 @@ async function run6(){const tok=++runTok,alive=()=>tok===runTok;st6=setup6();con
   st6.res.m0=rates6(st6.m0,st6.N);board6();
   ["run6a","out6a","why6Box","ans6Text","run6b","out6b","fin6"].forEach(i=>$(i).hidden=true);$("res6a").hidden=true;$("res6b").hidden=true;$("my6").value="";$("go6b").disabled=false;
   const pick=await choose($("pred6"),"no");if(!alive())return;
-  $("run6a").hidden=false;$("study6Msg").textContent="모자 색 칸을 지운 기록 40개로 AI가 다시 공부하는 중…";await study($("study6Bar"),1200);if(!alive())return;$("study6Msg").textContent="공부를 마쳤어요.";
+  $("run6a").hidden=false;seeIt($("run6a"));$("study6Msg").textContent="모자 색 칸을 지운 기록 40개로 AI가 다시 공부하는 중…";await study($("study6Bar"),1200);if(!alive())return;$("study6Msg").textContent="공부를 마쳤어요.";
   $("bars6").innerHTML=bars6(st6.mA);$("stageC").innerHTML=stageHTML("C",true);$("out6a").hidden=false;
   const sub=x=>` · ${VIL(x.v)}`;
   const sp=await runStage("C",st6.mA,tok,{auto:true,fast:true,people:st6.N,j:x=>judge6(st6.mA,x),sub});if(!alive()||sp<0)return;
@@ -663,7 +665,7 @@ async function run6(){const tok=++runTok,alive=()=>tok===runTok;st6=setup6();con
   $("res6a").textContent=`내 예상: ${pick==="yes"?"편견이 사라짐":"편견이 남음"} → 실제: 편견이 남았어요. `+(pick==="no"?"예상이 맞았어요! ":"예상이 빗나갔어요. ")+`모자 색을 지웠는데도 빨간 모자 합격률 ${r[0]}%, 파란 모자 ${r[1]}%예요.`+(()=>{const g0=Math.abs(st6.res.m0[0]-st6.res.m0[1]),g=Math.abs(r[0]-r[1]);return g<g0?` 처음(차이 ${g0}만큼)보다 줄긴 했지만 아직 ${g}만큼 차이가 나요.`:"";})()+` 생각 노트에서 '사는 마을' 막대를 보세요.`;$("res6a").hidden=false;$("why6Box").hidden=false;$("run6b").hidden=false;}
 $("ans6").onclick=()=>{$("ans6Text").hidden=false;};
 $("go6b").onclick=async()=>{const tok=++runTok,alive=()=>tok===runTok;$("go6b").disabled=true;
-  $("bars6b").innerHTML=bars6(st6.mB);$("stageD").innerHTML=stageHTML("D",true);$("out6b").hidden=false;
+  $("bars6b").innerHTML=bars6(st6.mB);$("stageD").innerHTML=stageHTML("D",true);$("out6b").hidden=false;seeIt($("stageD"));
   const sp=await runStage("D",st6.mB,tok,{auto:true,fast:true,people:st6.N,j:x=>judge6(st6.mB,x),sub:x=>` · ${VIL(x.v)}`});if(!alive()||sp<0)return;
   const r=st6.res.mB=rates6(st6.mB,st6.N);board6("mB");
   $("res6b").textContent=`마을 칸까지 지우니 빨간 모자 합격률 ${r[0]}%, 파란 모자 ${r[1]}%가 되었어요. 이제 AI는 시험 점수만 보고 판단해요.`;$("res6b").hidden=false;$("fin6").hidden=false;};
