@@ -98,23 +98,25 @@ html,body{overscroll-behavior-y:contain}
 .real .ico{font-family:var(--display);font-size:1rem;line-height:1.1;padding:6px 8px;border-radius:8px;background:#b8860b;color:#fff;text-align:center;word-break:keep-all;width:62px}
 .real p{margin:0;font-size:.95rem;line-height:1.55}
 .real b{font-weight:700}
+.deck{display:flex;flex-direction:column;align-items:center;gap:6px}
+.deck .cnt{font-size:.85rem;color:var(--muted)}
+#curCard{width:100%;display:flex;justify-content:center;min-height:84px}
 .prin{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-@media (max-width:620px){.prin{grid-template-columns:1fr}}
-.pbox{border:2px dashed var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:6px;min-height:120px;background:var(--bg);cursor:pointer}
-.pbox.armed{border-color:var(--accent);background:var(--accent-bg)}
-.pbox h4{margin:0;font-family:var(--display);font-size:1.25rem;line-height:1.1}
-.pbox>p{margin:0;font-size:.8rem;color:var(--muted);line-height:1.35}
-.rcards{display:flex;flex-wrap:wrap;gap:8px}
-.rc{touch-action:none;user-select:none;-webkit-user-select:none;font:inherit;font-size:.9rem;padding:8px 10px;border-radius:10px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;text-align:left;line-height:1.3;display:grid;grid-template-columns:52px 1fr;gap:8px;align-items:center;max-width:330px}
-.rc svg{width:52px;height:40px;border-radius:6px;background:#ead9b0}
-.rc.sel{border-color:var(--accent);outline:3px solid var(--accent);outline-offset:1px}
-.rc small{display:block;font-size:.76rem;color:var(--muted);margin-top:2px}
-.rc i{font-style:normal;font-size:.72rem;color:var(--ok);display:block}
+.pbox{font:inherit;color:var(--ink);text-align:left;border:2px dashed var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:6px;min-height:120px;background:var(--bg);cursor:pointer}
+.pbox h4{margin:0;font-family:var(--display);font-size:1.25rem;line-height:1.1;word-break:keep-all}
+.pbox>p{margin:0;font-size:.8rem;color:var(--muted);line-height:1.35;word-break:keep-all}
+.pbox .add{font-size:.78rem;color:var(--accent);margin-top:auto}
+@media (max-width:620px){.pbox{padding:8px 6px;min-height:104px}.pbox h4{font-size:1.02rem}.pbox>p{font-size:.7rem}}
+.chips{display:flex;flex-wrap:wrap;gap:4px}
+.chip{font:inherit;font-size:.76rem;line-height:1.25;padding:4px 7px;border-radius:8px;border:1.5px solid var(--accent);background:var(--paper);color:var(--ink);cursor:pointer;text-align:left;word-break:keep-all}
+.rc{font:inherit;font-size:.95rem;padding:10px 12px;border-radius:12px;border:2px solid var(--accent);background:var(--paper);color:var(--ink);text-align:left;line-height:1.35;display:grid;grid-template-columns:72px 1fr;gap:10px;align-items:center;width:100%;max-width:520px;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;box-shadow:0 2px 0 var(--line)}
+.rc svg{width:72px;height:54px;border-radius:8px;background:#ead9b0}
+.rc b{font-family:var(--display);font-size:1.2rem;display:block;line-height:1.2}
+.rc small{display:block;font-size:.8rem;color:var(--muted);margin-top:2px}
+.rc i{font-style:normal;font-size:.74rem;color:var(--ok);display:block}
 .rc.dragging{opacity:.3}
 .ghost{position:fixed;z-index:50;pointer-events:none;transform:rotate(-2deg) scale(1.03);box-shadow:0 8px 20px rgba(0,0,0,.25);margin:0}
 .pbox.over{border-style:solid;border-color:var(--accent);background:var(--accent-bg)}
-#rcards.over{outline:2px dashed var(--accent);outline-offset:4px;border-radius:10px}
-#rcards{min-height:56px}
 .extra{border:2px dashed var(--accent);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
 .extra p{margin:0}
 .part{border:1.5px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;background:var(--bg)}
@@ -212,12 +214,12 @@ html,body{overscroll-behavior-y:contain}
   <!-- 4단계 -->
   <section class="card" id="step4" hidden>
     <h2>우리가 그린 입마개, 어느 원칙일까?</h2>
-    <p class="note">양 로봇에게 그려 준 입마개와 울타리는 진짜 AI에게도 필요해요. 카드마다 그 규칙이 지켜 준 장면과, 진짜 AI의 비슷한 규칙이 적혀 있어요. 카드를 끌어서 알맞은 원칙 칸에 놓으세요. 칸에 넣은 카드도 다른 칸으로 옮기거나, 위쪽으로 끌어 빼낼 수 있어요.</p>
-    <div class="rcards" id="rcards"></div>
+    <p class="note">양 로봇에게 그려 준 입마개와 울타리는 진짜 AI에게도 필요해요. 카드마다 그 규칙이 지켜 준 장면과, 진짜 AI의 비슷한 규칙이 적혀 있어요. 카드를 한 장씩 알맞은 원칙 칸으로 끌어다 놓거나, 칸을 누르세요. 칸에 넣은 이름표를 누르면 다시 꺼낼 수 있어요.</p>
+    <div class="deck"><span class="cnt" id="deckCnt"></span><div id="curCard"></div></div>
     <div class="prin" id="prin">
-      <div class="pbox" data-k="h"><h4>인간 존엄성</h4><p>사람과 생명, 소중한 것을 해치지 않아요.</p><div class="rcards"></div></div>
-      <div class="pbox" data-k="p"><h4>사회의 공공선</h4><p>몇 사람이 아니라 모두에게, 별 전체에 이로워야 해요.</p><div class="rcards"></div></div>
-      <div class="pbox" data-k="t"><h4>기술의 합목적성</h4><p>정해진 목적에 맞게, 사람이 살피며 써야 해요.</p><div class="rcards"></div></div>
+      <div class="pbox" data-k="h" role="button" tabindex="0"><h4>인간 존엄성</h4><p>사람과 생명, 소중한 것을 해치지 않아요.</p><div class="chips"></div><span class="add">여기에 넣기</span></div>
+      <div class="pbox" data-k="p" role="button" tabindex="0"><h4>사회의 공공선</h4><p>모두에게, 별 전체에 이로워야 해요.</p><div class="chips"></div><span class="add">여기에 넣기</span></div>
+      <div class="pbox" data-k="t" role="button" tabindex="0"><h4>기술의 합목적성</h4><p>목적에 맞게, 사람이 살피며 써야 해요.</p><div class="chips"></div><span class="add">여기에 넣기</span></div>
     </div>
     <div id="fin4" hidden style="display:flex;flex-direction:column;gap:12px">
       <p class="echo">짝의 분류와 비교해 보세요. 다르게 넣은 카드가 있다면, 왜 그 칸에 넣었는지 서로 설명해 봐요. 한 카드가 여러 원칙에 걸칠 수도 있어요.</p>
@@ -606,28 +608,30 @@ const RC=[["cmd","바오밥 싹을 먹어 별을 지켜라","진짜 AI: 산불�
   ["thorn","가시가 있으면 먹지 마라","진짜 AI: 위험한 물건은 건드리지 않는 로봇 팔",th(gSheep(-12,4,1),gRose(18,0))],
   ["fence","장미에 울타리","진짜 AI: 어린이 보호 구역에는 들어가지 않는 배달 로봇",th(gFence(14,2),gRose(14,0))],
   ["ask","헷갈리면 나에게 물어봐","진짜 AI: 진단 AI의 결과를 의사가 확인하기",th(gSheep(-14,4,0),gPrince(18,4))]];
-let place={},selRC=null;
-function buildCards(){place={};selRC=null;renderCards();}
-function renderCards(){const card=([k,t,real,pic])=>`<button class="rc ${selRC===k?"sel":""}" data-r="${k}">${pic}<span>${t}<small>${real}</small>${used.has(k)?"<i>내가 쓴 규칙</i>":""}</span></button>`;
-  $("rcards").innerHTML=RC.filter(([k])=>!place[k]).map(card).join("")||`<p class="note">모든 카드를 칸에 넣었어요.</p>`;
-  document.querySelectorAll("#prin .pbox").forEach(bx=>{bx.querySelector(".rcards").innerHTML=RC.filter(([k])=>place[k]===bx.dataset.k).map(card).join("");bx.classList.toggle("armed",!!selRC);});
-  const all=RC.every(([k])=>place[k]);$("fin4").hidden=!all;if(all)done.add(4);}
-/* 끌어다 놓기 (터치와 마우스 모두) */
+let place={},queue=[];
+function buildCards(){place={};queue=RC.map(r=>r[0]);renderCards();}
+function renderCards(){queue=queue.filter(k=>!place[k]);RC.forEach(([k])=>{if(!place[k]&&!queue.includes(k))queue.push(k);});
+  const R=k=>RC.find(r=>r[0]===k),n=RC.filter(([k])=>place[k]).length;
+  if(queue.length){const [k,t,real,pic]=R(queue[0]);$("curCard").innerHTML=`<div class="rc" data-r="${k}">${pic}<span><b>${t}</b><small>${real}</small>${used.has(k)?"<i>내가 쓴 규칙</i>":""}</span></div>`;$("deckCnt").textContent=`${n+1} / ${RC.length}번째 카드`;}
+  else{$("curCard").innerHTML=`<p class="note">모든 카드를 칸에 넣었어요.</p>`;$("deckCnt").textContent="";}
+  document.querySelectorAll("#prin .pbox").forEach(bx=>{bx.querySelector(".chips").innerHTML=RC.filter(([k])=>place[k]===bx.dataset.k).map(([k,t])=>`<button class="chip" data-r="${k}">${t}</button>`).join("");bx.querySelector(".add").hidden=!queue.length;});
+  const all=!queue.length;$("fin4").hidden=!all;if(all)done.add(4);}
+function putCur(box){if(!queue.length)return;place[queue[0]]=box;renderCards();}
+/* 끌어다 놓기: 위쪽 카드 한 장만 끌 수 있어요 */
 let drag=null,justDragged=false;
-function dropTarget(x,y){const el=document.elementFromPoint(x,y);if(!el)return null;return el.closest("#prin .pbox")||el.closest("#rcards");}
-$("step4").addEventListener("pointerdown",e=>{const c=e.target.closest(".rc");if(!c)return;drag={k:c.dataset.r,el:c,x:e.clientX,y:e.clientY,on:false,id:e.pointerId};});
+function dropTarget(x,y){const el=document.elementFromPoint(x,y);return el?el.closest("#prin .pbox"):null;}
+$("curCard").addEventListener("pointerdown",e=>{const c=e.target.closest(".rc");if(!c)return;drag={el:c,x:e.clientX,y:e.clientY,on:false,id:e.pointerId};});
 window.addEventListener("pointermove",e=>{if(!drag||e.pointerId!==drag.id)return;
   if(!drag.on){if(Math.hypot(e.clientX-drag.x,e.clientY-drag.y)<8)return;drag.on=true;const r=drag.el.getBoundingClientRect();
-    drag.dx=drag.x-r.left;drag.dy=drag.y-r.top;drag.g=drag.el.cloneNode(true);drag.g.classList.add("ghost");drag.g.style.width=r.width+"px";document.body.appendChild(drag.g);drag.el.classList.add("dragging");selRC=null;}
+    drag.dx=drag.x-r.left;drag.dy=drag.y-r.top;drag.g=drag.el.cloneNode(true);drag.g.classList.add("ghost");drag.g.style.width=r.width+"px";document.body.appendChild(drag.g);drag.el.classList.add("dragging");}
   e.preventDefault();drag.g.style.left=(e.clientX-drag.dx)+"px";drag.g.style.top=(e.clientY-drag.dy)+"px";
-  const t=dropTarget(e.clientX,e.clientY);document.querySelectorAll("#prin .pbox,#rcards").forEach(b=>b.classList.toggle("over",b===t));},{passive:false});
+  const t=dropTarget(e.clientX,e.clientY);document.querySelectorAll("#prin .pbox").forEach(b=>b.classList.toggle("over",b===t));},{passive:false});
 function endDrag(e){if(!drag||e.pointerId!==drag.id)return;const d=drag;drag=null;if(!d.on)return;
   const t=dropTarget(e.clientX,e.clientY);d.g.remove();document.querySelectorAll(".over").forEach(b=>b.classList.remove("over"));
-  if(t&&t.classList.contains("pbox"))place[d.k]=t.dataset.k;else if(t&&t.id==="rcards")delete place[d.k];
-  justDragged=true;setTimeout(()=>{justDragged=false;},50);renderCards();}
+  justDragged=true;setTimeout(()=>{justDragged=false;},50);if(t)putCur(t.dataset.k);else renderCards();}
 window.addEventListener("pointerup",endDrag);window.addEventListener("pointercancel",e=>{if(drag&&drag.on){drag.g.remove();document.querySelectorAll(".over").forEach(b=>b.classList.remove("over"));renderCards();}drag=null;});
-$("step4").addEventListener("click",e=>{if(justDragged)return;const c=e.target.closest(".rc");if(c){const k=c.dataset.r;if(place[k]){delete place[k];selRC=null;}else selRC=selRC===k?null:k;renderCards();return;}
-  const bx=e.target.closest(".pbox");if(bx&&selRC){place[selRC]=bx.dataset.k;selRC=null;renderCards();}});
+$("prin").addEventListener("click",e=>{if(justDragged)return;const ch=e.target.closest(".chip");if(ch){const k=ch.dataset.r;delete place[k];queue.unshift(k);renderCards();return;}
+  const bx=e.target.closest(".pbox");if(bx)putCur(bx.dataset.k);});
 $("sample4").onclick=()=>{$("sample4Text").hidden=!$("sample4Text").hidden;};
 
 /* 더 해 보기: 잘못된 명령 */
@@ -646,7 +650,7 @@ function afterX(s){const fenced=set.fence.has(key(ROSE[0],ROSE[1])),m=$("xMsg");
 let resetArm=0;
 $("reset").onclick=()=>{if(Date.now()-resetArm>4000){resetArm=Date.now();$("reset").textContent="정말 처음부터 할까요? 한 번 더 누르세요";setTimeout(()=>{$("reset").textContent="처음부터 다시";},4000);return;}
   resetArm=0;$("reset").textContent="처음부터 다시";resetAll();};
-function resetAll(){stopRun();done.clear();runs1.clear();runs2.clear();lastConf=null;asked3=false;q3done=false;used.clear();place={};selRC=null;for(const k in firstDay)delete firstDay[k];
+function resetAll(){stopRun();done.clear();runs1.clear();runs2.clear();lastConf=null;asked3=false;q3done=false;used.clear();place={};queue=[];for(const k in firstDay)delete firstDay[k];
   Object.assign(set,{cmd:"",ask:false,override:false,abs:false});set.muz.clear();set.fence.clear();
   ["talk1","talk2","q3Box","q3Msg","fin4","sample4Text","real1","real2","real3"].forEach(i=>$(i).hidden=true);$("q3").querySelectorAll(".chk").forEach(x=>x.classList.remove("picked"));
   $("next1").disabled=$("next2").disabled=$("next3").disabled=true;$("hint2").textContent="하루를 두 번 이상 보내 보면 다음으로 갈 수 있어요.";$("hint3").textContent="'헷갈리면 나에게 물어봐'를 켜고 하루를 보내 보세요.";
