@@ -308,6 +308,7 @@ const FMAX=4;
 let items=[],sheep={r:START[0],c:START[1]},P={x:HOME.x,y:HOME.y,mode:"idle",sad:false},cloud=null,pb=null,phase="day",dayOver=false,stats=null,trees=[];
 
 function reach(){const seen=new Set([key(START[0],START[1])]),q=[START];while(q.length){const [r,c]=q.shift();for(const [dr,dc] of [[0,1],[1,0],[0,-1],[-1,0]]){const nr=r+dr,nc=c+dc,k=key(nr,nc);if(!seen.has(k)&&nr>=0&&nc>=0&&nr<N&&nc<N&&inside(nr,nc)&&!isVolc(nr,nc)){seen.add(k);q.push([nr,nc]);}}}return seen;}
+function reachFenced(){const seen=new Set([key(START[0],START[1])]),q=[START];while(q.length){const [r,c]=q.shift();for(const [dr,dc] of [[0,1],[1,0],[0,-1],[-1,0]]){const nr=r+dr,nc=c+dc,k=key(nr,nc);if(!seen.has(k)&&nr>=0&&nc>=0&&nr<N&&nc<N&&inside(nr,nc)&&!isVolc(nr,nc)&&!set.fence.has(k)){seen.add(k);q.push([nr,nc]);}}}return seen.size;}
 function freeCells(){const a=[],R=reach();for(let r=0;r<N;r++)for(let c=0;c<N;c++){const k=key(r,c);if(!R.has(k)||reserved(r,c))continue;if(r===ROSE[0]&&c===ROSE[1])continue;if(FLOWERS.some(f=>f[0]===r&&f[1]===c))continue;if(r===START[0]&&c===START[1])continue;if(set.fence.has(k))continue;a.push([r,c]);}return a;}
 function newDay(){const fc=freeCells().sort(()=>Math.random()-.5);let id=0;
   items=[{id:id++,kind:"rose",r:ROSE[0],c:ROSE[1]},...FLOWERS.map(([r,c])=>({id:id++,kind:"flower",r,c}))];
@@ -403,7 +404,7 @@ function gSay(x,y,t,col){const L=wrapK(t,14),w=Math.max(...L.map(l=>l.length))*1
   return `<g class="popin"><rect x="${bx}" y="${by}" width="${w}" height="${h}" rx="10" fill="#fffdf6" stroke="${col}" stroke-width="2"/>${L.map((l,i)=>`<text x="${bx+w/2}" y="${by+20+i*17}" text-anchor="middle" font-size="13.5" fill="#2f3a2c">${l}</text>`).join("")}</g>`;}
 const muzOn=()=>set.muz.size>0||set.abs;
 function draw(){const night=phase==="night";let s=`<circle cx="${C0}" cy="${C0}" r="190" fill="#ead9b0" stroke="#c8b080" stroke-width="3"/><circle cx="120" cy="300" r="10" fill="#dcc89c"/><circle cx="300" cy="80" r="7" fill="#dcc89c"/><circle cx="260" cy="320" r="5" fill="#dcc89c"/>`;
-  for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(inside(r,c))s+=`<rect class="gridc" x="${c*CS+2}" y="${r*CS+2}" width="${CS-4}" height="${CS-4}" rx="6" fill="none" stroke="transparent"/>`;
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(inside(r,c)&&!isVolc(r,c)&&!reserved(r,c)&&!(r===START[0]&&c===START[1]))s+=`<rect class="gridc" x="${c*CS+2}" y="${r*CS+2}" width="${CS-4}" height="${CS-4}" rx="6" fill="none" stroke="transparent"/>`;
   VOLC.forEach(([r,c],i)=>s+=gVolc(cx(c),cy(r),i<2));
   set.fence.forEach(k=>{const [r,c]=k.split(",").map(Number);s+=gFence(cx(c),cy(r));});
   for(const it of items){const x=cx(it.c),y=cy(it.r);if(trees.includes(it))continue;
@@ -574,7 +575,10 @@ function changed(msg){fresh();syncMuz();$("toast").className="toast";$("toast").
 $("muz").onclick=e=>{const b=e.target.closest(".chk");if(!b||running)return;const m=b.dataset.m;set.muz.has(m)?set.muz.delete(m):set.muz.add(m);changed();};
 $("askBtn").onclick=()=>{if(running)return;set.ask=!set.ask;changed();};
 $("planet").addEventListener("click",e=>{const t=e.target.closest(".tap");if(!t||running||!(cur===2||cur===3))return;const k=t.dataset.k;
-  if(set.fence.has(k))set.fence.delete(k);else{if(set.fence.size>=FMAX){$("toast").className="toast bad";$("toast").textContent=`울타리는 ${FMAX}칸까지만 칠 수 있어요. 걷을 칸을 먼저 눌러 주세요.`;return;}set.fence.add(k);}
+  if(set.fence.has(k))set.fence.delete(k);else{const bad=m=>{$("toast").className="toast bad";$("toast").textContent=m;};
+    if(k===key(START[0],START[1])){bad("양 로봇에게는 울타리를 칠 수 없어요.");return;}
+    set.fence.add(k);const room=reachFenced();set.fence.delete(k);if(room<10){bad("거기에 울타리를 치면 양 로봇이 갇혀 버려요. 다른 칸을 골라 주세요.");return;}
+    if(set.fence.size>=FMAX){$("toast").className="toast bad";$("toast").textContent=`울타리는 ${FMAX}칸까지만 칠 수 있어요. 걷을 칸을 먼저 눌러 주세요.`;return;}set.fence.add(k);}
   if(!dayOver&&items.some(i=>(i.kind==="baobab"||i.kind==="rsprout")&&set.fence.has(key(i.r,i.c))))newDay();
   changed("울타리를 바꿨어요.");});
 $("fenceRose").onclick=()=>{if(running)return;const k=key(ROSE[0],ROSE[1]);if(set.fence.has(k))return;if(set.fence.size>=FMAX){$("toast").className="toast bad";$("toast").textContent=`울타리는 ${FMAX}칸까지만 칠 수 있어요.`;return;}set.fence.add(k);changed("장미에 울타리를 쳤어요.");};
