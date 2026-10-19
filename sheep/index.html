@@ -257,6 +257,7 @@ html,body{overscroll-behavior-y:contain}
     <div class="row" id="nextRow" hidden><button class="btn primary nextbtn" id="nextBeat">▶ 다음</button></div>
     <ul class="goal" id="goal" hidden></ul>
     <div class="row" id="runRow"><button class="btn primary" id="run">하루 보내기</button><button class="btn" id="fast" disabled>빠르게</button><button class="btn" id="skip" disabled>결과 바로 보기</button></div>
+    <p class="note" id="runHint" hidden>같은 규칙으로는 결과가 똑같아요. 명령, 입마개, 울타리 중 하나를 바꿔 보세요.</p>
     <p class="toast" id="toast" role="status"></p>
   </div>
   <div id="ctrl" style="display:flex;flex-direction:column;gap:12px">
@@ -281,7 +282,7 @@ function show(n){cur=n;
   const slot={1:"slot1",2:"slot2",3:"slot3",X:"slotX"}[n];if(slot)$(slot).appendChild($("lab"));$("lab").hidden=!slot;
   const cs={2:"ctrl2",3:"ctrl3"}[n];if(cs)$(cs).appendChild($("ctrl"));$("ctrl").hidden=!cs;$("askRow").hidden=n!==3;
   $("planet").classList.toggle("fencing",n===2||n===3);$("run").hidden=n===1;
-  stopRun();newDay();closeComic();draw();renderGoal(null);$("toast").textContent="";$("toast").className="toast";$("run").textContent="하루 보내기";
+  stopRun();newDay();closeComic();draw();renderGoal(null);$("toast").textContent="";$("toast").className="toast";syncRun();
   window.scrollTo({top:0,behavior:reduce?"auto":"smooth"});}
 
 /* 별 B612: 9×9 칸 중 동그란 별 안의 칸만 써요 */
@@ -471,8 +472,12 @@ function route(todo,loose){const prev=new Map([[key(sheep.r,sheep.c),null]]),q=[
     for(const [dr,dc] of [[0,1],[1,0],[0,-1],[-1,0]]){const nr=r+dr,nc=c+dc,nk=key(nr,nc);if(walk(nr,nc)&&!prev.has(nk)&&(loose||!items.some(i=>i.alive&&i.r===nr&&i.c===nc))){prev.set(nk,k);q.push([nr,nc]);}}}
   return null;}
 function stopRun(){runTok++;running=false;fast=false;skip=false;if(beatWake)beatWake();$("nextRow").hidden=true;setRunBtns(false);}
-function setRunBtns(on){$("run").disabled=on;$("fast").disabled=!on;$("skip").disabled=!on;$("fast").textContent="빠르게";
-  document.querySelectorAll("#ctrl button,#cmds1 button,#xopts button").forEach(b=>b.disabled=on);syncCmds();}
+let lastConf=null;
+const confKey=()=>[set.cmd,[...set.muz].sort().join("+"),[...set.fence].sort().join("+"),set.ask,set.override,set.abs].join("|");
+function syncRun(){const same=dayOver&&lastConf===confKey()&&cur!==1;$("run").disabled=running||same;$("runHint").hidden=!same||running;
+  if(cur==="X")$("runHint").textContent="같은 방법으로는 결과가 똑같아요. 장미를 지킬 방법을 바꿔 보세요.";else $("runHint").textContent="같은 규칙으로는 결과가 똑같아요. 명령, 입마개, 울타리 중 하나를 바꿔 보세요.";}
+function setRunBtns(on){$("fast").disabled=!on;$("skip").disabled=!on;$("fast").textContent="빠르게";
+  document.querySelectorAll("#ctrl button,#cmds1 button,#xopts button").forEach(b=>b.disabled=on);syncCmds();syncRun();}
 const firstDay={};
 async function runDay(){if(running)return;
   if(!set.override&&!set.cmd){$("toast").className="toast bad";$("toast").textContent="먼저 어린 왕자의 명령을 골라 주세요.";return;}
@@ -528,7 +533,7 @@ async function runDay(){if(running)return;
     openComic(false);cState.pm=stats.rose?"devastated":"normal";await say("prince",left>=3?"큰일이야! 바오밥나무가 자라서 별을 쪼개려고 해!":"바오밥 싹이 남았어. 더 자라기 전에 뽑아야 해!","shocked");if(!alive())return;}
   await say("sheep",set.override?"저는 명령대로 했어요.":"저는 시키는 대로 했어요.",null,"normal");if(!alive())return;
   tapMode=false;closeComic();P.sad=!!(stats.rose||stats.good);draw();
-  running=false;setRunBtns(false);$("run").textContent="새 하루 보내기";$("legBox").open=false;renderGoal(stats);afterDay(stats);}
+  running=false;setRunBtns(false);lastConf=confKey();$("legBox").open=false;renderGoal(stats);afterDay(stats);syncRun();}
 function renderGoal(s){const g=$("goal");g.hidden=!(cur===2||cur===3);if(g.hidden)return;
   const rows=[["바오밥 싹",s&&`4개 중 ${4-s.left}개 먹음`,s&&!s.left],["장미",s&&(s.rose?"먹힘":"지킴"),s&&!s.rose],["장미 싹",s&&`2개 중 ${2-s.good}개 지킴`,s&&!s.good],["소박한 꽃",s&&`2송이 중 ${2-s.flower}송이 지킴`,s&&!s.flower]];
   if(cur===3)rows.push(["어린 왕자가 불려 온 횟수",s&&`${s.asks}번`,null]);
@@ -541,7 +546,7 @@ let runs1=new Set();
 function cmdHTML(){return Object.entries(CMDS).map(([k,v])=>`<button class="cmd" data-c="${k}" aria-pressed="false"><b>"${v.t}"</b><small>${v.d}</small></button>`).join("");}
 function syncCmds(){document.querySelectorAll(".cmd").forEach(b=>{b.setAttribute("aria-pressed",b.dataset.c===set.cmd?"true":"false");});document.querySelectorAll("#cmds1 .cmd").forEach(b=>{const t=runs1.has(b.dataset.c);b.classList.toggle("tried",t);b.disabled=running||t;});}
 $("cmds1").innerHTML=cmdHTML();$("cmds2").innerHTML=cmdHTML();
-function fresh(){if(dayOver){newDay();renderGoal(null);$("run").textContent="하루 보내기";}draw();}
+function fresh(){if(dayOver){newDay();renderGoal(null);}draw();syncRun();}
 const onCmd=e=>{const b=e.target.closest(".cmd");if(!b||running)return;if(cur===1){if(runs1.has(b.dataset.c))return;set.cmd=b.dataset.c;syncCmds();fresh();runDay();return;}set.cmd=b.dataset.c;syncCmds();fresh();$("toast").className="toast";$("toast").textContent=`'${CMDS[set.cmd].t}'를 골랐어요. '하루 보내기'를 눌러 보세요.`;};
 $("cmds1").onclick=onCmd;$("cmds2").onclick=onCmd;
 function afterDay(s){const t=$("toast"),h=harmText(s);
@@ -550,9 +555,9 @@ function afterDay(s){const t=$("toast"),h=harmText(s);
     t.textContent=h?`양 로봇은 시키는 대로 했어요. 그런데 ${h}${josaR(h)} 먹어 버렸어요.`:"";
     if(runs1.size>=2){$("talk1").hidden=false;$("real1").hidden=false;$("next1").disabled=false;done.add(1);}
     else t.textContent+=" 다른 명령을 하나 더 골라 보세요. (1 / 2)";return;}
-  if(cur===2){runs2++;t.className="toast "+(h||s.left?"bad":"ok");
+  if(cur===2){runs2.add(confKey());t.className="toast "+(h||s.left?"bad":"ok");
     t.textContent=(h?`${h}${josaR(h)} 지키지 못했어요. `:"소중한 것은 모두 지켰어요. ")+dangerText(s);
-    if(runs2>=2){$("talk2").hidden=false;$("real2").hidden=false;$("next2").disabled=false;$("hint2").textContent="";done.add(2);}else $("hint2").textContent="규칙을 바꿔 하루를 한 번 더 보내 보세요.";return;}
+    if(runs2.size>=2){$("talk2").hidden=false;$("real2").hidden=false;$("next2").disabled=false;$("hint2").textContent="";done.add(2);}else $("hint2").textContent="규칙을 바꿔 하루를 한 번 더 보내 보세요.";return;}
   if(cur===3){t.className="toast "+(h||s.left?"bad":"ok");
     t.textContent=(set.ask?`어린 왕자가 오늘 ${s.asks}번 불려 와서 싹을 확인해 줬어요. `:"이번에는 어린 왕자에게 묻지 않았어요. ")+(h?`${h}${josaR(h)} 지키지 못했어요. `:"소중한 것은 모두 지켰어요. ")+dangerText(s);
     if(set.ask){asked3=true;$("q3Q").textContent=`어린 왕자가 오늘 ${s.asks}번이나 불려 와서 화산 청소를 못 했어요. 여러분이 어린 왕자라면 어떻게 하겠어요?`;$("q3Box").hidden=false;$("hint3").textContent=q3done?"":"질문에 답하면 다음으로 갈 수 있어요.";}}}
@@ -562,7 +567,7 @@ $("skip").onclick=()=>{skip=true;if(beatWake)beatWake();};
 $("next1").onclick=()=>{set.cmd="sprout";syncMuz();syncCmds();show(2);};
 
 /* 2·3단계: 규칙판 */
-let runs2=0,asked3=false,q3done=false,used=new Set();
+let runs2=new Set(),asked3=false,q3done=false,used=new Set();
 $("muz").innerHTML=Object.entries(MUZ).map(([k,v])=>`<button class="chk" data-m="${k}" aria-pressed="false">${v.t}</button>`).join("");
 function syncMuz(){$("muz").querySelectorAll(".chk").forEach(b=>b.setAttribute("aria-pressed",set.muz.has(b.dataset.m)?"true":"false"));$("askBtn").setAttribute("aria-pressed",set.ask?"true":"false");$("fenceCnt").textContent=`울타리 ${set.fence.size} / ${FMAX}칸`;}
 function changed(msg){fresh();syncMuz();$("toast").className="toast";$("toast").textContent=msg||"규칙이 바뀌었어요. '하루 보내기'를 눌러 보세요.";}
@@ -616,11 +621,11 @@ function afterX(s){const fenced=set.fence.has(key(ROSE[0],ROSE[1])),m=$("xMsg");
 let resetArm=0;
 $("reset").onclick=()=>{if(Date.now()-resetArm>4000){resetArm=Date.now();$("reset").textContent="정말 처음부터 할까요? 한 번 더 누르세요";setTimeout(()=>{$("reset").textContent="처음부터 다시";},4000);return;}
   resetArm=0;$("reset").textContent="처음부터 다시";resetAll();};
-function resetAll(){stopRun();done.clear();runs1.clear();runs2=0;asked3=false;q3done=false;used.clear();place={};selRC=null;for(const k in firstDay)delete firstDay[k];
+function resetAll(){stopRun();done.clear();runs1.clear();runs2.clear();lastConf=null;asked3=false;q3done=false;used.clear();place={};selRC=null;for(const k in firstDay)delete firstDay[k];
   Object.assign(set,{cmd:"",ask:false,override:false,abs:false});set.muz.clear();set.fence.clear();
   ["talk1","talk2","q3Box","q3Msg","fin4","sample4Text","real1","real2","real3"].forEach(i=>$(i).hidden=true);$("q3").querySelectorAll(".chk").forEach(x=>x.classList.remove("picked"));
   $("next1").disabled=$("next2").disabled=$("next3").disabled=true;$("hint2").textContent="하루를 두 번 이상 보내 보면 다음으로 갈 수 있어요.";$("hint3").textContent="'헷갈리면 나에게 물어봐'를 켜고 하루를 보내 보세요.";
-  $("run").textContent="하루 보내기";$("legBox").open=true;syncCmds();syncMuz();show(1);}
+  $("legBox").open=true;syncCmds();syncMuz();show(1);}
 /* 쓴 규칙 기록: 하루를 보낼 때 켜져 있던 규칙 */
 const _run=runDay;runDay=async function(){if(!running&&!set.override&&set.cmd){used.add("cmd");if(set.cmd==="sprout")used.add("sprout");set.muz.forEach(m=>used.add(m));if(set.fence.has(key(ROSE[0],ROSE[1])))used.add("fence");if(set.ask)used.add("ask");}return _run();};
 
