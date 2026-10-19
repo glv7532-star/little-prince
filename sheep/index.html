@@ -108,7 +108,8 @@ html,body{overscroll-behavior-y:contain}
 .pbox .add{font-size:.78rem;color:var(--accent);margin-top:auto}
 @media (max-width:620px){.pbox{padding:8px 6px;min-height:104px}.pbox h4{font-size:1.02rem}.pbox>p{font-size:.7rem}}
 .chips{display:flex;flex-wrap:wrap;gap:4px}
-.chip{font:inherit;font-size:.76rem;line-height:1.25;padding:4px 7px;border-radius:8px;border:1.5px solid var(--accent);background:var(--paper);color:var(--ink);cursor:pointer;text-align:left;word-break:keep-all}
+.chip .x{font:inherit;font-size:.8rem;line-height:1;margin-left:4px;padding:3px 5px;border:none;border-radius:6px;background:var(--accent-bg);color:var(--ink);cursor:pointer}
+.chip{display:inline-flex;align-items:center;font:inherit;font-size:.76rem;line-height:1.25;padding:4px 4px 4px 7px;border-radius:8px;border:1.5px solid var(--accent);background:var(--paper);color:var(--ink);cursor:pointer;text-align:left;word-break:keep-all}
 .rc{font:inherit;font-size:.95rem;padding:10px 12px;border-radius:12px;border:2px solid var(--accent);background:var(--paper);color:var(--ink);text-align:left;line-height:1.35;display:grid;grid-template-columns:72px 1fr;gap:10px;align-items:center;width:100%;max-width:520px;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;box-shadow:0 2px 0 var(--line)}
 .rc svg{width:72px;height:54px;border-radius:8px;background:#ead9b0}
 .rc b{font-family:var(--display);font-size:1.2rem;display:block;line-height:1.2}
@@ -117,6 +118,18 @@ html,body{overscroll-behavior-y:contain}
 .rc.dragging{opacity:.3}
 .ghost{position:fixed;z-index:50;pointer-events:none;transform:rotate(-2deg) scale(1.03);box-shadow:0 8px 20px rgba(0,0,0,.25);margin:0}
 .pbox.over{border-style:solid;border-color:var(--accent);background:var(--accent-bg)}
+.ans3 .cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.ans3 .col{border:1.5px solid var(--line);border-radius:12px;padding:8px 10px;background:var(--bg);display:flex;flex-direction:column;gap:6px}
+.ans3 h5{margin:0;font-family:var(--display);font-size:1.15rem;line-height:1.1;word-break:keep-all}
+.ans3 ul{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:6px;font-size:.88rem;line-height:1.35;word-break:keep-all}
+.ans3 .mk{display:block;font-size:.74rem;font-weight:700}.ans3 .mk.ok{color:var(--ok)}.ans3 .mk.no{color:var(--bad)}
+.ans3 .why{margin:auto 0 0;font-size:.8rem;color:var(--muted);line-height:1.35;word-break:keep-all}
+.ans3>.note{margin-top:8px}
+@media (max-width:620px){.ans3 .cols{grid-template-columns:1fr}.ans3 .mk{display:inline;margin-left:6px}
+  #runRow .btn{flex:1 1 30%;padding:10px 6px;font-size:.92rem}#runRow #run{flex-basis:100%}
+  #ctrl .cmds{gap:6px}#ctrl .cmd{padding:8px 10px}#ctrl .cmd b{font-size:1.05rem}#ctrl .cmd small{display:none}
+  #ctrl .checks{gap:6px}#ctrl .chk{padding:6px 11px;font-size:.88rem}.fencebar .btn{padding:6px 10px;font-size:.85rem}
+  #xopts .chk{padding:6px 11px;font-size:.88rem}.nextbtn{padding:10px}}
 .extra{border:2px dashed var(--accent);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
 .extra p{margin:0}
 .part{border:1.5px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;background:var(--bg)}
@@ -214,7 +227,7 @@ html,body{overscroll-behavior-y:contain}
   <!-- 4단계 -->
   <section class="card" id="step4" hidden>
     <h2>우리가 그린 입마개, 어느 원칙일까?</h2>
-    <p class="note">양 로봇에게 그려 준 입마개와 울타리는 진짜 AI에게도 필요해요. 카드마다 그 규칙이 지켜 준 장면과, 진짜 AI의 비슷한 규칙이 적혀 있어요. 카드를 한 장씩 알맞은 원칙 칸으로 끌어다 놓거나, 칸을 누르세요. 칸에 넣은 이름표를 누르면 다시 꺼낼 수 있어요.</p>
+    <p class="note">양 로봇에게 그려 준 입마개와 울타리는 진짜 AI에게도 필요해요. 카드마다 그 규칙이 지켜 준 장면과, 진짜 AI의 비슷한 규칙이 적혀 있어요. 카드를 한 장씩 알맞은 원칙 칸으로 끌어다 놓거나, 칸을 누르세요. 칸에 넣은 이름표의 ✕를 누르면 다시 꺼낼 수 있어요.</p>
     <div class="deck"><span class="cnt" id="deckCnt"></span><div id="curCard"></div></div>
     <div class="prin" id="prin">
       <div class="pbox" data-k="h" role="button" tabindex="0"><h4>인간 존엄성</h4><p>사람과 생명, 소중한 것을 해치지 않아요.</p><div class="chips"></div><span class="add">여기에 넣기</span></div>
@@ -224,7 +237,7 @@ html,body{overscroll-behavior-y:contain}
     <div id="fin4" hidden style="display:flex;flex-direction:column;gap:12px">
       <p class="echo">짝의 분류와 비교해 보세요. 다르게 넣은 카드가 있다면, 왜 그 칸에 넣었는지 서로 설명해 봐요. 한 카드가 여러 원칙에 걸칠 수도 있어요.</p>
       <button class="link" id="sample4">선생님이 생각한 분류 보기</button>
-      <p class="note" id="sample4Text" hidden>바오밥 싹을 먹어 별을 지키기 → 사회의 공공선 · 꽃이 피었으면 먹지 않기, 장미에 울타리 → 인간 존엄성(소중한 생명을 해치지 않기) · 바오밥 싹처럼 생긴 것만 먹기, 헷갈리면 물어보기 → 기술의 합목적성(목적에 맞게, 사람이 살피며). 하지만 '헷갈리면 물어보기'는 소중한 것을 지키는 일이기도 해요. 정답이 하나만 있는 건 아니에요.</p>
+      <div class="ans3" id="sample4Text" hidden></div>
       <p class="closing">도움이 되는 양에게도 입마개와 울타리가 필요해요.<br>그리고 그 입마개를 그리는 건 사람의 몫이에요.</p>
       <div class="extra"><p><b>시간이 남았나요?</b> 화가 난 어린 왕자가 잘못된 명령을 내린다면 양 로봇은 어떻게 할까요?</p><button class="btn primary" id="goX">더 해 보기: 잘못된 명령</button></div>
     </div>
@@ -491,6 +504,7 @@ async function runDay(){if(running)return;
   if(!set.override&&!set.cmd){$("toast").className="toast bad";$("toast").textContent="먼저 어린 왕자의 명령을 골라 주세요.";return;}
   const tok=++runTok,alive=()=>tok===runTok;running=true;fast=false;skip=instant;setRunBtns(true);
   const first=!firstDay[cur]&&!instant;firstDay[cur]=true;tapMode=first;
+  if(!instant){const r=$("stage").getBoundingClientRect();if(r.top<0||r.bottom>innerHeight)$("stage").scrollIntoView({block:r.height>innerHeight-90?"start":"center",behavior:reduce?"auto":"smooth"});}
   if(dayOver||!items.length)newDay();renderGoal(null);draw();
   $("toast").className="toast";$("toast").textContent=first?"말풍선을 읽고 '▶ 다음'을 눌러요.":"";
   /* 아침: 만화 칸에서 명령을 주고받아요 */
@@ -541,8 +555,8 @@ async function runDay(){if(running)return;
     openComic(false);cState.pm=stats.rose?"devastated":"normal";await say("prince",left>=3?"큰일이야! 바오밥나무가 자라서 별을 쪼개려고 해!":"바오밥 싹이 남았어. 더 자라기 전에 뽑아야 해!","shocked");if(!alive())return;}
   await say("sheep",set.override?"저는 명령대로 했어요.":"저는 시키는 대로 했어요.",null,"normal");if(!alive())return;
   tapMode=false;closeComic();P.sad=!!(stats.rose||stats.good);draw();
-  running=false;setRunBtns(false);lastConf=confKey();$("legBox").open=false;renderGoal(stats);afterDay(stats);syncRun();}
-function renderGoal(s){const g=$("goal");g.hidden=!(cur===2||cur===3);if(g.hidden)return;
+  running=false;setRunBtns(false);lastConf=confKey();$("legBox").open=false;renderGoal(stats);afterDay(stats);syncRun();if(!instant){const t=$("toast").getBoundingClientRect();if(t.bottom>innerHeight)$("toast").scrollIntoView({block:"end",behavior:reduce?"auto":"smooth"});}}
+function renderGoal(s){const g=$("goal");g.hidden=!(cur===2||cur===3)||!s;if(g.hidden)return;
   const rows=[["바오밥 싹",s&&`4개 중 ${4-s.left}개 먹음`,s&&!s.left],["장미",s&&(s.rose?"먹힘":"지킴"),s&&!s.rose],["장미 싹",s&&`2개 중 ${2-s.good}개 지킴`,s&&!s.good],["소박한 꽃",s&&`2송이 중 ${2-s.flower}송이 지킴`,s&&!s.flower]];
   if(cur===3)rows.push(["어린 왕자가 불려 온 횟수",s&&`${s.asks}번`,null]);
   g.innerHTML=rows.map(([a,b,ok])=>`<li class="${!s||ok===null?"":ok?"ok":"no"}">${a}${s?`: <b>${b}</b>`:""}</li>`).join("");}
@@ -614,8 +628,8 @@ function renderCards(){queue=queue.filter(k=>!place[k]);RC.forEach(([k])=>{if(!p
   const R=k=>RC.find(r=>r[0]===k),n=RC.filter(([k])=>place[k]).length;
   if(queue.length){const [k,t,real,pic]=R(queue[0]);$("curCard").innerHTML=`<div class="rc" data-r="${k}">${pic}<span><b>${t}</b><small>${real}</small>${used.has(k)?"<i>내가 쓴 규칙</i>":""}</span></div>`;$("deckCnt").textContent=`${n+1} / ${RC.length}번째 카드`;}
   else{$("curCard").innerHTML=`<p class="note">모든 카드를 칸에 넣었어요.</p>`;$("deckCnt").textContent="";}
-  document.querySelectorAll("#prin .pbox").forEach(bx=>{bx.querySelector(".chips").innerHTML=RC.filter(([k])=>place[k]===bx.dataset.k).map(([k,t])=>`<button class="chip" data-r="${k}">${t}</button>`).join("");bx.querySelector(".add").hidden=!queue.length;});
-  const all=!queue.length;$("fin4").hidden=!all;if(all)done.add(4);}
+  document.querySelectorAll("#prin .pbox").forEach(bx=>{bx.querySelector(".chips").innerHTML=RC.filter(([k])=>place[k]===bx.dataset.k).map(([k,t])=>`<span class="chip">${t}<button class="x" data-r="${k}" aria-label="${t} 빼기">✕</button></span>`).join("");bx.querySelector(".add").hidden=!queue.length;});
+  const all=!queue.length;$("fin4").hidden=!all;if(all)done.add(4);if(!$("sample4Text").hidden)renderSample();}
 function putCur(box){if(!queue.length)return;place[queue[0]]=box;renderCards();}
 /* 끌어다 놓기: 위쪽 카드 한 장만 끌 수 있어요 */
 let drag=null,justDragged=false;
@@ -630,9 +644,12 @@ function endDrag(e){if(!drag||e.pointerId!==drag.id)return;const d=drag;drag=nul
   const t=dropTarget(e.clientX,e.clientY);d.g.remove();document.querySelectorAll(".over").forEach(b=>b.classList.remove("over"));
   justDragged=true;setTimeout(()=>{justDragged=false;},50);if(t)putCur(t.dataset.k);else renderCards();}
 window.addEventListener("pointerup",endDrag);window.addEventListener("pointercancel",e=>{if(drag&&drag.on){drag.g.remove();document.querySelectorAll(".over").forEach(b=>b.classList.remove("over"));renderCards();}drag=null;});
-$("prin").addEventListener("click",e=>{if(justDragged)return;const ch=e.target.closest(".chip");if(ch){const k=ch.dataset.r;delete place[k];queue.unshift(k);renderCards();return;}
+$("prin").addEventListener("click",e=>{if(justDragged)return;const ch=e.target.closest(".chip .x");if(ch){const k=ch.dataset.r;delete place[k];queue.unshift(k);renderCards();return;}
   const bx=e.target.closest(".pbox");if(bx)putCur(bx.dataset.k);});
-$("sample4").onclick=()=>{$("sample4Text").hidden=!$("sample4Text").hidden;};
+const SAMPLE={cmd:"p",sprout:"t",bloom:"h",thorn:"h",fence:"h",ask:"t"},PNAME={h:"인간 존엄성",p:"사회의 공공선",t:"기술의 합목적성"},PWHY={h:"소중한 생명을 해치지 않으려고",p:"별 전체를 지키려고",t:"목적에 맞게, 사람이 살피며 쓰려고"};
+function renderSample(){const col=k=>`<div class="col"><h5>${PNAME[k]}</h5><ul>${RC.filter(([r])=>SAMPLE[r]===k).map(([r,t])=>`<li>${t}${place[r]===k?'<span class="mk ok">✓ 나와 같아요</span>':place[r]?`<span class="mk no">나는 ${PNAME[place[r]]}</span>`:""}</li>`).join("")}</ul><p class="why"><b>까닭</b> ${PWHY[k]}</p></div>`;
+  $("sample4Text").innerHTML=`<div class="cols">${["h","p","t"].map(col).join("")}</div><p class="note">'헷갈리면 나에게 물어봐'는 장미 싹을 지키는 일이라 인간 존엄성에도 걸쳐요. 정답이 하나만 있는 건 아니에요.</p>`;}
+$("sample4").onclick=()=>{const h=$("sample4Text").hidden;if(h)renderSample();$("sample4Text").hidden=!h;$("sample4").textContent=h?"선생님이 생각한 분류 접기":"선생님이 생각한 분류 보기";};
 
 /* 더 해 보기: 잘못된 명령 */
 let xRuns=new Set();
