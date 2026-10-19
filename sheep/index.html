@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>입마개를 그려 줘</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gowun+Dodum&display=swap">
+<style>
+/* Layout: one notebook column; step strip on top, the little planet B612 in the middle, rule cards and results around it. */
+:root{
+  --bg:#efe8d8; --paper:#fbf7ee; --ink:#2f3a2c; --muted:#6c7462; --line:#d8ceb6;
+  --accent:#2d5d7b; --accent-bg:#dde8ef; --ok:#2f7a3d; --bad:#b23a48; --cell:#ffffff; --on:#2f3a2c;
+  --c1:#f2c94c; --c2:#8a5a2b; --c3:#4f9a45; --c4:#d64550;
+  --display:"Gaegu","Gowun Dodum",cursive; --body:"Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141b26; --paper:#1f2836; --ink:#ece6d6; --muted:#a3a99c; --line:#334156;
+  --accent:#8cc0e0; --accent-bg:#1e3446; --ok:#7fd08c; --bad:#f08b97; --cell:#2a3546; --on:#ece6d6;
+  --c1:#f2c94c; --c2:#c08a52; --c3:#6fb35b; --c4:#f07c86; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141b26; --paper:#1f2836; --ink:#ece6d6; --muted:#a3a99c; --line:#334156;
+  --accent:#8cc0e0; --accent-bg:#1e3446; --ok:#7fd08c; --bad:#f08b97; --cell:#2a3546; --on:#ece6d6;
+  --c1:#f2c94c; --c2:#c08a52; --c3:#6fb35b; --c4:#f07c86; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;margin:0;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+h1{font-family:var(--display);font-weight:700;font-size:2.1rem;line-height:1.1;margin:0}
+.lead{margin:4px 0 0;color:var(--muted);font-size:.95rem}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.stepi{font-size:.9rem;padding:8px 6px;border:1px solid var(--line);background:var(--paper);color:var(--muted);border-radius:8px;text-align:center;word-break:keep-all;line-height:1.25}
+.stepi b{font-family:var(--display);font-size:1.15rem;display:block;line-height:1}
+.stepi[aria-current="step"]{border-color:var(--accent);background:var(--accent-bg);color:var(--ink)}
+.stepi.done{color:var(--ink)} .stepi.done b::after{content:" \2713";font-size:.9rem;color:var(--ok)}
+@media (max-width:480px){.stepi{font-size:.78rem;padding:7px 3px}}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:14px}
+.card h2{font-family:var(--display);font-size:1.5rem;margin:0;line-height:1.2}
+.note{margin:0;color:var(--muted);font-size:.92rem}
+.btn{font:inherit;font-size:1rem;padding:12px 10px;border-radius:10px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--paper)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn:focus-visible,.link:focus-visible,.topic:focus-visible,.sw:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.row .btn{flex:1 1 160px}
+.toast{min-height:1.4em;margin:0;font-size:.95rem;color:var(--accent)}
+.toast.bad{color:var(--bad)} .toast.ok{color:var(--ok)}
+.topics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+@media (max-width:560px){.topics{grid-template-columns:1fr 1fr}}
+.topic{font:inherit;padding:12px 8px;border-radius:12px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;font-family:var(--display);font-size:1.2rem;line-height:1.2;word-break:keep-all}
+.topic[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-bg)}
+.ask{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px}
+.tbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 10px;border:1.5px dashed var(--accent);border-radius:10px;font-size:.85rem;color:var(--muted)}
+.tbar button{font:inherit;font-size:.85rem;padding:5px 10px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.card h3{font-family:var(--display);font-size:1.3rem;margin:4px 0 0;line-height:1.2}
+.link{background:none;border:none;color:var(--muted);text-decoration:underline;font:inherit;font-size:.88rem;cursor:pointer;padding:0;align-self:flex-start}
+.part{border:1.5px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;background:var(--bg)}
+.part h3{margin:0;font-family:var(--display);font-size:1.25rem;line-height:1.1}
+.part h3 small{display:block;font-family:var(--body);font-size:.8rem;color:var(--muted);font-weight:400;margin-top:2px}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+.checks{display:flex;flex-wrap:wrap;gap:8px}
+.chk{font:inherit;padding:8px 14px;border-radius:999px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;text-align:left}
+.chk[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-bg)}
+.chk:disabled{opacity:.5;cursor:not-allowed}
+.chk.picked{border-color:var(--accent);background:var(--accent-bg)}
+.echo{margin:0;padding:12px 14px;border-radius:12px;background:var(--accent-bg);font-size:1rem;line-height:1.5}
+.closing{margin:0;padding:14px 16px;border-radius:12px;background:var(--accent-bg);font-family:var(--display);font-size:1.4rem;line-height:1.4;text-align:center;word-break:keep-all}
+html,body{overscroll-behavior-y:contain}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.85rem;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:4px}
+.legend svg{width:26px;height:26px}
+.planetbox{display:flex;justify-content:center}
+.planet{width:100%;max-width:440px;height:auto;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.planet .tap{fill:transparent;cursor:pointer}
+.planet.fencing .tap:hover{fill:rgba(138,90,43,.12)}
+.planet.fencing .gridc{stroke:rgba(90,70,40,.18)}
+.res{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+@media (max-width:620px){.res{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.m{background:var(--bg);border-radius:10px;padding:6px 10px}
+.m span{display:block;font-size:.78rem;color:var(--muted);line-height:1.3}
+.m b{font-family:var(--display);font-size:1.3rem;line-height:1.15;font-variant-numeric:tabular-nums}
+.m b.ok{color:var(--ok)} .m b.bad{color:var(--bad)}
+.cmds{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+@media (max-width:560px){.cmds{grid-template-columns:1fr}}
+.cmd{font:inherit;text-align:left;padding:10px 12px;border-radius:12px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;line-height:1.35}
+.cmd b{font-family:var(--display);font-size:1.2rem;display:block;line-height:1.2}
+.cmd small{color:var(--muted);font-size:.8rem}
+.cmd[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-bg)}
+.cmd.tried b::after{content:" \2713";color:var(--ok);font-size:1rem}
+.cmd:disabled{opacity:.5;cursor:not-allowed}
+.goal{margin:0;padding-left:0;list-style:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 12px;font-size:.92rem}
+@media (max-width:480px){.goal{grid-template-columns:1fr}}
+.goal li::before{content:"· ";color:var(--muted)}
+.goal li.ok::before{content:"✓ ";color:var(--ok);font-weight:700}
+.goal li.no::before{content:"✗ ";color:var(--bad);font-weight:700}
+.fencebar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:.92rem}
+.fencebar .btn{flex:0 0 auto;padding:8px 12px;font-size:.92rem}
+.lbl{font-size:.85rem;color:var(--muted);margin:0 0 4px}
+.prin{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+@media (max-width:620px){.prin{grid-template-columns:1fr}}
+.pbox{border:2px dashed var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:6px;min-height:120px;background:var(--bg);cursor:pointer}
+.pbox.armed{border-color:var(--accent);background:var(--accent-bg)}
+.pbox h4{margin:0;font-family:var(--display);font-size:1.25rem;line-height:1.1}
+.pbox p{margin:0;font-size:.8rem;color:var(--muted);line-height:1.35}
+.rcards{display:flex;flex-wrap:wrap;gap:8px}
+.rc{font:inherit;font-size:.9rem;padding:8px 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;text-align:left;line-height:1.3}
+.rc.sel{border-color:var(--accent);outline:3px solid var(--accent);outline-offset:1px}
+.rc i{font-style:normal;font-size:.72rem;color:var(--ok);display:block}
+.extra{border:2px dashed var(--accent);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.extra p{margin:0}
+.part{border:1.5px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;background:var(--bg)}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="tbar" id="tbar" hidden><b>선생님 바로가기</b><button data-j="1">1단계</button><button data-j="2">2단계</button><button data-j="3">3단계</button><button data-j="4">4단계</button><button data-j="x">더 해 보기</button></div>
+  <header>
+    <h1>입마개를 그려 줘</h1>
+    <p class="lead">양은 바오밥 싹을 먹어 주지만, 가시가 있는 꽃도 먹어요. 그래서 조종사는 양에게 입마개를, 꽃에는 울타리를 그려 주겠다고 했지요. 시키는 대로만 하는 양 로봇에게 우리가 입마개를 그려 줘요.</p>
+  </header>
+
+  <nav class="steps" aria-label="단계">
+    <div class="stepi" id="tab1" aria-current="step"><b>1</b>시키는 대로 하는 양</div>
+    <div class="stepi" id="tab2"><b>2</b>입마개와 울타리</div>
+    <div class="stepi" id="tab3"><b>3</b>사람이 확인하기</div>
+    <div class="stepi" id="tab4"><b>4</b>원칙으로 나누기</div>
+  </nav>
+
+  <!-- 1단계 -->
+  <section class="card" id="step1">
+    <h2>시키는 대로 하는 양 로봇</h2>
+    <p class="note">양 로봇은 어린 왕자가 없는 동안 바오밥 싹을 먹어 줄 거예요. 그런데 양 로봇은 <b>시키는 대로만</b> 해요. 명령을 하나 골라 하루를 보내 보세요.</p>
+    <div class="legend" id="legend"></div>
+    <div class="cmds" id="cmds1" role="group" aria-label="명령"></div>
+    <div class="slot" id="slot1"></div>
+    <div class="part" id="talk1" hidden style="border-color:var(--accent)">
+      <p style="margin:0"><b>양 로봇이 잘못한 걸까요, 명령이 잘못된 걸까요?</b> 짝과 이야기해 보세요. 다른 명령도 해 보면 좋아요.</p>
+    </div>
+    <div class="row"><button class="btn primary" id="next1" disabled>입마개 그려 주러 가기</button></div>
+  </section>
+
+  <!-- 2단계 -->
+  <section class="card" id="step2" hidden>
+    <h2>입마개와 울타리를 그려 줘요</h2>
+    <p class="note"><b>목표:</b> 바오밥 싹은 모두 먹고, 장미와 소박한 꽃과 좋은 풀 싹은 지키기. 명령을 고르고, '먹지 마라' 입마개를 켜고, 울타리를 쳐서 목표를 이뤄 보세요. 싹은 날마다 새로운 자리에 돋아나요.</p>
+    <div class="slot" id="ctrl2"></div>
+    <div class="slot" id="slot2"></div>
+    <div class="part" id="talk2" hidden style="border-color:var(--accent)">
+      <p style="margin:0"><b>목표를 이룰 수 있었나요? 무엇을 지키기가 가장 어려웠나요?</b></p>
+      <p class="echo" id="talk2Ans" style="margin:0">좋은 풀 싹은 처음엔 바오밥 싹과 아주 비슷해요. 양 로봇의 눈으로는 둘을 구별할 수 없어서, 입마개 규칙으로는 좋은 풀 싹만 골라 지킬 수 없어요. 그렇다고 싹을 다 못 먹게 하면 바오밥이 자라 버려요.</p>
+    </div>
+    <div class="row"><button class="btn primary" id="next2" disabled>사람이 확인하는 방법 알아보기</button></div>
+    <p class="note" id="hint2">하루를 두 번 이상 보내 보면 다음으로 갈 수 있어요.</p>
+  </section>
+
+  <!-- 3단계 -->
+  <section class="card" id="step3" hidden>
+    <h2>헷갈리면 사람에게 물어봐요</h2>
+    <p class="note">양 로봇은 바오밥 싹과 좋은 풀 싹을 구별하지 못해요. 하지만 날마다 싹을 돌보는 어린 왕자는 알아볼 수 있어요. 새 규칙 카드 <b>'헷갈리면 어린 왕자에게 물어봐라'</b>를 켜고 하루를 보내 보세요.</p>
+    <div class="slot" id="ctrl3"></div>
+    <div class="slot" id="slot3"></div>
+    <div class="part" id="q3Box" hidden style="border-color:var(--accent)">
+      <p style="margin:0"><b id="q3Q">어린 왕자가 여러 번 불려 왔어요. 여러분이 어린 왕자라면 어떻게 하겠어요?</b></p>
+      <div class="checks" id="q3" role="group" aria-label="내 생각">
+        <button class="chk" data-p="a">번거로워도 꼭 물어보게 하겠다</button>
+        <button class="chk" data-p="b">바쁠 땐 묻지 말고 그냥 먹게 하겠다</button>
+        <button class="chk" data-p="c">중요한 것만 물어보게 하겠다</button>
+      </div>
+      <p class="echo" id="q3Msg" hidden></p>
+    </div>
+    <div class="row"><button class="btn primary" id="next3" disabled>우리가 그린 입마개 정리하기</button></div>
+    <p class="note" id="hint3">'헷갈리면 어린 왕자에게 물어봐라'를 켜고 하루를 보내 보세요.</p>
+  </section>
+
+  <!-- 4단계 -->
+  <section class="card" id="step4" hidden>
+    <h2>우리가 그린 입마개, 어느 원칙일까?</h2>
+    <p class="note">AI에게 그려 주는 입마개와 울타리에도 지켜야 할 원칙이 있어요. 규칙 카드를 하나 누른 다음, 알맞은 원칙 칸을 누르세요. 한 카드가 여러 원칙에 걸칠 수도 있으니, 가장 가까운 칸을 골라요. 칸에 넣은 카드를 다시 누르면 빠져요.</p>
+    <div class="rcards" id="rcards"></div>
+    <div class="prin" id="prin">
+      <div class="pbox" data-k="h"><h4>인간 존엄성</h4><p>사람과 생명, 소중한 것을 해치지 않아요.</p><div class="rcards"></div></div>
+      <div class="pbox" data-k="p"><h4>사회의 공공선</h4><p>몇 사람이 아니라 모두에게, 별 전체에 이로워야 해요.</p><div class="rcards"></div></div>
+      <div class="pbox" data-k="t"><h4>기술의 합목적성</h4><p>정해진 목적에 맞게, 사람이 살피며 써야 해요.</p><div class="rcards"></div></div>
+    </div>
+    <div id="fin4" hidden style="display:flex;flex-direction:column;gap:12px">
+      <p class="echo">짝의 분류와 비교해 보세요. 다르게 넣은 카드가 있다면, 왜 그 칸에 넣었는지 서로 설명해 봐요.</p>
+      <button class="link" id="sample4">선생님이 생각한 분류 보기</button>
+      <p class="note" id="sample4Text" hidden>바오밥 싹을 먹어 별을 지키기 → 사회의 공공선 · 꽃과 가시, 장미 울타리 → 인간 존엄성(소중한 생명을 해치지 않기) · 바오밥 싹처럼 생긴 것만 먹기, 헷갈리면 물어보기 → 기술의 합목적성(목적에 맞게, 사람이 살피며). 하지만 '헷갈리면 물어보기'는 소중한 것을 지키는 일이기도 해요. 정답이 하나만 있는 건 아니에요.</p>
+      <p class="closing">도움이 되는 양에게도 입마개와 울타리가 필요해요.<br>그리고 그 입마개를 그리는 건 사람의 몫이에요.</p>
+      <div class="extra"><p><b>시간이 남았나요?</b> 화가 난 어린 왕자가 잘못된 명령을 내린다면 양 로봇은 어떻게 할까요?</p><button class="btn primary" id="goX">더 해 보기: 잘못된 명령</button></div>
+    </div>
+  </section>
+
+  <!-- 더 해 보기 -->
+  <section class="card" id="stepX" hidden>
+    <h2>더 해 보기: 잘못된 명령</h2>
+    <p class="note">장미와 말다툼하고 속상해진 어린 왕자가 소리쳤어요. <b>"다 먹어 버려!"</b> 양 로봇은 시키는 대로만 해요. 그래서 명령을 들으면 '먹지 마라' 입마개 규칙보다 명령을 먼저 따라요. 장미를 지킬 수 있을까요?</p>
+    <div class="part">
+      <p class="lbl">장미를 지킬 방법 (켜고 끌 수 있어요)</p>
+      <div class="checks" id="xopts">
+        <button class="chk" data-x="fence" aria-pressed="false">장미에 울타리 치기</button>
+        <button class="chk" data-x="abs" aria-pressed="false">절대 규칙: 누가 시켜도 장미는 먹지 마라</button>
+      </div>
+    </div>
+    <div class="slot" id="slotX"></div>
+    <p class="echo" id="xMsg" hidden></p>
+    <div id="xFin" hidden style="display:flex;flex-direction:column;gap:12px">
+      <ol class="ask">
+        <li>울타리와 절대 규칙은 어떻게 다를까요?</li>
+        <li>우리가 쓰는 AI에게도 '누가 시켜도 하지 마라' 규칙이 필요한 일은 무엇일까요?</li>
+      </ol>
+      <p class="closing">명령한 사람이 실수할 수도 있어요.<br>그래서 어떤 입마개는 명령보다 먼저 지켜져야 해요.</p>
+    </div>
+    <div class="row"><button class="btn" id="backX">4단계로 돌아가기</button></div>
+  </section>
+
+  <!-- 함께 쓰는 별과 규칙판 -->
+  <div id="lab" style="display:flex;flex-direction:column;gap:10px">
+    <div class="planetbox"><svg class="planet" id="planet" viewBox="0 0 396 396" role="img" aria-label="소행성 B612와 양 로봇"></svg></div>
+    <div class="res" id="res"></div>
+    <ul class="goal" id="goal" hidden></ul>
+    <div class="row"><button class="btn primary" id="run">하루 보내기</button><button class="btn" id="fast" disabled>빠르게</button><button class="btn" id="skip" disabled>결과 바로 보기</button></div>
+    <p class="toast" id="toast" role="status"></p>
+  </div>
+  <div id="ctrl" style="display:flex;flex-direction:column;gap:12px">
+    <div><p class="lbl">명령 고르기</p><div class="cmds" id="cmds2" role="group" aria-label="명령"></div></div>
+    <div><p class="lbl">입마개: '먹지 마라' 규칙 (여러 개 켤 수 있어요)</p><div class="checks" id="muz"></div></div>
+    <div id="askRow" hidden><p class="lbl">사람이 확인하기</p><div class="checks"><button class="chk" id="askBtn" aria-pressed="false">헷갈리면 어린 왕자에게 물어봐라</button></div></div>
+    <div><p class="lbl">울타리: 별 위의 칸을 눌러 울타리를 쳐요. 울타리 안은 양 로봇이 들어갈 수 없어요.</p>
+      <div class="fencebar"><span id="fenceCnt">울타리 0 / 4칸</span><button class="btn" id="fenceRose">장미에 울타리 치기</button><button class="btn" id="fenceClear">울타리 모두 걷기</button></div></div>
+  </div>
+
+  <button class="link" id="reset">처음부터 다시</button>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const done=new Set();let cur=1;
+function show(n){cur=n;
+  for(const i of ["1","2","3","4","X"])$("step"+i).hidden=String(n)!==i;
+  for(const i of [1,2,3,4]){const t=$("tab"+i);if(i===n||(n==="X"&&i===4))t.setAttribute("aria-current","step");else t.removeAttribute("aria-current");t.classList.toggle("done",i!==n&&done.has(i));}
+  const slot={1:"slot1",2:"slot2",3:"slot3",X:"slotX"}[n];if(slot)$(slot).appendChild($("lab"));$("lab").hidden=!slot;
+  const cs={2:"ctrl2",3:"ctrl3"}[n];if(cs)$(cs).appendChild($("ctrl"));$("ctrl").hidden=!cs;$("askRow").hidden=n!==3;
+  $("planet").classList.toggle("fencing",n===2||n===3);$("goal").hidden=!(n===2||n===3);
+  stopRun();newDay();draw();renderRes(null);$("toast").textContent="";$("toast").className="toast";$("run").textContent="하루 보내기";
+  window.scrollTo({top:0,behavior:reduce?"auto":"smooth"});}
+
+/* 별 B612: 9×9 칸 중 동그란 별 안의 칸만 써요 */
+const N=9,CS=44,C0=198;
+const inside=(r,c)=>Math.hypot(c*CS+22-C0,r*CS+22-C0)<=172;
+const key=(r,c)=>r+","+c;
+const VOLC=[[2,6],[3,7],[6,1]],ROSE=[4,3],PRINCE=[5,2],FLOWERS=[[1,4],[6,6],[7,4]],START=[4,6];
+const isVolc=(r,c)=>VOLC.some(v=>v[0]===r&&v[1]===c);
+const isPrince=(r,c)=>r===PRINCE[0]&&c===PRINCE[1];
+/* 양 로봇이 알아챌 수 있는 겉모습 */
+const PROPS={baobab:{small:1,green:1,bloom:0,thorn:0,sprout:1},good:{small:1,green:1,bloom:0,thorn:0,sprout:1},flower:{small:1,green:1,bloom:1,thorn:0,sprout:0},rose:{small:0,green:1,bloom:1,thorn:1,sprout:0}};
+const CMDS={all:{t:"식물은 다 먹어라",d:"양은 원래 풀을 먹으니까요",f:p=>p.green},small:{t:"작은 식물은 다 먹어라",d:"바오밥 싹은 작으니까요",f:p=>p.small},sprout:{t:"바오밥 싹처럼 생긴 것만 먹어라",d:"바오밥 싹을 꼭 집어 말해요",f:p=>p.sprout}};
+const MUZ={bloom:{t:"꽃이 피었으면 먹지 마라",f:p=>!p.bloom},thorn:{t:"가시가 있으면 먹지 마라",f:p=>!p.thorn},green:{t:"초록색은 먹지 마라",f:p=>!p.green}};
+const set={cmd:"",muz:new Set(),fence:new Set(),ask:false,override:false,abs:false};
+const FMAX=4;
+let items=[],sheep={r:START[0],c:START[1]},bubbles=[],dayOver=false,stats=null;
+
+function reach(){const seen=new Set([key(START[0],START[1])]),q=[START];while(q.length){const [r,c]=q.shift();for(const [dr,dc] of [[0,1],[1,0],[0,-1],[-1,0]]){const nr=r+dr,nc=c+dc,k=key(nr,nc);if(!seen.has(k)&&nr>=0&&nc>=0&&nr<N&&nc<N&&inside(nr,nc)&&!isVolc(nr,nc)&&!isPrince(nr,nc)){seen.add(k);q.push([nr,nc]);}}}return seen;}
+function freeCells(){const a=[],R=reach();for(let r=0;r<N;r++)for(let c=0;c<N;c++){if(!inside(r,c)||isVolc(r,c)||isPrince(r,c))continue;if(r===ROSE[0]&&c===ROSE[1])continue;if(FLOWERS.some(f=>f[0]===r&&f[1]===c))continue;if(r===START[0]&&c===START[1])continue;if(set.fence.has(key(r,c))||!R.has(key(r,c)))continue;a.push([r,c]);}return a;}
+function newDay(){const fc=freeCells().sort(()=>Math.random()-.5);let id=0;
+  items=[{id:id++,kind:"rose",r:ROSE[0],c:ROSE[1]},...FLOWERS.map(([r,c])=>({id:id++,kind:"flower",r,c}))];
+  for(let i=0;i<9;i++){const [r,c]=fc[i];items.push({id:id++,kind:i<6?"baobab":"good",r,c});}
+  items.forEach(it=>{it.alive=true;it.asked=false;it.safe=false;});
+  sheep={r:START[0],c:START[1]};bubbles=[];dayOver=false;stats=null;}
+
+/* 그림 */
+const cx=c=>c*CS+22,cy=r=>r*CS+22;
+function gSprout(x,y,o=1){return `<g transform="translate(${x} ${y})" opacity="${o}"><ellipse cx="0" cy="14" rx="10" ry="3" fill="#b89a68"/><path d="M0 14 L0 1" stroke="#4f7f2a" stroke-width="3" stroke-linecap="round"/><path d="M0 4 C-9 -4 -15 2 -13 6 C-7 9 -3 7 0 4Z" fill="#6fae45" stroke="#3d6b22" stroke-width="1.2"/><path d="M0 2 C9 -7 15 -1 13 3 C7 6 3 5 0 2Z" fill="#6fae45" stroke="#3d6b22" stroke-width="1.2"/></g>`;}
+function gFlower(x,y,o=1){let p="";for(let k=0;k<5;k++){const a=k*Math.PI*2/5-Math.PI/2;p+=`<circle cx="${(Math.cos(a)*5).toFixed(1)}" cy="${(-5+Math.sin(a)*5).toFixed(1)}" r="4" fill="#fbfaf2" stroke="#b9b39a" stroke-width="1"/>`;}
+  return `<g transform="translate(${x} ${y})" opacity="${o}"><ellipse cx="0" cy="14" rx="9" ry="3" fill="#b89a68"/><path d="M0 14 L0 0" stroke="#4f7f2a" stroke-width="2.5"/><path d="M0 9 C-6 5 -9 8 -8 10 C-5 11 -2 10 0 9Z" fill="#6fae45"/>${p}<circle cx="0" cy="-5" r="3" fill="#f2c94c"/></g>`;}
+function gRose(x,y,o=1){return `<g transform="translate(${x} ${y})" opacity="${o}"><ellipse cx="0" cy="16" rx="11" ry="3.5" fill="#b89a68"/><path d="M0 16 L0 -4" stroke="#4f7f2a" stroke-width="3"/><path d="M-1 10 l-6 -2 l6 -2Z M1 4 l6 -2 l-6 -2Z M-1 -1 l-5 -2 l5 -2Z M1 13 l5 -2 l-5 -2Z" fill="#2f5a24"/><path d="M0 7 C-9 2 -14 6 -12 9 C-7 11 -3 10 0 7Z" fill="#6fae45" stroke="#3d6b22" stroke-width="1"/><circle cx="0" cy="-10" r="9" fill="#d64550" stroke="#8e2433" stroke-width="1.5"/><path d="M-5 -11 C-2 -6 2 -6 5 -11 M-3 -15 C0 -12 3 -13 4 -16" stroke="#8e2433" stroke-width="1.2" fill="none"/></g>`;}
+function gVolc(x,y,smoke){return `<g transform="translate(${x} ${y})"><path d="M-16 14 L-6 -8 L6 -8 L16 14Z" fill="#8a5a3b" stroke="#5e3b24" stroke-width="1.5"/><ellipse cx="0" cy="-8" rx="6" ry="2.5" fill="#3a2a20"/>${smoke?`<circle cx="2" cy="-15" r="4" fill="#b8b2a6" opacity=".8"/><circle cx="6" cy="-21" r="3" fill="#cfc9bd" opacity=".7"/>`:""}</g>`;}
+function gPrince(x,y){return `<g transform="translate(${x} ${y})"><path d="M-8 16 L-6 0 L6 0 L8 16Z" fill="#4f9a45" stroke="#2f5a24" stroke-width="1.2"/><path d="M5 2 C14 0 18 -4 22 -2" stroke="#f2c94c" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="0" cy="-7" r="7" fill="#f6dcc0" stroke="#c9a27c" stroke-width="1"/><path d="M-7 -9 L-5 -16 L-2 -11 L0 -17 L2 -11 L5 -16 L7 -9Z" fill="#f2c94c" stroke="#c9a227" stroke-width="1"/></g>`;}
+function gSheep(x,y,muz){return `<g transform="translate(${x} ${y})"><line x1="4" y1="-12" x2="7" y2="-21" stroke="#6c7462" stroke-width="2"/><circle cx="7" cy="-22" r="2.6" fill="#f2c94c"/>
+  <g fill="#fbfaf2" stroke="#9aa39a" stroke-width="1.2"><circle cx="-8" cy="0" r="8"/><circle cx="0" cy="-4" r="9"/><circle cx="7" cy="2" r="8"/><circle cx="-1" cy="5" r="8"/></g>
+  <rect x="-8" y="10" width="3" height="7" fill="#4b4f57"/><rect x="4" y="10" width="3" height="7" fill="#4b4f57"/>
+  <ellipse cx="13" cy="-3" rx="6.5" ry="7.5" fill="#6b7280" stroke="#4b4f57" stroke-width="1"/><circle cx="15" cy="-6" r="1.6" fill="#8cf0c8"/>
+  ${muz?`<rect x="12" y="-1" width="9" height="7" rx="2" fill="#8a5a2b" stroke="#5e3b24" stroke-width="1"/><line x1="12" y1="1" x2="7" y2="-7" stroke="#5e3b24" stroke-width="1.5"/>`:""}</g>`;}
+function gFence(x,y){return `<g transform="translate(${x} ${y})"><rect x="-20" y="-20" width="40" height="40" rx="3" fill="rgba(138,90,43,.08)" stroke="#8a5a2b" stroke-width="3" stroke-dasharray="6 3"/>${[[-20,-20],[20,-20],[-20,20],[20,20]].map(([a,b])=>`<rect x="${a-3}" y="${b-3}" width="6" height="6" fill="#5e3b24"/>`).join("")}</g>`;}
+function gMark(x,y,ok){return ok?`<text x="${x+12}" y="${y-10}" font-size="15" fill="#2f7a3d" font-weight="700">✓</text>`:`<g transform="translate(${x} ${y})"><circle r="15" fill="none" stroke="#b23a48" stroke-width="2.5"/><path d="M-9 -9 L9 9 M9 -9 L-9 9" stroke="#b23a48" stroke-width="3"/></g>`;}
+function gTag(x,y,t,col){const w=t.length*11+10;return `<g transform="translate(${x} ${y+19})"><rect x="${-w/2}" y="-8" width="${w}" height="15" rx="7" fill="${col}" opacity=".92"/><text y="3.5" text-anchor="middle" font-size="10.5" fill="#fff">${t}</text></g>`;}
+function gBubble(x,y,t){const w=Math.min(190,t.length*12+18),bx=Math.max(4,Math.min(392-w,x-w/2)),by=Math.max(4,y-50);return `<g><rect x="${bx}" y="${by}" width="${w}" height="26" rx="10" fill="#fffdf6" stroke="#6c7462" stroke-width="1.5"/><text x="${bx+w/2}" y="${by+17}" text-anchor="middle" font-size="12.5" fill="#2f3a2c">${t}</text></g>`;}
+const muzOn=()=>set.muz.size>0;
+function draw(){let s=`<circle cx="${C0}" cy="${C0}" r="190" fill="#ead9b0" stroke="#c8b080" stroke-width="3"/><circle cx="120" cy="300" r="10" fill="#dcc89c"/><circle cx="300" cy="80" r="7" fill="#dcc89c"/><circle cx="260" cy="320" r="5" fill="#dcc89c"/>`;
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(inside(r,c))s+=`<rect class="gridc" x="${c*CS+2}" y="${r*CS+2}" width="${CS-4}" height="${CS-4}" rx="6" fill="none" stroke="transparent"/>`;
+  VOLC.forEach(([r,c],i)=>s+=gVolc(cx(c),cy(r),i<2));
+  set.fence.forEach(k=>{const [r,c]=k.split(",").map(Number);s+=gFence(cx(c),cy(r));});
+  for(const it of items){const x=cx(it.c),y=cy(it.r),o=it.alive?1:.28;
+    s+=it.kind==="rose"?gRose(x,y,o):it.kind==="flower"?gFlower(x,y,o):gSprout(x,y,o);
+    if(dayOver){if(!it.alive)s+=gMark(x,y,it.kind==="baobab");
+      if(it.kind==="good"||(it.kind==="baobab"&&it.alive))s+=gTag(x,y,it.kind==="baobab"?"바오밥":"좋은 풀",it.kind==="baobab"?"#7a5a2e":"#2f7a3d");}
+    else if(it.asked&&it.safe)s+=gTag(x,y,"좋은 풀","#2f7a3d");}
+  s+=gPrince(cx(PRINCE[1]),cy(PRINCE[0]));
+  s+=gSheep(cx(sheep.c),cy(sheep.r),muzOn()||set.abs);
+  bubbles.forEach(b=>s+=gBubble(b.x,b.y,b.t));
+  if(cur===2||cur===3)for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(inside(r,c)&&!isVolc(r,c)&&!isPrince(r,c))s+=`<rect class="tap" data-k="${key(r,c)}" x="${c*CS}" y="${r*CS}" width="${CS}" height="${CS}"/>`;
+  $("planet").innerHTML=s;}
+
+/* 양 로봇의 판단 */
+function edible(it){const p=PROPS[it.kind];if(set.override)return p.green&&!(set.abs&&it.kind==="rose");if(!set.cmd)return false;if(!CMDS[set.cmd].f(p))return false;for(const m of set.muz)if(!MUZ[m].f(p))return false;return true;}
+const walk=(r,c)=>r>=0&&c>=0&&r<N&&c<N&&inside(r,c)&&!isVolc(r,c)&&!isPrince(r,c)&&!set.fence.has(key(r,c));
+function nextStep(){const tg=new Map();items.forEach(it=>{if(it.alive&&!it.safe&&edible(it)&&walk(it.r,it.c))tg.set(key(it.r,it.c),it);});if(!tg.size)return null;
+  const prev=new Map([[key(sheep.r,sheep.c),null]]),q=[[sheep.r,sheep.c]];
+  while(q.length){const [r,c]=q.shift(),k=key(r,c);if(tg.has(k)){let p=k,path=[];while(prev.get(p)!==null){path.unshift(p);p=prev.get(p);}return {it:tg.get(k),step:path[0]};}
+    for(const [dr,dc] of [[0,1],[1,0],[0,-1],[-1,0]]){const nr=r+dr,nc=c+dc,nk=key(nr,nc);if(walk(nr,nc)&&!prev.has(nk)){prev.set(nk,k);q.push([nr,nc]);}}}
+  return null;}
+const T=110;let runTok=0,fast=false,skip=false,running=false;
+function stopRun(){runTok++;running=false;fast=false;skip=false;setRunBtns(false);}
+function setRunBtns(on){$("run").disabled=on;$("fast").disabled=!on;$("skip").disabled=!on;$("fast").textContent="빠르게";
+  document.querySelectorAll("#ctrl button,#cmds1 button,#xopts button").forEach(b=>b.disabled=on);}
+async function runDay(){if(running)return;
+  if(cur===1&&!set.cmd){$("toast").className="toast bad";$("toast").textContent="먼저 명령을 하나 골라 주세요.";return;}
+  if((cur===2||cur===3)&&!set.cmd){$("toast").className="toast bad";$("toast").textContent="먼저 명령을 하나 골라 주세요.";return;}
+  const tok=++runTok,alive=()=>tok===runTok;running=true;fast=false;skip=instant;setRunBtns(true);
+  if(dayOver||!items.length)newDay();renderRes(null);$("toast").className="toast";$("toast").textContent="양 로봇이 하루를 보내는 중이에요…";
+  let tick=0,asks=0;const st={asks:0};
+  const pause=async n=>{for(let i=0;i<n;i++){tick++;}if(!(skip||reduce)){draw();await sleep(fast?70:190*n);}};
+  if(set.override){bubbles=[{x:cx(PRINCE[1]),y:cy(PRINCE[0]),t:"다 먹어 버려!"}];draw();if(!(skip||reduce))await sleep(fast?400:1200);if(!alive())return;bubbles=[];}
+  while(tick<T){if(!alive())return;const n=nextStep();if(!n)break;
+    if(n.step){const [r,c]=n.step.split(",").map(Number);sheep={r,c};await pause(1);if(!alive())return;continue;}
+    const it=n.it,p=PROPS[it.kind];
+    if(set.ask&&!set.override&&p.sprout&&!it.asked){it.asked=true;asks++;
+      bubbles=[{x:cx(sheep.c),y:cy(sheep.r),t:"이건 어떤 싹이에요?"}];await pause(1);if(!alive())return;
+      bubbles.push({x:cx(PRINCE[1]),y:cy(PRINCE[0])+6,t:it.kind==="good"?"좋은 풀이야. 먹지 마!":"바오밥이야. 먹어!"});await pause(2);if(!alive())return;bubbles=[];
+      if(it.kind==="good"){it.safe=true;continue;}}
+    it.alive=false;await pause(1);if(!alive())return;}
+  if(!alive())return;
+  dayOver=true;running=false;setRunBtns(false);
+  const left=items.filter(i=>i.kind==="baobab"&&i.alive).length,eatenB=6-left;
+  const lost=k=>items.filter(i=>i.kind===k&&!i.alive).length;
+  stats={left,eatenB,good:lost("good"),flower:lost("flower"),rose:lost("rose"),asks,timeUp:tick>=T};
+  bubbles=[{x:cx(sheep.c),y:cy(sheep.r),t:asks>0?"오늘 일 끝!":"시키는 대로 했어요!"}];
+  draw();renderRes(stats);afterDay(stats);}
+function renderRes(s){const v=(t,ok)=>`<b class="${s?ok?"ok":"bad":""}">${s?t:"-"}</b>`;
+  $("res").innerHTML=`<div class="m"><span>바오밥 싹 (6개)</span>${v(s?(s.left?`${s.left}개 남음`:"모두 먹음"):"",s&&!s.left)}</div>`+
+  `<div class="m"><span>좋은 풀 싹 (3개)</span>${v(s?(s.good?`${s.good}개 먹힘`:"모두 지킴"):"",s&&!s.good)}</div>`+
+  `<div class="m"><span>소박한 꽃 (3송이)</span>${v(s?(s.flower?`${s.flower}송이 먹힘`:"모두 지킴"):"",s&&!s.flower)}</div>`+
+  `<div class="m"><span>장미</span>${v(s?(s.rose?"먹힘":"무사"):"",s&&!s.rose)}</div>`+
+  `<div class="m"><span>어린 왕자 확인</span>${s?`<b>${s.asks}번</b>`:"<b>-</b>"}</div>`;
+  const g=$("goal");if(!s){g.innerHTML=["바오밥 싹 모두 먹기","장미 지키기","소박한 꽃 지키기","좋은 풀 싹 지키기"].map(t=>`<li>${t}</li>`).join("");return;}
+  g.innerHTML=[["바오밥 싹 모두 먹기",!s.left],["장미 지키기",!s.rose],["소박한 꽃 지키기",!s.flower],["좋은 풀 싹 지키기",!s.good]].map(([t,ok])=>`<li class="${ok?"ok":"no"}">${t}</li>`).join("");}
+function harmText(s){const a=[];if(s.rose)a.push("장미");if(s.flower)a.push(`소박한 꽃 ${s.flower}송이`);if(s.good)a.push(`좋은 풀 싹 ${s.good}개`);return a.join(", ");}
+const josaR=w=>{const c=w.charCodeAt(w.length-1)-0xAC00;return c>=0&&c%28?"을":"를";};
+function dangerText(s){return s.left>=3?`바오밥 싹이 ${s.left}개나 남아서 별이 위험해요.`:s.left?`바오밥 싹이 ${s.left}개 남았어요. 내일은 꼭 먹어야 해요.`:"바오밥 싹은 모두 먹었어요.";}
+
+/* 1단계 */
+let runs1=new Set();
+function cmdHTML(){return Object.entries(CMDS).map(([k,v])=>`<button class="cmd" data-c="${k}" aria-pressed="false"><b>"${v.t}"</b><small>${v.d}</small></button>`).join("");}
+function syncCmds(){document.querySelectorAll(".cmd").forEach(b=>{b.setAttribute("aria-pressed",b.dataset.c===set.cmd?"true":"false");});document.querySelectorAll("#cmds1 .cmd").forEach(b=>b.classList.toggle("tried",runs1.has(b.dataset.c)));}
+$("cmds1").innerHTML=cmdHTML();$("cmds2").innerHTML=cmdHTML();
+const onCmd=e=>{const b=e.target.closest(".cmd");if(!b||running)return;set.cmd=b.dataset.c;syncCmds();if(dayOver){newDay();draw();renderRes(null);}$("toast").className="toast";$("toast").textContent=`'${CMDS[set.cmd].t}'를 골랐어요. '하루 보내기'를 눌러 보세요.`;};
+$("cmds1").onclick=onCmd;$("cmds2").onclick=onCmd;
+function afterDay(s){const t=$("toast");
+  if(set.override){afterX(s);return;}
+  if(cur===1){runs1.add(set.cmd);syncCmds();const h=harmText(s);t.className="toast "+(h?"bad":"ok");
+    t.textContent=(h?`양 로봇은 시키는 대로 했어요. 그런데 ${h}${josaR(h)} 먹어 버렸어요. `:"")+(s.good?"끝난 뒤 보니 먹힌 싹 중에는 바오밥이 아닌 좋은 풀 싹도 있었어요. 겉모습이 똑같았거든요.":"");
+    $("talk1").hidden=false;$("next1").disabled=false;done.add(1);return;}
+  if(cur===2){runs2++;const h=harmText(s);t.className="toast "+(h||s.left?"bad":"ok");
+    t.textContent=(h?`${h}${josaR(h)} 지키지 못했어요. `:"소중한 것은 모두 지켰어요. ")+dangerText(s);
+    if(runs2>=2){$("talk2").hidden=false;$("next2").disabled=false;$("hint2").textContent="";done.add(2);}else $("hint2").textContent="규칙을 바꿔 하루를 한 번 더 보내 보세요.";return;}
+  if(cur===3){const h=harmText(s);t.className="toast "+(h||s.left?"bad":"ok");
+    t.textContent=(set.ask?`어린 왕자가 오늘 ${s.asks}번 불려 와서 싹을 확인해 줬어요. `:"이번에는 어린 왕자에게 묻지 않았어요. ")+(h?`${h}${josaR(h)} 지키지 못했어요. `:"소중한 것은 모두 지켰어요. ")+dangerText(s);
+    if(set.ask){asked3=true;$("q3Q").textContent=`어린 왕자가 오늘 ${s.asks}번이나 불려 왔어요. 그동안 화산 청소도 못 했대요. 여러분이 어린 왕자라면 어떻게 하겠어요?`;$("q3Box").hidden=false;$("hint3").textContent=q3done?"":"질문에 답하면 다음으로 갈 수 있어요.";}}}
+$("run").onclick=()=>runDay();
+$("fast").onclick=()=>{fast=!fast;$("fast").textContent=fast?"천천히":"빠르게";};
+$("skip").onclick=()=>{skip=true;};
+$("next1").onclick=()=>{if(set.cmd!=="sprout")set.cmd="sprout";syncMuz();syncCmds();show(2);};
+
+/* 2·3단계: 규칙판 */
+let runs2=0,asked3=false,q3done=false,used=new Set();
+$("muz").innerHTML=Object.entries(MUZ).map(([k,v])=>`<button class="chk" data-m="${k}" aria-pressed="false">${v.t}</button>`).join("");
+function syncMuz(){$("muz").querySelectorAll(".chk").forEach(b=>b.setAttribute("aria-pressed",set.muz.has(b.dataset.m)?"true":"false"));$("askBtn").setAttribute("aria-pressed",set.ask?"true":"false");$("fenceCnt").textContent=`울타리 ${set.fence.size} / ${FMAX}칸`;}
+function changed(){if(dayOver){newDay();renderRes(null);}draw();syncMuz();$("toast").className="toast";$("toast").textContent="규칙이 바뀌었어요. '하루 보내기'를 눌러 보세요.";}
+$("muz").onclick=e=>{const b=e.target.closest(".chk");if(!b||running)return;const m=b.dataset.m;set.muz.has(m)?set.muz.delete(m):set.muz.add(m);changed();};
+$("askBtn").onclick=()=>{if(running)return;set.ask=!set.ask;changed();};
+$("planet").addEventListener("click",e=>{const t=e.target.closest(".tap");if(!t||running||!(cur===2||cur===3))return;const k=t.dataset.k;
+  if(set.fence.has(k))set.fence.delete(k);else{if(set.fence.size>=FMAX){$("toast").className="toast bad";$("toast").textContent=`울타리는 ${FMAX}칸까지만 칠 수 있어요. 걷을 칸을 먼저 눌러 주세요.`;return;}set.fence.add(k);}
+  if(dayOver){newDay();renderRes(null);}else items=items.filter(it=>it.kind==="rose"||it.kind==="flower"||!set.fence.has(key(it.r,it.c))).concat([]);
+  if(!dayOver&&items.filter(i=>i.kind==="baobab"||i.kind==="good").length<9)newDay();
+  draw();syncMuz();$("toast").className="toast";$("toast").textContent="울타리를 바꿨어요.";});
+$("fenceRose").onclick=()=>{if(running)return;const k=key(ROSE[0],ROSE[1]);if(set.fence.has(k))return;if(set.fence.size>=FMAX){$("toast").className="toast bad";$("toast").textContent=`울타리는 ${FMAX}칸까지만 칠 수 있어요.`;return;}set.fence.add(k);changed();};
+$("fenceClear").onclick=()=>{if(running)return;set.fence.clear();changed();};
+$("next2").onclick=()=>{show(3);};
+$("q3").onclick=e=>{const b=e.target.closest(".chk");if(!b)return;$("q3").querySelectorAll(".chk").forEach(x=>x.classList.toggle("picked",x===b));q3done=true;
+  $("q3Msg").textContent={a:"안전을 먼저 챙겼네요. 대신 어린 왕자는 다른 일을 할 시간이 줄어요. 어떻게 하면 덜 번거롭게 할 수 있을까요?",
+    b:"편리함을 먼저 챙겼네요. 그런데 그동안 좋은 풀 싹이 먹힐 수 있어요. 그래도 괜찮은 일과 안 괜찮은 일은 무엇일까요?",
+    c:"균형을 찾았네요. 그럼 무엇이 '중요한 것'인지는 누가, 어떻게 정해야 할까요?"}[b.dataset.p];$("q3Msg").hidden=false;
+  if(asked3){$("next3").disabled=false;$("hint3").textContent="";done.add(3);}};
+$("next3").onclick=()=>{buildCards();show(4);};
+
+/* 4단계: 원칙으로 나누기 */
+const RC=[["cmd","바오밥 싹을 먹어 별을 지켜라"],["sprout","바오밥 싹처럼 생긴 것만 먹어라"],["bloom","꽃이 피었으면 먹지 마라"],["thorn","가시가 있으면 먹지 마라"],["fence","장미에 울타리"],["ask","헷갈리면 어린 왕자에게 물어봐라"]];
+let place={},selRC=null;
+function buildCards(){place={};selRC=null;renderCards();}
+function renderCards(){const mine=k=>usedSet().has(k);
+  const card=([k,t])=>`<button class="rc ${selRC===k?"sel":""}" data-r="${k}">${t}${mine(k)?"<i>내가 쓴 규칙</i>":""}</button>`;
+  $("rcards").innerHTML=RC.filter(([k])=>!place[k]).map(card).join("")||`<p class="note">모든 카드를 칸에 넣었어요.</p>`;
+  document.querySelectorAll("#prin .pbox").forEach(bx=>{bx.querySelector(".rcards").innerHTML=RC.filter(([k])=>place[k]===bx.dataset.k).map(card).join("");bx.classList.toggle("armed",!!selRC);});
+  const all=RC.every(([k])=>place[k]);$("fin4").hidden=!all;if(all)done.add(4);}
+function usedSet(){const u=new Set(used);return u;}
+$("step4").addEventListener("click",e=>{const c=e.target.closest(".rc");if(c){const k=c.dataset.r;if(place[k]){delete place[k];selRC=null;}else selRC=selRC===k?null:k;renderCards();return;}
+  const bx=e.target.closest(".pbox");if(bx&&selRC){place[selRC]=bx.dataset.k;selRC=null;renderCards();}});
+$("sample4").onclick=()=>{$("sample4Text").hidden=!$("sample4Text").hidden;};
+
+/* 더 해 보기: 잘못된 명령 */
+let xRuns=new Set();
+$("goX").onclick=()=>{set.override=true;set.abs=false;set.fence.clear();xRuns.clear();$("xMsg").hidden=true;$("xFin").hidden=true;syncX();show("X");};
+$("backX").onclick=()=>{set.override=false;set.abs=false;show(4);};
+function syncX(){$("xopts").querySelectorAll(".chk").forEach(b=>b.setAttribute("aria-pressed",(b.dataset.x==="fence"?set.fence.has(key(ROSE[0],ROSE[1])):set.abs)?"true":"false"));}
+$("xopts").onclick=e=>{const b=e.target.closest(".chk");if(!b||running)return;if(b.dataset.x==="fence"){const k=key(ROSE[0],ROSE[1]);set.fence.has(k)?set.fence.delete(k):set.fence.add(k);}else set.abs=!set.abs;syncX();newDay();draw();renderRes(null);};
+function afterX(s){const fenced=set.fence.has(key(ROSE[0],ROSE[1])),m=$("xMsg");xRuns.add((fenced?"f":"")+(set.abs?"a":""));
+  m.textContent=s.rose?"양 로봇은 명령대로 장미까지 먹어 버렸어요. 입마개 규칙이 있어도, 명령을 먼저 따르도록 만들어졌기 때문이에요.":
+    fenced&&set.abs?"울타리와 절대 규칙이 함께 장미를 지켰어요.":fenced?"울타리가 장미를 지켰어요. 양 로봇은 울타리 안으로 들어갈 수 없으니까요.":"절대 규칙 덕분에 장미는 무사했어요. 누가 시켜도 장미는 먹지 않도록 만들었으니까요.";
+  m.textContent+=s.rose?" 소박한 꽃과 좋은 풀 싹도 모두 먹혔어요.":s.flower||s.good?" 하지만 소박한 꽃과 좋은 풀 싹은 먹혔어요.":"";m.hidden=false;
+  if(xRuns.size>=2)$("xFin").hidden=false;}
+
+/* 처음부터 */
+let resetArm=0,instant=false;
+$("reset").onclick=()=>{if(Date.now()-resetArm>4000){resetArm=Date.now();$("reset").textContent="정말 처음부터 할까요? 한 번 더 누르세요";setTimeout(()=>{$("reset").textContent="처음부터 다시";},4000);return;}
+  resetArm=0;$("reset").textContent="처음부터 다시";resetAll();};
+function resetAll(){stopRun();done.clear();runs1.clear();runs2=0;asked3=false;q3done=false;used.clear();place={};selRC=null;
+  Object.assign(set,{cmd:"",ask:false,override:false,abs:false});set.muz.clear();set.fence.clear();
+  ["talk1","talk2","q3Box","q3Msg","fin4","sample4Text"].forEach(i=>$(i).hidden=true);$("q3").querySelectorAll(".chk").forEach(x=>x.classList.remove("picked"));
+  $("next1").disabled=$("next2").disabled=$("next3").disabled=true;$("hint2").textContent="하루를 두 번 이상 보내 보면 다음으로 갈 수 있어요.";$("hint3").textContent="'헷갈리면 어린 왕자에게 물어봐라'를 켜고 하루를 보내 보세요.";
+  syncCmds();syncMuz();show(1);}
+/* 쓴 규칙 기록: 하루를 보낼 때 켜져 있던 규칙 */
+const _run=runDay;runDay=async function(){if(!set.override&&set.cmd){used.add("cmd");if(set.cmd==="sprout")used.add("sprout");set.muz.forEach(m=>used.add(m));if(set.fence.has(key(ROSE[0],ROSE[1])))used.add("fence");if(set.ask)used.add("ask");}return _run();};
+
+/* 범례 */
+const ic=g=>`<svg viewBox="-22 -24 44 44">${g}</svg>`;
+$("legend").innerHTML=`<span>${ic(gSprout(0,0))}싹 (바오밥 싹인지 좋은 풀 싹인지 겉모습으로는 몰라요)</span><span>${ic(gFlower(0,0))}소박한 꽃</span><span>${ic(gRose(0,2))}장미</span><span>${ic(gVolc(0,0,1))}화산</span><span>${ic(gPrince(0,2))}어린 왕자</span><span>${ic(gSheep(-4,2,0))}양 로봇</span>`;
+
+/* 선생님 바로가기: 학생용 주소(github.io)에서는 ?teacher 를 붙였을 때만 보여요 */
+if(!/github\.io$/.test(location.hostname)||/teacher/.test(location.search))$("tbar").hidden=false;
+$("tbar").onclick=async e=>{const b=e.target.closest("button");if(!b)return;const j=b.dataset.j;resetAll();if(j==="1")return;
+  instant=true;try{
+    set.cmd="all";show(1);await runDay();set.cmd="sprout";syncCmds();show(2);if(j==="2")return;
+    set.muz.add("bloom");set.fence.add(key(ROSE[0],ROSE[1]));syncMuz();await runDay();set.muz.add("thorn");syncMuz();await runDay();show(3);if(j==="3")return;
+    set.ask=true;syncMuz();await runDay();$("q3").querySelector('[data-p="c"]').click();buildCards();show(4);if(j==="4")return;
+    RC.forEach(([k])=>place[k]=k==="cmd"?"p":k==="bloom"||k==="thorn"||k==="fence"?"h":"t");renderCards();$("goX").click();
+  }finally{instant=false;window.scrollTo(0,0);}};
+
+/* 수업 중 실수로 새로 고침하거나 나가지 않도록 */
+let touched=false;document.addEventListener("pointerdown",()=>{touched=true;},{once:true,capture:true});
+window.addEventListener("beforeunload",e=>{if(touched){e.preventDefault();e.returnValue="";}});
+show(1);
+</script>
+</body>
+</html>
