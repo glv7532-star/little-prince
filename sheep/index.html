@@ -122,7 +122,8 @@ html,body{overscroll-behavior-y:contain}
 .ans3 .col{border:1.5px solid var(--line);border-radius:12px;padding:8px 10px;background:var(--bg);display:flex;flex-direction:column;gap:6px}
 .ans3 h5{margin:0;font-family:var(--display);font-size:1.15rem;line-height:1.1;word-break:keep-all}
 .ans3 ul{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:6px;font-size:.88rem;line-height:1.35;word-break:keep-all}
-.ans3 .mk{display:block;font-size:.74rem;font-weight:700}.ans3 .mk.ok{color:var(--ok)}.ans3 .mk.no{color:var(--bad)}
+.ans3 .mk{display:block;font-size:.74rem;font-weight:700}.ans3 .mk.ok{color:var(--ink)}
+.pc-h{color:var(--bad)}.pc-p{color:var(--ok)}.pc-t{color:var(--accent)}
 .ans3 .why{margin:auto 0 0;font-size:.8rem;color:var(--muted);line-height:1.35;word-break:keep-all}
 .ans3>.note{margin-top:8px}
 @media (max-width:620px){.ans3 .cols{grid-template-columns:1fr}.ans3 .mk{display:inline;margin-left:6px}
@@ -230,9 +231,9 @@ html,body{overscroll-behavior-y:contain}
     <p class="note">양 로봇에게 그려 준 입마개와 울타리는 진짜 AI에게도 필요해요. 카드마다 그 규칙이 지켜 준 장면과, 진짜 AI의 비슷한 규칙이 적혀 있어요. 카드를 한 장씩 알맞은 원칙 칸으로 끌어다 놓거나, 칸을 누르세요. 칸에 넣은 이름표의 ✕를 누르면 다시 꺼낼 수 있어요.</p>
     <div class="deck"><span class="cnt" id="deckCnt"></span><div id="curCard"></div></div>
     <div class="prin" id="prin">
-      <div class="pbox" data-k="h" role="button" tabindex="0"><h4>인간 존엄성</h4><p>사람과 생명, 소중한 것을 해치지 않아요.</p><div class="chips"></div><span class="add">여기에 넣기</span></div>
-      <div class="pbox" data-k="p" role="button" tabindex="0"><h4>사회의 공공선</h4><p>모두에게, 별 전체에 이로워야 해요.</p><div class="chips"></div><span class="add">여기에 넣기</span></div>
-      <div class="pbox" data-k="t" role="button" tabindex="0"><h4>기술의 합목적성</h4><p>목적에 맞게, 사람이 살피며 써야 해요.</p><div class="chips"></div><span class="add">여기에 넣기</span></div>
+      <div class="pbox" data-k="h" role="button" tabindex="0"><h4 class="pc-h">인간 존엄성</h4><p>사람과 생명, 소중한 것을 해치지 않아요.</p><div class="chips"></div><span class="add">여기에 넣기</span></div>
+      <div class="pbox" data-k="p" role="button" tabindex="0"><h4 class="pc-p">사회의 공공선</h4><p>모두에게, 별 전체에 이로워야 해요.</p><div class="chips"></div><span class="add">여기에 넣기</span></div>
+      <div class="pbox" data-k="t" role="button" tabindex="0"><h4 class="pc-t">기술의 합목적성</h4><p>목적에 맞게, 사람이 살피며 써야 해요.</p><div class="chips"></div><span class="add">여기에 넣기</span></div>
     </div>
     <div id="fin4" hidden style="display:flex;flex-direction:column;gap:12px">
       <p class="echo">짝의 분류와 비교해 보세요. 다르게 넣은 카드가 있다면, 왜 그 칸에 넣었는지 서로 설명해 봐요. 한 카드가 여러 원칙에 걸칠 수도 있어요.</p>
@@ -626,8 +627,8 @@ let place={},queue=[];
 function buildCards(){place={};queue=RC.map(r=>r[0]);renderCards();}
 function renderCards(){queue=queue.filter(k=>!place[k]);RC.forEach(([k])=>{if(!place[k]&&!queue.includes(k))queue.push(k);});
   const R=k=>RC.find(r=>r[0]===k),n=RC.filter(([k])=>place[k]).length;
-  if(queue.length){const [k,t,real,pic]=R(queue[0]);$("curCard").innerHTML=`<div class="rc" data-r="${k}">${pic}<span><b>${t}</b><small>${real}</small>${used.has(k)?"<i>내가 쓴 규칙</i>":""}</span></div>`;$("deckCnt").textContent=`${n+1} / ${RC.length}번째 카드`;}
-  else{$("curCard").innerHTML=`<p class="note">모든 카드를 칸에 넣었어요.</p>`;$("deckCnt").textContent="";}
+  if(queue.length){const [k,t,real,pic]=R(queue[0]);$("curCard").innerHTML=`<div class="rc" data-r="${k}">${pic}<span><b>${t}</b><small>${real}</small>${used.has(k)?"<i>내가 쓴 규칙</i>":""}</span></div>`;$("deckCnt").textContent=`${n+1} / ${RC.length}번째 카드`;$("curCard").style.minHeight="";}
+  else{$("curCard").innerHTML=`<p class="note">모든 카드를 칸에 넣었어요.</p>`;$("curCard").style.minHeight="0";$("deckCnt").textContent="";}
   document.querySelectorAll("#prin .pbox").forEach(bx=>{bx.querySelector(".chips").innerHTML=RC.filter(([k])=>place[k]===bx.dataset.k).map(([k,t])=>`<span class="chip">${t}<button class="x" data-r="${k}" aria-label="${t} 빼기">✕</button></span>`).join("");bx.querySelector(".add").hidden=!queue.length;});
   const all=!queue.length;$("fin4").hidden=!all;if(all)done.add(4);if(!$("sample4Text").hidden)renderSample();}
 function putCur(box){if(!queue.length)return;place[queue[0]]=box;renderCards();}
@@ -647,7 +648,7 @@ window.addEventListener("pointerup",endDrag);window.addEventListener("pointercan
 $("prin").addEventListener("click",e=>{if(justDragged)return;const ch=e.target.closest(".chip .x");if(ch){const k=ch.dataset.r;delete place[k];queue.unshift(k);renderCards();return;}
   const bx=e.target.closest(".pbox");if(bx)putCur(bx.dataset.k);});
 const SAMPLE={cmd:"p",sprout:"t",bloom:"h",thorn:"h",fence:"h",ask:"t"},PNAME={h:"인간 존엄성",p:"사회의 공공선",t:"기술의 합목적성"},PWHY={h:"소중한 생명을 해치지 않으려고",p:"별 전체를 지키려고",t:"목적에 맞게, 사람이 살피며 쓰려고"};
-function renderSample(){const col=k=>`<div class="col"><h5>${PNAME[k]}</h5><ul>${RC.filter(([r])=>SAMPLE[r]===k).map(([r,t])=>`<li>${t}${place[r]===k?'<span class="mk ok">✓ 나와 같아요</span>':place[r]?`<span class="mk no">나는 ${PNAME[place[r]]}</span>`:""}</li>`).join("")}</ul><p class="why"><b>까닭</b> ${PWHY[k]}</p></div>`;
+function renderSample(){const col=k=>`<div class="col"><h5 class="pc-${k}">${PNAME[k]}</h5><ul>${RC.filter(([r])=>SAMPLE[r]===k).map(([r,t])=>`<li>${t}${place[r]===k?'<span class="mk ok">✓ 같아요</span>':place[r]?`<span class="mk pc-${place[r]}">→ ${PNAME[place[r]]}</span>`:""}</li>`).join("")}</ul><p class="why"><b>까닭</b> ${PWHY[k]}</p></div>`;
   $("sample4Text").innerHTML=`<div class="cols">${["h","p","t"].map(col).join("")}</div><p class="note">'헷갈리면 나에게 물어봐'는 장미 싹을 지키는 일이라 인간 존엄성에도 걸쳐요. 정답이 하나만 있는 건 아니에요.</p>`;}
 $("sample4").onclick=()=>{const h=$("sample4Text").hidden;if(h)renderSample();$("sample4Text").hidden=!h;$("sample4").textContent=h?"선생님이 생각한 분류 접기":"선생님이 생각한 분류 보기";};
 
