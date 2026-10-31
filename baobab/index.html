@@ -127,6 +127,15 @@ th{white-space:nowrap}
 .redo{border:2px solid var(--bad);background:var(--rose-bg);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px}
 .redo strong{font-family:var(--display);font-size:1.35rem;line-height:1.2}
 .redo p{margin:0}
+.drop{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:12px;background:var(--baobab-bg);border:2px solid var(--baobab)}
+.drop strong{font-family:var(--display);font-size:1.35rem;line-height:1.2;word-break:keep-all}
+.drop>p{margin:0;word-break:keep-all}
+.dopts{display:flex;flex-direction:column;gap:6px}
+.dopt{font:inherit;text-align:left;padding:10px 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;word-break:keep-all}
+.dopt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-bg)}
+.dopt:disabled{cursor:default}.dopt:disabled:not([aria-pressed="true"]){opacity:.5}
+.drop input{font:inherit;padding:10px 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);width:100%}
+.dropfb{margin:0;padding:10px 12px;border-radius:10px;background:var(--paper);line-height:1.55;word-break:keep-all}
 .tbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 10px;border:1.5px dashed var(--accent);border-radius:10px;font-size:.85rem;color:var(--muted)}
 .tbar button{font:inherit;font-size:.85rem;padding:5px 10px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
 .tbar button:disabled{opacity:.5}
@@ -216,6 +225,20 @@ th{white-space:nowrap}
       <strong>AI는 여러분이 가르친 대로만 배워요.</strong>
       <p>대충 붙인 이름표는 없었나요? 내 기준이 정말 바오밥 싹과 장미 싹을 잘 나누는지도 다시 생각해 봐요.</p>
       <div class="row"><button class="btn primary" id="redoBtn">내가 붙인 이름표를 다시 살펴볼까요? 다시 가르치러 가기</button></div>
+    </div>
+    <div class="drop" id="dropNote" hidden>
+      <strong>많이 가르쳤는데도 왜 정확도가 낮아졌을까요?</strong>
+      <p id="dropNums"></p>
+      <div class="dopts" id="dropOpts" role="group" aria-label="원인 고르기">
+        <button class="dopt" data-d="label" aria-pressed="false">헷갈려서 이름표를 잘못 붙인 싹이 있었다</button>
+        <button class="dopt" data-d="hard" aria-pressed="false">겉모습만으로는 구별하기 어려운 싹이 섞여 있었다</button>
+        <button class="dopt" data-d="luck" aria-pressed="false" id="dropLuck">한 문제 차이라서 우연일 수도 있다</button>
+        <button class="dopt" data-d="own" aria-pressed="false">직접 쓰기</button>
+      </div>
+      <input id="dropOwn" type="text" maxlength="60" placeholder="내 생각을 적어 보세요" autocomplete="off" aria-label="내가 생각한 원인" hidden>
+      <div class="row"><button class="btn primary" id="dropOk" disabled>확인</button></div>
+      <p class="note" id="dropHint">원인을 하나 고르거나 적어야 다음 단계로 갈 수 있어요.</p>
+      <p class="dropfb" id="dropFb" hidden></p>
     </div>
     <div class="grid" id="testGrid"></div>
     <div>
@@ -359,7 +382,7 @@ async function runTest(isMid){
   if(phase===1) done.add(3); if(phase===2) done.add(4);
   const preds=test.map(s=>predict(model,s));
   show(2); $("testTitle").textContent=mid?"중간 점검: 5개만 배운 AI":TITLES[phase];
-  $("score").textContent="검사 중"; $("scoreNote").textContent=""; $("redo").hidden=true; $("bars").innerHTML="";
+  $("score").textContent="검사 중"; $("scoreNote").textContent=""; $("redo").hidden=true; $("dropNote").hidden=true; $("bars").innerHTML="";
   $("teachMore").disabled=$("goNext").disabled=true; $("speedBtn").disabled=$("skipBtn").disabled=false; $("speedBtn").textContent="빠르게";
   const grid=$("testGrid"); grid.innerHTML=test.map(()=>`<div class="cell wait"></div>`).join("");
   const slot=$("scanSlot"),beam=$("beam"),stamp=$("stamp"),bed=$("bed");
@@ -405,10 +428,31 @@ function finishTest(ok){
   if(!mid&&phase===0){baseTry++;if(baseTry>1)kind=`기본 (${baseTry}차)`;}
   const low=!mid&&phase===0&&pct<60;
   $("redo").hidden=!low; $("goNext").hidden=mid||low;
+  /* 30개를 배웠는데 중간 점검보다 낮으면 원인을 골라 보게 해요 (다시 가르치라고 하지는 않아요) */
+  const m5=results.mid,drop=!mid&&phase===0&&!low&&!instant&&m5&&pct<m5.pct;$("dropNote").hidden=!drop;
+  if(drop){const k=Math.round((m5.pct-pct)/5);$("dropNums").textContent=`5개만 배웠을 때 ${m5.pct}% → 30개를 배웠을 때 ${pct}%`;
+    $("dropLuck").textContent=`${k===1?"한 문제":k+"문제"} 차이라서 우연일 수도 있다`;dropPick="";dropAns=null;
+    $("dropOpts").querySelectorAll(".dopt").forEach(b=>{b.disabled=false;b.setAttribute("aria-pressed","false");});
+    $("dropOwn").hidden=true;$("dropOwn").value="";$("dropOwn").disabled=false;$("dropOk").disabled=true;$("dropOk").hidden=false;$("dropHint").hidden=false;$("dropFb").hidden=true;$("goNext").disabled=true;}
   const row=`<tr${!mid&&phase===0?' data-base':''}><td>${round}</td><td>${kind}</td><td>${desc}</td><td>${pct}%</td></tr>`;
   const log=$("log");if(round===1)log.innerHTML="";$("logCard").hidden=false;log.insertAdjacentHTML("beforeend",row);
   show(2);
 }
+let dropPick="",dropAns=null;
+const DROP_FB={label:"그럴 수 있어요. AI는 우리가 붙인 이름표를 그대로 믿고 배워요. 이름표 몇 개만 틀려도 기준이 흔들릴 수 있어요.",
+  hard:"그럴 수 있어요. 가르친 싹 중에는 바오밥 싹인지 장미 싹인지 겉모습만으로는 알기 어려운 싹도 섞여 있었어요. 그런 싹에 붙인 이름표는 맞을 수도, 틀릴 수도 있어요.",
+  luck:"그럴 수 있어요. 시험이 20문제뿐이라 한 문제만 달라도 5%가 바뀌어요. 문제를 더 많이 풀어 보면 더 확실히 알 수 있어요.",
+  own:"좋은 생각이에요. 친구들은 어떻게 생각했는지 비교해 봐요."};
+const dropReady=()=>{$("dropOk").disabled=!dropPick||(dropPick==="own"&&!$("dropOwn").value.trim());};
+$("dropOpts").onclick=e=>{const b=e.target.closest(".dopt");if(!b||b.disabled)return;dropPick=b.dataset.d;
+  $("dropOpts").querySelectorAll(".dopt").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));
+  $("dropOwn").hidden=dropPick!=="own";if(dropPick==="own")$("dropOwn").focus();dropReady();};
+$("dropOwn").oninput=dropReady;
+$("dropOk").onclick=()=>{if($("dropOk").disabled)return;
+  const txt=dropPick==="own"?$("dropOwn").value.trim():$("dropOpts").querySelector(`[data-d="${dropPick}"]`).textContent;
+  dropAns=txt.replace(/[<>&]/g,"");$("dropOpts").querySelectorAll(".dopt").forEach(x=>x.disabled=true);$("dropOwn").disabled=true;
+  $("dropOk").hidden=true;$("dropHint").hidden=true;
+  $("dropFb").textContent=DROP_FB[dropPick]+" 다음 단계에서는 틀린 이름표가 많이 섞이면 AI가 어떻게 되는지 실험해 봐요.";$("dropFb").hidden=false;$("goNext").disabled=false;};
 function renderSummary(){
   const card=(k,cls,r,d)=>`<div class="sumc ${cls}"><span class="k">${k}</span><span class="v">${r?r.pct+"%":"-"}</span><div class="meter"><i style="width:${r?r.pct:0}%"></i></div><span class="d">${d}</span></div>`;
   const m=results.mid,a=results[0],b=results[1],c=results[2];
@@ -416,7 +460,8 @@ function renderSummary(){
     +card("③ 틀린 이름표","wrong",b,b?`틀린 이름표 ${b.w}개가 섞였어요.`:"")
     +card("④ 편식","picky",c,c?`배운 데이터: ${c.desc}. 장미 싹 ${c.rs}개 중 ${c.rw}개를 바오밥이라고 했어요.`:"");
   const t=a&&a.top>=0?FEATS[a.top][1]:"-";
-  $("ruleCmp").innerHTML=`<div class="sumc"><span class="k">0단계에서 내가 세운 기준</span><span class="v s">${myRule.replace(/[<>&]/g,"")||"-"}</span></div><div class="sumc"><span class="k">② 30개를 배운 AI가 가장 중요하게 본 것</span><span class="v s">${t}</span></div>`;
+  $("ruleCmp").innerHTML=`<div class="sumc"><span class="k">0단계에서 내가 세운 기준</span><span class="v s">${myRule.replace(/[<>&]/g,"")||"-"}</span></div><div class="sumc"><span class="k">② 30개를 배운 AI가 가장 중요하게 본 것</span><span class="v s">${t}</span></div>`
+    +(dropAns?`<div class="sumc"><span class="k">②에서 정확도가 낮아진 까닭 (내가 생각한 원인)</span><span class="v s">${dropAns}</span></div>`:"");
 }
 function show(n){
   if(n!==2&&$("score").textContent==="검사 중"){stopScan();$("score").textContent="-";$("testGrid").innerHTML="";}
@@ -490,7 +535,7 @@ $("addSkew").onclick=async()=>{
 };
 $("redoBtn").onclick=()=>{
   $("log").querySelectorAll("tr[data-base]").forEach(tr=>{if(tr.children[1].textContent==="기본")tr.children[1].textContent="기본 (1차)";});
-  data=[];delete results[0];done.delete(1);done.delete(2);$("redo").hidden=true;
+  data=[];delete results[0];dropAns=null;done.delete(1);done.delete(2);$("redo").hidden=true;
   $("toast1").textContent="처음부터 30개를 다시 가르쳐요. 이번에는 이름표 하나하나 신중하게 붙여 봐요.";
   $("ruleErr").textContent="";show(0);$("myRule").focus();$("myRule").select();
 };
@@ -503,7 +548,7 @@ $("reset").onclick=()=>{
 };
 function resetAll(){
   tRun++;stopScan();$("teachBox").hidden=true;
-  phase=0;baseTry=0;$("redo").hidden=true;done=new Set();results={};pending=false;$("retest").disabled=true;mid=false;$("teachMore").hidden=true;$("goNext").hidden=false;$("goNext").textContent="엉터리 선생님 (1) 해 보기";
+  phase=0;baseTry=0;$("redo").hidden=true;$("dropNote").hidden=true;dropAns=null;dropPick="";done=new Set();results={};pending=false;$("retest").disabled=true;mid=false;$("teachMore").hidden=true;$("goNext").hidden=false;$("goNext").textContent="엉터리 선생님 (1) 해 보기";
   data=[];round=0;model=null;current=makeSprout();test=Array.from({length:TN},()=>makeSprout(null,true));
   $("log").innerHTML=`<tr><td colspan="4" class="note">아직 시험을 보지 않았어요.</td></tr>`;$("logCard").hidden=true;
   $("toast1").textContent="";$("toast3").textContent="";myRule="";$("myRule").value="";$("mineShow").textContent="";show(0);
