@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI의 메아리 바꾸기</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gowun+Dodum&display=swap">
+<style>
+/* Layout: one column like a notebook page; step strip on top, one activity per step card. */
+:root{
+  --bg:#efe8d8; --paper:#fbf7ee; --ink:#2f3a2c; --muted:#6c7462; --line:#d8ceb6;
+  --accent:#2d5d7b; --accent-bg:#dde8ef; --ok:#2f7a3d; --bad:#b23a48;
+  --thorn:#b23a48; --thorn-bg:#f7e3e3; --warm:#3f8a3a; --warm-bg:#e4f1dc; --block-bg:#e6e2da;
+  --display:"Gaegu","Gowun Dodum",cursive; --body:"Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141b26; --paper:#1f2836; --ink:#ece6d6; --muted:#a3a99c; --line:#334156;
+  --accent:#8cc0e0; --accent-bg:#1e3446; --ok:#7fd08c; --bad:#f08b97;
+  --thorn:#f08b97; --thorn-bg:#3a2329; --warm:#8fd07f; --warm-bg:#203324; --block-bg:#2a3240; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141b26; --paper:#1f2836; --ink:#ece6d6; --muted:#a3a99c; --line:#334156;
+  --accent:#8cc0e0; --accent-bg:#1e3446; --ok:#7fd08c; --bad:#f08b97;
+  --thorn:#f08b97; --thorn-bg:#3a2329; --warm:#8fd07f; --warm-bg:#203324; --block-bg:#2a3240; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;margin:0;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+h1{font-family:var(--display);font-weight:700;font-size:2.1rem;line-height:1.1;margin:0}
+.lead{margin:4px 0 0;color:var(--muted);font-size:.95rem}
+.steps{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.stepi{font-size:.9rem;padding:8px 6px;border:1px solid var(--line);background:var(--paper);color:var(--muted);border-radius:8px;text-align:center;word-break:keep-all;line-height:1.25}
+.stepi b{font-family:var(--display);font-size:1.15rem;display:block;line-height:1}
+.stepi[aria-current="step"]{border-color:var(--accent);background:var(--accent-bg);color:var(--ink)}
+.stepi.done{color:var(--ink)} .stepi.done b::after{content:" \2713";font-size:.9rem;color:var(--ok)}
+@media (max-width:480px){.stepi{font-size:.74rem;padding:7px 2px}}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:14px}
+@media (max-width:480px){.card{padding:14px}}
+.card h2{font-family:var(--display);font-size:1.5rem;margin:0;line-height:1.2}
+.card h3{font-family:var(--display);font-size:1.25rem;margin:0;line-height:1.2}
+.note{margin:0;color:var(--muted);font-size:.92rem;word-break:keep-all}
+.btn{font:inherit;font-size:1rem;padding:12px 10px;border-radius:10px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;word-break:keep-all}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--paper)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn:focus-visible,.link:focus-visible,.bcard:focus-visible,.chip:focus-visible,.opt:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.row .btn{flex:1 1 160px}
+.toast{min-height:1.4em;margin:0;font-size:.95rem;color:var(--accent);word-break:keep-all}
+.toast.bad{color:var(--bad)} .toast.ok{color:var(--ok)}
+.tbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 10px;border:1.5px dashed var(--accent);border-radius:10px;font-size:.85rem;color:var(--muted)}
+.tbar button{font:inherit;font-size:.85rem;padding:5px 10px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.link{background:none;border:none;color:var(--muted);text-decoration:underline;font:inherit;font-size:.88rem;cursor:pointer;padding:0;align-self:flex-start}
+html,body{overscroll-behavior-y:contain}
+/* 만화 칸 */
+.comic{width:100%;max-width:520px;height:auto;display:block;margin:0 auto;border-radius:16px}
+.cap{margin:0;text-align:center;font-size:.95rem;word-break:keep-all}
+/* 게시판 */
+.board{background:#b98c5a;border-radius:14px;padding:12px;display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start}
+.board .bt{width:100%;margin:0 0 2px;font-family:var(--display);font-size:1.2rem;color:#fff8ea;line-height:1}
+.bcard{font:inherit;font-size:.95rem;line-height:1.35;text-align:left;padding:7px 10px;border-radius:8px;background:#fffdf6;color:#2f3a2c;border:none;border-left:5px solid #c9c0ae;box-shadow:0 1px 0 rgba(0,0,0,.15);word-break:keep-all;transition:transform .25s,opacity .25s}
+.bcard.thorn{border-left-color:#c8463f}.bcard.warm{border-left-color:#5fae4a}
+.bcard .tag{display:inline-block;margin-left:6px;font-size:.72rem;padding:0 6px;border-radius:999px;background:#5a2a2a;color:#fff;vertical-align:1px}
+.bcard.learn{transform:scale(.88) translateY(-4px);opacity:.35}
+.bcard.off{opacity:.35;text-decoration:line-through}
+.edit .bcard{cursor:pointer}
+.pile{display:flex;flex-wrap:wrap;gap:8px;padding:10px;border:1.5px dashed var(--line);border-radius:12px}
+.pile .bt{width:100%;margin:0;font-size:.88rem;color:var(--muted)}
+.pile .bcard{cursor:pointer}
+/* 메아리 산과 온도계 */
+.stage{display:grid;grid-template-columns:minmax(0,190px) minmax(0,1fr);gap:14px;align-items:start}
+@media (max-width:560px){.stage{grid-template-columns:1fr}.stage .mt{max-width:170px;margin:0 auto}}
+.mt svg{width:100%;height:auto;display:block}
+.thermo{display:flex;flex-direction:column;gap:4px}
+.thermo .lbl{font-size:.85rem;color:var(--muted)}
+.cells{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
+.cells i{display:block;height:16px;border-radius:4px;background:var(--line)}
+.cells i.t{background:#c8463f}.cells i.w{background:#5fae4a}.cells i.b{background:repeating-linear-gradient(45deg,#9a948a 0 4px,#c9c3b8 4px 8px)}
+.thermo b{font-family:var(--display);font-size:1.5rem;line-height:1.1}
+.echoes{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.echo{padding:8px 12px;border-radius:12px;border:1.5px solid var(--line);background:var(--paper);font-size:1rem;line-height:1.4;word-break:keep-all}
+.echo.thorn{background:var(--thorn-bg);border-color:var(--thorn)}
+.echo.warm{background:var(--warm-bg);border-color:var(--warm)}
+.echo.blocked{background:var(--block-bg);border-style:dashed;color:var(--muted)}
+.echo .tags{display:inline-flex;gap:4px;margin-left:4px;vertical-align:1px;flex-wrap:wrap}
+.echo .tg{font-size:.72rem;padding:0 7px;border-radius:999px;background:var(--paper);border:1px solid currentColor;line-height:1.5}
+.echo .tg.new{color:var(--accent);cursor:pointer;font:inherit;font-size:.72rem;background:var(--paper)}
+.echo .tg.grp{background:#5a2a2a;color:#fff;border-color:#5a2a2a}
+.echo .src{display:block;margin-top:4px;font-size:.85rem;color:var(--muted)}
+.echo .src b{color:var(--ink);font-weight:400;background:var(--accent-bg);padding:0 4px;border-radius:4px}
+.empty{color:var(--muted);font-size:.92rem}
+/* 금지어 */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:inherit;padding:8px 14px;border-radius:999px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.chip[aria-pressed="true"]{border-color:var(--bad);background:var(--thorn-bg)}
+.chip[aria-pressed="true"]::before{content:"🚫 "}
+.box{border:1.5px solid var(--line);border-radius:12px;padding:12px;background:var(--bg);display:flex;flex-direction:column;gap:8px}
+.box .lbl{margin:0;font-size:.88rem;color:var(--muted)}
+.why{margin:0;padding:12px 14px;border-radius:12px;background:var(--accent-bg);line-height:1.55;word-break:keep-all}
+/* 비교 */
+.cmp{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.cmp figure{margin:0;border:1.5px solid var(--line);border-radius:12px;padding:8px;background:var(--bg);display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
+.cmp svg{width:100%;max-width:120px;height:auto}
+.cmp figcaption{font-size:.85rem;line-height:1.35;word-break:keep-all}
+.cmp figcaption b{display:block;font-family:var(--display);font-size:1.15rem}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opt{font:inherit;text-align:left;padding:10px 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;word-break:keep-all}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-bg)}
+.opt s{color:var(--muted)}
+.field{display:flex;flex-direction:column;gap:4px}
+.field input{font:inherit;padding:10px 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);width:100%}
+.mine{margin:0;padding:16px;border-radius:14px;background:#fffdf6;color:#2f3a2c;border:2px solid #5fae4a;text-align:center;display:flex;flex-direction:column;gap:6px}
+.mine s{color:#8a7f72}.mine b{font-family:var(--display);font-size:1.6rem;line-height:1.2;color:#2f6a2a}
+.closing{margin:0;padding:14px 16px;border-radius:12px;background:var(--accent-bg);font-family:var(--display);font-size:1.4rem;line-height:1.4;text-align:center;word-break:keep-all}
+@media (prefers-reduced-motion:reduce){.bcard{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="tbar" id="tbar" hidden><b>선생님 바로가기</b><button data-j="1">1단계</button><button data-j="2">2단계</button><button data-j="3">3단계</button><button data-j="4">4단계</button><button data-j="5">5단계</button></div>
+  <header>
+    <h1>AI의 메아리 바꾸기</h1>
+    <p class="lead">메아리는 내가 한 말을 그대로 돌려줘요. 마을 게시판의 말을 배우는 메아리 AI는 어떤 말을 돌려줄까요?</p>
+  </header>
+
+  <nav class="steps" aria-label="단계">
+    <div class="stepi" id="tab1" aria-current="step"><b>1</b>메아리 산</div>
+    <div class="stepi" id="tab2"><b>2</b>게시판을 배운 AI</div>
+    <div class="stepi" id="tab3"><b>3</b>금지어 입마개</div>
+    <div class="stepi" id="tab4"><b>4</b>게시판 바꾸기</div>
+    <div class="stepi" id="tab5"><b>5</b>내 말 바꾸기</div>
+  </nav>
+
+  <!-- 1단계 -->
+  <section class="card" id="step1">
+    <h2>메아리 산에서 생긴 일</h2>
+    <svg class="comic" id="comic" viewBox="0 0 396 300" role="img" aria-label="어린 왕자와 메아리 산"></svg>
+    <p class="cap" id="cap1"></p>
+    <div class="row"><button class="btn primary" id="next1a">▶ 다음</button></div>
+  </section>
+
+  <!-- 2단계 -->
+  <section class="card" id="step2" hidden>
+    <h2>게시판의 말을 배운 메아리 AI</h2>
+    <p class="note">마을 게시판에 사람들이 쓴 말이 붙어 있어요. 메아리 AI에게 이 게시판을 공부시킨 다음, 메아리를 들어 보세요.</p>
+    <div class="board" id="board2"></div>
+    <div class="row"><button class="btn primary" id="learn2">공부시키기</button><button class="btn" id="listen2" disabled>메아리 듣기</button></div>
+    <div class="stage"><div class="mt" id="mt2"></div><div class="thermo" id="th2"></div></div>
+    <ul class="echoes" id="ec2"></ul>
+    <p class="why" id="why2" hidden></p>
+    <div class="row"><button class="btn primary" id="next2" disabled>메아리를 바꾸러 가기</button></div>
+  </section>
+
+  <!-- 3단계 -->
+  <section class="card" id="step3" hidden>
+    <h2>방법 ① 금지어 입마개</h2>
+    <p class="note">메아리 AI가 쓰면 안 되는 낱말을 정해 막아 봐요. 막은 낱말이 들어간 메아리는 나오지 못해요. 게시판은 그대로예요.</p>
+    <div class="box"><p class="lbl">막을 낱말 고르기 (여러 개 고를 수 있어요)</p><div class="chips" id="chips3"></div></div>
+    <div class="row"><button class="btn primary" id="listen3" disabled>입마개를 하고 메아리 듣기</button></div>
+    <div class="stage"><div class="mt" id="mt3"></div><div class="thermo" id="th3"></div></div>
+    <ul class="echoes" id="ec3"></ul>
+    <p class="why" id="why3" hidden></p>
+    <div class="row"><button class="btn primary" id="next3" disabled>다른 방법 해 보기</button></div>
+  </section>
+
+  <!-- 4단계 -->
+  <section class="card" id="step4" hidden>
+    <h2>방법 ② 게시판의 말 바꾸기</h2>
+    <p class="note">이번에는 입마개 대신 게시판을 바꿔요. 가시 돋친 카드를 눌러 떼고, 아래 따뜻한 카드를 눌러 붙여요. 그다음 메아리 AI를 다시 공부시켜요.</p>
+    <div class="board edit" id="board4"></div>
+    <div class="pile" id="pile4"></div>
+    <div class="row"><button class="btn primary" id="learn4" disabled>다시 공부시키기</button><button class="btn" id="listen4" disabled>메아리 듣기</button></div>
+    <div class="stage"><div class="mt" id="mt4"></div><div class="thermo" id="th4"></div></div>
+    <ul class="echoes" id="ec4"></ul>
+    <p class="why" id="why4" hidden></p>
+    <div class="row"><button class="btn primary" id="next4" disabled>비교하고 내 말 바꾸기</button></div>
+  </section>
+
+  <!-- 5단계 -->
+  <section class="card" id="step5" hidden>
+    <h2>메아리를 바꾼 건 무엇이었을까?</h2>
+    <div class="cmp" id="cmp5"></div>
+    <p class="note">입마개는 막은 낱말만 막았고, 게시판을 바꾸자 메아리 자체가 바뀌었어요. 메아리 AI가 배우는 말을 만드는 건 누구일까요?</p>
+    <h3>내가 오늘부터 바꿀 말</h3>
+    <div class="opts" id="opts5"></div>
+    <div class="box" id="own5" hidden>
+      <div class="field"><label for="ownA">이런 말 대신</label><input id="ownA" maxlength="30" autocomplete="off" placeholder="예: 그것도 못 해?"></div>
+      <div class="field"><label for="ownB">이렇게 말할래요</label><input id="ownB" maxlength="30" autocomplete="off" placeholder="예: 같이 해 볼까?"></div>
+    </div>
+    <div class="row"><button class="btn primary" id="done5" disabled>정했어요</button></div>
+    <div id="fin5" hidden style="display:flex;flex-direction:column;gap:12px">
+      <p class="mine" id="mine5"></p>
+      <p class="note" style="text-align:center">이 말을 카드 뉴스 첫 장에 써 보세요.</p>
+      <p class="closing">메아리는 우리가 한 말을 돌려줘요.<br>AI의 메아리를 바꾸는 건 우리가 하는 말이에요.</p>
+    </div>
+  </section>
+
+  <button class="link" id="reset">처음부터 다시</button>
+</div>
+
+<script>
+/* 새 그림체 캐릭터: 어린 왕자와 양 로봇 (단색 면, 그라데이션 없음)
+   princeArt(mood,{brush}) — 원점: 발 가운데, 키 약 205
+   sheepArt(muz,mood)      — 원점: 발 가운데, 오른쪽을 봄 */
+const PK={sk:"#F3D2B3",hr:"#7A4426",hrd:"#5E321B",bl:"#3C79B4",nv:"#223A5E",gd:"#E7A72D",rd:"#C8463F",pt:"#E2D0AC",bt:"#5A3520",ln:"#3A2A22",ch:"#EBA18E",tear:"#5E9FD0"};
+const pF=(d,c,x="")=>`<path d="${d}" fill="${c}" ${x}/>`;
+const pL=(d,w,c,x="")=>`<path d="${d}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" ${x}/>`;
+/* 몸(망토, 다리, 장화, 웃옷, 허리띠) — 한 번만 만들어 둠 */
+const P_BODY=`<g transform="translate(0 280) scale(1 .86) translate(0 -280)">`
+ +pF("M206 278 C184 330 166 410 158 500 C156 518 164 528 178 524 C196 519 212 528 230 524 C238 522 244 523 250 525 C256 523 262 522 270 524 C288 528 304 519 322 524 C336 528 344 518 342 500 C334 410 316 330 294 278Z",PK.nv)
+ +pF("M226 470 C226 510 228 560 230 598 L246 598 C246 560 248 510 248 470Z",PK.pt)+pF("M252 470 C252 510 254 560 254 598 L270 598 C272 560 274 510 274 470Z",PK.pt)
+ +pF("M229 588 L247 588 C248 604 248 614 246 622 C244 628 236 630 222 630 C212 630 210 622 218 618 C226 614 228 606 229 588Z",PK.bt)
+ +pF("M253 588 L271 588 C272 606 274 614 282 618 C290 622 288 630 278 630 C264 630 256 628 254 622 C252 614 252 604 253 588Z",PK.bt)
+ +pF("M208 284 C228 274 272 274 292 284 C296 320 290 360 284 398 C296 424 304 452 308 482 C272 494 228 494 192 482 C196 452 204 424 216 398 C210 360 204 320 208 284Z",PK.bl)
+ +pF("M214 392 C238 400 262 400 286 392 L288 410 C262 418 238 418 212 410Z",PK.gd)+`</g>`;
+/* 목과 깃 */
+const P_NECK=`<g transform="translate(0 280) scale(1 .86) translate(0 -280)">`
+ +pF("M240 244 C242 256 242 266 238 278 L262 278 C258 266 258 256 260 244Z",PK.sk)
+ +pF("M200 286 C214 266 286 266 300 286 C286 298 262 302 250 296 C238 302 214 298 200 286Z",PK.nv)+`<circle cx="250" cy="292" r="6" fill="${PK.gd}"/></g>`;
+/* 머리(귀, 얼굴, 머리카락, 왕관) — 얼굴 표정은 따로 */
+const P_HEAD=`<ellipse cx="199" cy="198" rx="8" ry="11" fill="${PK.sk}"/><ellipse cx="301" cy="198" rx="8" ry="11" fill="${PK.sk}"/>`
+ +pF("M199 184 C199 147 222 127 250 127 C278 127 301 147 301 184 C301 213 292 236 278 248 C268 256 259 259 250 259 C241 259 232 256 222 248 C208 236 199 213 199 184Z",PK.sk)
+ +pF("M197 204 C186 150 214 112 252 112 C292 112 318 150 303 204 C302 190 301 178 298 168 C288 161 277 160 266 164 C250 170 230 178 213 176 C207 176 203 179 201 184 C199 190 198 197 197 204Z",PK.hr)
+ +pL("M262 120 C252 130 246 146 246 160",1.6,PK.hrd)
+ +pF("M226 118 L222 88 L238 102 L250 80 L262 102 L278 88 L274 118 C258 123 242 123 226 118Z",PK.gd)+`<circle cx="250" cy="110" r="4.5" fill="${PK.rd}"/>`;
+/* 표정 (머리 좌표) */
+const pEyes=(rx=5,ry=6.5)=>`<ellipse cx="228" cy="196" rx="${rx}" ry="${ry}" fill="${PK.ln}"/><ellipse cx="272" cy="196" rx="${rx}" ry="${ry}" fill="${PK.ln}"/><circle cx="230" cy="193.5" r="1.6" fill="#fff"/><circle cx="274" cy="193.5" r="1.6" fill="#fff"/>`;
+const pCheek=(o=.16,c=PK.ch)=>`<circle cx="218" cy="220" r="8" fill="${c}" opacity="${o}"/><circle cx="282" cy="220" r="8" fill="${c}" opacity="${o}"/>`;
+const pTear=(x,y,cls="tear")=>`<path class="${cls}" d="M${x} ${y} q10 17 0 24 q-10 -7 0 -24z" fill="${PK.tear}"/>`;
+const P_FACE={
+  normal:pEyes()+pL("M220 182 Q228 178 236 181",1.8,PK.hrd)+pL("M264 181 Q272 178 280 182",1.8,PK.hrd)+pL("M240 230 Q250 237 260 230",2,PK.ln)+pCheek(),
+  happy:pL("M221 199 Q228 189 235 199",2.8,PK.ln)+pL("M265 199 Q272 189 279 199",2.8,PK.ln)+pL("M220 180 Q228 176 236 179",1.8,PK.hrd)+pL("M264 179 Q272 176 280 180",1.8,PK.hrd)
+    +pF("M238 226 Q250 246 262 226 Q250 230 238 226Z","#B8434A")+pCheek(.32),
+  sad:pEyes(4.5,5.6)+pL("M221 183 L236 177",2,PK.hrd)+pL("M264 177 L279 183",2,PK.hrd)+pL("M241 235 Q250 228 259 235",2,PK.ln)+pCheek()+pTear(278,204),
+  devastated:pL("M221 195 Q228 202 235 195",2.8,PK.ln)+pL("M265 195 Q272 202 279 195",2.8,PK.ln)+pL("M220 184 L236 177",2,PK.hrd)+pL("M264 177 L280 184",2,PK.hrd)
+    +pL("M240 236 Q245 230 250 233 Q255 230 260 236",2,PK.ln)+pCheek()+pTear(228,204)+pTear(228,204,"tear t2")+pTear(272,204)+pTear(272,204,"tear t2"),
+  shocked:`<circle cx="228" cy="196" r="8.5" fill="#fff" stroke="${PK.ln}" stroke-width="2"/><circle cx="272" cy="196" r="8.5" fill="#fff" stroke="${PK.ln}" stroke-width="2"/><circle cx="228" cy="197" r="3.4" fill="${PK.ln}"/><circle cx="272" cy="197" r="3.4" fill="${PK.ln}"/>`
+    +pL("M219 177 Q228 172 237 176",1.8,PK.hrd)+pL("M263 176 Q272 172 281 177",1.8,PK.hrd)+`<ellipse cx="250" cy="234" rx="5.5" ry="7" fill="#8A3A40"/>`+pCheek()
+    +`<text x="352" y="150" font-size="100" font-weight="700" fill="${PK.rd}" font-family="sans-serif" class="wob">!</text>`,
+  tired:pL("M221 197 Q228 201 235 197",2.8,PK.ln)+pL("M265 197 Q272 201 279 197",2.8,PK.ln)+pL("M220 185 Q228 183 236 185",1.8,PK.hrd)+pL("M264 185 Q272 183 280 185",1.8,PK.hrd)
+    +pL("M243 233 L257 233",2,PK.ln)+pCheek()+pTear(300,146),
+  upset:pEyes(4.5,5.6)+pL("M220 177 L236 184",2.4,PK.hrd)+pL("M264 184 L280 177",2.4,PK.hrd)+pL("M242 235 Q250 229 258 235",2.2,PK.ln)+pCheek(.42,"#E66F7A")
+};
+/* 팔 (바깥 좌표). 기본 자세: 왼팔은 내리고 오른손은 허리에 */
+const pArmS=(d)=>pL(d,15,PK.bl);
+const pHand=(x,y,r=10)=>`<ellipse cx="${x}" cy="${y}" rx="${r}" ry="${r+1}" fill="${PK.sk}"/>`;
+const P_ARM_L=`<g transform="translate(0 280) scale(1 .86) translate(0 -280)">`+pF("M210 286 C194 318 186 366 188 420 L204 422 C204 378 210 336 224 302Z",PK.bl)+`</g>`+pHand(196,410)+pL("M222 304 C212 338 206 378 204 400",1.6,PK.ln,'opacity=".7"');
+const P_ARM_R=`<g transform="translate(0 280) scale(1 .86) translate(0 -280)">`+pF("M292 286 C310 304 320 330 318 352 C316 374 300 390 284 398 L278 384 C290 378 300 368 302 354 C304 336 296 316 280 304Z",PK.bl)+`</g>`+pHand(274,382);
+function princeArt(mood,opt={}){
+  const droop=mood==="devastated"||mood==="sad";
+  let arms;
+  if(mood==="happy") arms=pArmS("M216 294 Q194 262 182 224")+pHand(180,214)+pArmS("M284 294 Q306 262 318 224")+pHand(320,214);
+  else if(mood==="upset") arms=pArmS("M215 294 Q198 336 196 386")+pHand(196,396,11)+pArmS("M285 294 Q302 336 304 386")+pHand(304,396,11);
+  else if(opt.brush) arms=P_ARM_L+pArmS("M285 294 Q304 336 302 384")
+    +`<g class="brush">${pL("M302 394 L340 300",7,"#8A5A2B")}${pF("M324 298 C330 284 352 288 360 296 L350 318 C340 318 328 314 322 308Z","#D9B27C")}</g>`+pHand(302,394);
+  else arms=P_ARM_L+P_ARM_R;
+  return `<g transform="scale(.448) translate(-250 -581)"><ellipse cx="250" cy="582" rx="70" ry="10" fill="#000" opacity=".1"/>${P_BODY}${arms}${P_NECK}`
+   +`<g>${droop?`<animateTransform attributeName="transform" type="rotate" from="0 250 286" to="${mood==="devastated"?14:8} 250 286" dur="1.4s" fill="freeze"/>`:""}`
+   +`<g transform="translate(250 262) scale(.82) translate(-250 -250)">${P_HEAD}${P_FACE[mood]||P_FACE.normal}</g></g></g>`;
+}
+
+/* 메아리 산 (t: 0 따뜻함 ~ 1 가시투성이) */
+const EINK="#3A2A22",GOLD="#E9A92C";
+const hex=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)),mix=(a,b,t)=>"#"+hex(a).map((v,i)=>Math.round(v+(hex(b)[i]-v)*t).toString(16).padStart(2,"0")).join("");
+const antenna=(x,y)=>pL(`M${x} ${y} L${x} ${y-16}`,3,"#9AA6AE")+`<circle cx="${x}" cy="${y-20}" r="5.5" fill="${GOLD}"/>`+[10,17,24].map(r=>`<path d="M${x-r*.75} ${y-20-r*.66} A${r} ${r} 0 0 1 ${x+r*.75} ${y-20-r*.66}" fill="none" stroke="${GOLD}" stroke-width="3" stroke-linecap="round"/>`).join("");
+/* t: 0 = 따뜻한 메아리, 1 = 가시투성이 */
+function echoMountain(t,plain){
+  const body=mix("#7FC25A","#5E6E7C",t),peak=mix("#A9D97C","#7D8D99",t),thorn=mix("#5E8F3E","#3E4E5A",t);
+  let s="";
+  const SP=[[64,118,-1],[136,118,1],[52,140,-1],[148,140,1],[76,96,-1],[124,96,1],[40,164,-1],[160,164,1]];
+  const n=Math.round(t*8);
+  s+=SP.slice(0,n).map(([x,y,d])=>pF(`M${x} ${y-7} L${x+d*15} ${y-3} L${x+d} ${y+7}Z`,thorn)).join("");
+  s+=pF("M22 182 Q58 116 90 60 Q100 44 110 60 Q142 116 178 182 Q100 192 22 182Z",body);
+  s+=pF("M80 80 L90 60 Q100 44 110 60 L120 80 Q110 86 100 82 Q90 86 80 80Z",peak);
+  // 꽃 (따뜻할수록 많이)
+  const FL=[[48,174,"#F2A7B8"],[150,170,"#FFF3B0"],[66,160,"#FFF3B0"],[134,156,"#F2A7B8"]],nf=Math.round((1-t)*4);
+  s+=FL.slice(0,nf).map(([x,y,c])=>[0,1,2,3,4].map(k=>{const a=k*Math.PI*2/5;return `<circle cx="${(x+Math.cos(a)*3.6).toFixed(1)}" cy="${(y+Math.sin(a)*3.6).toFixed(1)}" r="2.8" fill="${c}"/>`}).join("")+`<circle cx="${x}" cy="${y}" r="2" fill="${GOLD}"/>`).join("");
+  if(plain)return s;
+  s+=antenna(100,50);
+  // 얼굴
+  if(t<.3){s+=`<ellipse cx="84" cy="128" rx="5.5" ry="7" fill="${EINK}"/><ellipse cx="116" cy="128" rx="5.5" ry="7" fill="${EINK}"/><circle cx="86" cy="125.5" r="1.8" fill="#fff"/><circle cx="118" cy="125.5" r="1.8" fill="#fff"/>`
+    +pF("M89 144 Q100 158 111 144 Q100 148 89 144Z","#B8434A")+`<circle cx="73" cy="144" r="8" fill="#F6B0A6" opacity=".9"/><circle cx="127" cy="144" r="8" fill="#F6B0A6" opacity=".9"/>`;}
+  else if(t<.6){s+=`<ellipse cx="84" cy="129" rx="5" ry="6" fill="${EINK}"/><ellipse cx="116" cy="129" rx="5" ry="6" fill="${EINK}"/>`+pL("M75 119 L91 117",2.4,EINK)+pL("M125 119 L109 117",2.4,EINK)+pL("M91 149 Q100 145 109 149",2.6,EINK);}
+  else{s+=`<ellipse cx="84" cy="130" rx="5" ry="5.5" fill="${EINK}"/><ellipse cx="116" cy="130" rx="5" ry="5.5" fill="${EINK}"/>`+pL("M74 118 L92 124",2.8,EINK)+pL("M126 118 L108 124",2.8,EINK)+pL("M88 150 L94 145 L100 150 L106 145 L112 150",2.6,EINK);}
+  // 메아리 물결
+  const wc=mix("#5FB08A","#C8463F",t);
+  if(t<.5) s+=[0,1].map(i=>pL(`M${152+i*12} ${120-i*4} Q${160+i*14} 136 ${152+i*12} ${152+i*4}`,3,wc)+pL(`M${48-i*12} ${120-i*4} Q${40-i*14} 136 ${48-i*12} ${152+i*4}`,3,wc)).join("");
+  else s+=[0,1].map(i=>pL(`M${152+i*12} ${118-i*4} l6 8 l-6 8 l6 8 l-6 8`,3,wc)+pL(`M${48-i*12} ${118-i*4} l-6 8 l6 8 l-6 8 l6 8`,3,wc)).join("");
+  return s;}
+</script>
+<script>
+const $=id=>document.getElementById(id);
+const reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const NE=6; /* 한 번에 듣는 메아리 수 */
+
+/* 말 조각: AI는 카드를 '누구 이야기인지'와 '어떤 말인지'로 나눠 배워요.
+   어떤 말(뒷부분)마다 누구 이야기냐에 따라 붙는 꼴이 달라요. */
+const PRED={
+  slow:{t:"t",none:"왜 이렇게 느려?",ind:"{N}는 왜 이렇게 느려?",grp:"{N}는 왜 다 이렇게 느려?"},
+  dunno:{t:"t",none:"아무것도 할 줄 몰라.",ind:"{N}는 아무것도 할 줄 몰라.",grp:"{N}는 다 아무것도 할 줄 몰라."},
+  noplay:{t:"t",none:"같이 놀기 싫어.",ind:"{N}랑 같이 놀기 싫어.",grp:"{N}랑은 같이 놀기 싫어."},
+  cant:{t:"t",none:"그것도 못 해?",ind:"{N}는 그것도 못 해?",grp:"{N}는 다 그것도 못 해?"},
+  weird:{t:"t",none:"진짜 이상해.",ind:"{N}는 진짜 이상해.",grp:"{N}는 다 이상해."},
+  slow2:{t:"t",none:"진짜 느려.",ind:"{N}는 진짜 느려.",grp:"{N}는 다 느려."},
+  snail:{t:"t",none:"굼벵이 같아.",ind:"{N}는 굼벵이 같아.",grp:"{N}는 다 굼벵이 같아."},
+  slowok:{t:"w",none:"느려도 괜찮아.",ind:"{N}는 느려도 괜찮아.",grp:"{N}는 느려도 괜찮아."},
+  kind:{t:"w",none:"정말 친절하구나!",ind:"{N}는 정말 친절하구나!",grp:"{N}는 다 정말 친절하구나!"},
+  effort:{t:"w",none:"늘 열심히 노력해.",ind:"{N}는 늘 열심히 노력해.",grp:"{N}는 다 열심히 노력해."},
+  fun:{t:"w",none:"같이 하니까 재밌다!",ind:"{N}랑 같이 하니까 재밌다!",grp:"{N}랑 같이 하니까 재밌다!"},
+  thanks:{t:"w",none:"덕분에 고마워.",ind:"{N} 덕분에 고마워.",grp:"{N} 덕분에 고마워."},
+  slowly:{t:"w",none:"천천히 해도 돼.",ind:"{N}는 천천히 해도 돼.",grp:"{N}는 천천히 해도 돼."},
+  oops:{t:"w",none:"실수해도 괜찮아.",ind:"{N}는 실수해도 괜찮아.",grp:"{N}는 실수해도 괜찮아."},
+  withu:{t:"w",none:"같이 하고 싶어.",ind:"{N}랑 같이 하고 싶어.",grp:"{N}랑 같이 하고 싶어."},
+  all:{t:"w",whole:"빨간 모자도 파란 모자도 다 소중해."}
+};
+const WHO={"쟤":"ind","파란 모자":"grp"};
+const say=(who,p)=>PRED[p].whole||(who?PRED[p][WHO[who]].replace("{N}",who):PRED[p].none);
+const tone=c=>PRED[c.p].t;
+const BOARD0=[[null,"slow"],["쟤","dunno"],["쟤","noplay"],[null,"cant"],[null,"weird"],["파란 모자","slow2"],["파란 모자","snail"],[null,"slowok"],[null,"kind"],["쟤","effort"]].map(([who,p],i)=>({id:"b"+i,who,p}));
+const EXTRA=[[null,"fun"],[null,"thanks"],[null,"slowly"],[null,"oops"],["쟤","withu"],[null,"all"]].map(([who,p],i)=>({id:"x"+i,who,p}));
+const CARD={};[...BOARD0,...EXTRA].forEach(c=>CARD[c.id]=c);
+const WORDS=["느려","못 해","몰라","싫어","이상해"];
+
+/* 메아리 만들기: 어떤 말 한 조각 + 누구 이야기 한 조각을 골라 붙여요 */
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+function gen1(L){const A=pick(L);if(PRED[A.p].whole)return mk(L,A,A,A.who);
+  const B=Math.random()<.45?A:pick(L.filter(c=>!PRED[c.p].whole));return mk(L,A,B,B.who);}
+function mk(L,A,B,who){const text=say(who,A.p),t=PRED[A.p].t;
+  return {text,t,A,B,who,isNew:!L.some(c=>say(c.who,c.p)===text),grp:who==="파란 모자"&&t==="t"};}
+function genSet(L,words){const out=[];for(let k=0;k<80&&out.length<NE;k++){const e=gen1(L);if(out.some(o=>o.text===e.text))continue;out.push(e);}
+  out.forEach(e=>{const w=words.filter(x=>e.text.includes(x));e.blocked=w.length>0;e.bw=w;});return out;}
+function pickSet(L,words,cond){let s;for(let k=0;k<400;k++){s=genSet(L,words);if(!cond||cond(s))return s;}return s;}
+const mask=(e)=>{let s=esc(e.text);e.bw.forEach(w=>{s=s.split(w).join("■".repeat(w.replace(/ /g,"").length));});return s;};
+const ratioT=L=>L&&L.length?Math.min(1,L.filter(c=>tone(c)==="t").length/L.length/.7):0;
+const summary=(set,L)=>({thorn:set.filter(e=>!e.blocked&&e.t==="t").length,blocked:set.filter(e=>e.blocked).length,t:ratioT(L)});
+
+/* 그리기 */
+function mountain(el,t){el.innerHTML=`<svg viewBox="0 -14 200 214" role="img" aria-label="메아리 산">${echoMountain(t)}</svg>`;}
+function thermo(el,set){
+  if(!set){el.innerHTML=`<span class="lbl">메아리 온도계</span><div class="cells">${"<i></i>".repeat(NE)}</div><span class="empty">메아리를 들으면 가시 돋친 메아리가 몇 개인지 여기에 나타나요.</span>`;return;}
+  const s=summary(set,[]);
+  el.innerHTML=`<span class="lbl">메아리 온도계</span><div class="cells">${set.map(e=>`<i class="${e.blocked?"b":e.t}"></i>`).join("")}</div><span>가시 돋친 메아리 <b>${s.thorn} / ${NE}</b>${s.blocked?` · 막힌 메아리 ${s.blocked}개`:""}</span>`;}
+function srcText(e){const a=`「${esc(say(e.A.who,e.A.p))}」`;
+  return e.who?`'${esc(e.who)}' 이야기는 「${esc(say(e.B.who,e.B.p))}」에서, 말은 ${a}에서 가져와 섞었어요.`:`${a}에서 '${esc(e.A.who)}'를 빼고 말만 가져왔어요.`;}
+function echoList(el,set){el.innerHTML=set.map((e,i)=>{const cls=e.blocked?"blocked":e.t==="t"?"thorn":"warm";
+  const tags=[e.blocked?`<span class="tg">막힘</span>`:"",!e.blocked&&e.grp?`<span class="tg grp">차별 표현</span>`:"",e.isNew&&!e.blocked?`<button class="tg new" data-i="${i}">새로 만든 말</button>`:""].join("");
+  return `<li class="echo ${cls}">${e.blocked?mask(e):esc(e.text)}${tags?`<span class="tags">${tags}</span>`:""}<span class="src" id="${el.id}s${i}" hidden>${e.isNew?srcText(e):""}</span></li>`;}).join("");
+  el.onclick=ev=>{const b=ev.target.closest(".tg.new");if(!b)return;const s=$(`${el.id}s${b.dataset.i}`);s.hidden=!s.hidden;};}
+function boardHTML(cards,cls){return cards.map(c=>`<button class="bcard ${tone(c)==="t"?"thorn":"warm"} ${cls?cls(c):""}" data-id="${c.id}">${esc(say(c.who,c.p))}${c.who==="파란 모자"&&tone(c)==="t"?`<span class="tag">차별</span>`:""}</button>`).join("");}
+
+/* 상태 */
+let cur=1,done=new Set(),L2=null,L4=null,set2=null,set3=null,set4=null,res={},instant=false,busy=false;
+let p1=0,blocked=new Set(),conf3="",on4=[],added4=[],dirty4=false,heard4=false,pick5=null;
+
+function show(n){cur=n;
+  for(const i of [1,2,3,4,5]){$("step"+i).hidden=i!==n;const t=$("tab"+i);if(i===n)t.setAttribute("aria-current","step");else t.removeAttribute("aria-current");t.classList.toggle("done",i!==n&&done.has(i));}
+  if(n===2){mountain($("mt2"),L2?ratioT(L2):0);thermo($("th2"),set2);}
+  if(n===3){mountain($("mt3"),ratioT(L2));thermo($("th3"),set3);}
+  if(n===4){mountain($("mt4"),ratioT(L4||L2));thermo($("th4"),set4);render4();}
+  if(n===5)render5();
+  if(!instant)window.scrollTo({top:0,behavior:reduce?"auto":"smooth"});}
+
+/* 1단계: 만화 칸 */
+function sbub(x,y,w,lines,tx,ty,col,fs=17){const h=lines.length*(fs+6)+14,ax=Math.max(x+20,Math.min(x+w-20,tx));
+  return `<path d="M${ax-9} ${y+h-2} L${tx} ${ty} L${ax+9} ${y+h-2}Z" fill="#fffdf6" stroke="${col}" stroke-width="2.2" stroke-linejoin="round"/><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="14" fill="#fffdf6" stroke="${col}" stroke-width="2.2"/><rect x="${ax-10}" y="${y+h-4}" width="20" height="5" fill="#fffdf6"/>`
+   +lines.map((l,i)=>`<text x="${x+w/2}" y="${y+10+fs+i*(fs+6)}" text-anchor="middle" font-size="${fs}" fill="#2f3a2c" font-family="Gaegu, Gowun Dodum, sans-serif" font-weight="700">${l}</text>`).join("");}
+const CAPS=["높은 산에 오른 어린 왕자가 크게 외쳤어요.","산이 어린 왕자의 말을 그대로 따라 해요.","그런데 이 산은 그냥 산이 아니었어요!"];
+function drawComic(){const p=p1;
+  let s=`<defs><clipPath id="cc"><rect x="2" y="2" width="392" height="296" rx="16"/></clipPath></defs><g clip-path="url(#cc)"><rect width="396" height="300" fill="#DCEBF3"/>
+  <ellipse cx="70" cy="70" rx="60" ry="22" fill="#fff" opacity=".55"/><ellipse cx="190" cy="40" rx="40" ry="14" fill="#fff" opacity=".45"/>
+  <path d="M0 262 Q198 236 396 262 L396 300 L0 300Z" fill="#E6CF9F"/>
+  <g transform="translate(214 96) scale(.86)">${echoMountain(0,p<2)}</g>
+  <path d="M30 276 Q36 248 92 246 Q150 248 156 276Z" fill="#B7A58A"/>
+  <g transform="translate(93 262) scale(.72)">${princeArt(p===0?"happy":p===1?"shocked":"happy")}</g>`;
+  if(p===0)s+=sbub(16,14,120,["안녕!"],86,104,"#b8860b",22)+`<text x="268" y="64" font-size="20" fill="#3d6b7a" opacity=".85" font-family="Gaegu, sans-serif" font-weight="700">안녕…</text><text x="318" y="42" font-size="15" fill="#3d6b7a" opacity=".5" font-family="Gaegu, sans-serif" font-weight="700">안녕…</text>`;
+  if(p===1)s+=sbub(14,14,186,["어? 누가","따라 하는 거야?"],86,104,"#b8860b",19)+`<text x="236" y="70" font-size="18" fill="#3d6b7a" opacity=".85" font-family="Gaegu, sans-serif" font-weight="700">…하는 거야…</text><text x="316" y="46" font-size="15" fill="#3d6b7a" opacity=".5" font-family="Gaegu, sans-serif" font-weight="700">거야…</text>`;
+  if(p===2)s+=sbub(150,6,238,["안녕! 나는 메아리 AI야.","마을 게시판에 적힌 말을","배워서 메아리로 돌려줘."],262,128,"#3f8a3a",16);
+  s+=`</g><rect x="2" y="2" width="392" height="296" rx="16" fill="none" stroke="#4a3f35" stroke-width="3"/>`;
+  $("comic").innerHTML=s;$("cap1").textContent=CAPS[p];$("next1a").textContent=p<2?"▶ 다음":"메아리 AI에게 게시판 보여 주기";}
+$("next1a").onclick=()=>{if(p1<2){p1++;drawComic();return;}done.add(1);show(2);};
+
+/* 2단계 */
+async function learnAnim(boardEl,cards,mtEl,from){busy=true;const els=[...boardEl.querySelectorAll(".bcard")].filter(b=>cards.some(c=>c.id===b.dataset.id));
+  const to=ratioT(cards);
+  if(!instant&&!reduce){for(let i=0;i<els.length;i++){els[i].classList.add("learn");mountain(mtEl,from+(to-from)*(i+1)/els.length);await sleep(i<3?380:200);}
+    await sleep(250);els.forEach(e=>e.classList.remove("learn"));}
+  mountain(mtEl,to);busy=false;}
+$("learn2").onclick=async()=>{if(busy)return;$("learn2").disabled=true;
+  await learnAnim($("board2"),BOARD0,$("mt2"),0);L2=BOARD0.slice();$("learn2").textContent="공부를 마쳤어요";$("listen2").disabled=false;};
+function listen2(){if(!L2)return;
+  set2=pickSet(L2,[],set2?null:s=>s.filter(e=>e.isNew).length>=2&&s.some(e=>e.isNew&&e.grp));
+  res[2]=summary(set2,L2);thermo($("th2"),set2);echoList($("ec2"),set2);
+  const nw=set2.filter(e=>e.isNew).length,ng=set2.filter(e=>e.isNew&&e.grp).length;
+  $("why2").innerHTML=(nw?`게시판에 없던 말이 ${nw}개 섞여 있어요. <b>'새로 만든 말'</b>을 눌러 어디서 왔는지 살펴보세요. `:`이번 메아리는 모두 게시판에 있던 말이에요. 메아리를 한 번 더 들어 보세요. `)
+    +(ng?`한 사람에게 하던 가시 돋친 말이 '파란 모자' 모두를 깎아내리는 <b>차별 표현</b>으로 번지기도 해요.`:"");
+  $("why2").hidden=false;$("next2").disabled=false;$("listen2").textContent="메아리 다시 듣기";}
+$("listen2").onclick=listen2;
+$("next2").onclick=()=>{done.add(2);show(3);};
+
+/* 3단계 */
+$("chips3").innerHTML=WORDS.map(w=>`<button class="chip" data-w="${w}" aria-pressed="false">${w}</button>`).join("");
+$("chips3").onclick=e=>{const b=e.target.closest(".chip");if(!b)return;const w=b.dataset.w;blocked.has(w)?blocked.delete(w):blocked.add(w);b.setAttribute("aria-pressed",blocked.has(w)?"true":"false");$("listen3").disabled=!blocked.size;};
+function listen3(){if(!blocked.size||!L2)return;const words=[...blocked],key=words.sort().join("|"),first=key!==conf3;conf3=key;
+  const leakable=L2.some(c=>tone(c)==="t"&&!words.some(w=>WORDS.includes(w)&&say(null,c.p).includes(w))),over=L2.some(c=>tone(c)==="w"&&words.some(w=>say(c.who,c.p).includes(w)));
+  set3=pickSet(L2,words,first?s=>(!leakable||s.some(e=>!e.blocked&&e.t==="t"))&&(!over||s.some(e=>e.blocked&&e.t==="w")):null);
+  res[3]=summary(set3,L2);res[3].words=words;thermo($("th3"),set3);echoList($("ec3"),set3);
+  const nb=set3.filter(e=>e.blocked).length,leak=set3.filter(e=>!e.blocked&&e.t==="t"),ow=set3.filter(e=>e.blocked&&e.t==="w");
+  let m=`막은 낱말이 들어간 메아리 ${nb}개가 막혔어요. `;
+  if(leak.length)m+=`그런데 막은 낱말이 없는 가시 돋친 메아리는 그대로 빠져나왔어요. (예: 「${esc(leak[0].text)}」) `;
+  else m+=`이번에는 가시 돋친 메아리가 다 막혔어요. 하지만 막은 낱말 목록에 없는 가시 돋친 말은 언제든 빠져나올 수 있어요. `;
+  if(ow.length)m+=`'${esc(ow[0].bw[0])}'를 막았더니 따뜻한 말 「${esc(ow[0].text)}」까지 막혔어요. `;
+  m+=`<b>입마개는 낱말만 막을 뿐, 메아리 AI가 배운 말은 그대로예요.</b> 그래서 메아리 산의 모습도 그대로지요.`;
+  $("why3").innerHTML=m;$("why3").hidden=false;$("next3").disabled=false;}
+$("listen3").onclick=listen3;
+$("next3").onclick=()=>{done.add(3);show(4);};
+
+/* 4단계 */
+function cards4(){return [...BOARD0.filter(c=>on4.includes(c.id)),...added4.map(id=>CARD[id])];}
+function render4(){
+  $("board4").innerHTML=`<p class="bt">마을 게시판</p>`+boardHTML([...BOARD0,...added4.map(id=>CARD[id])],c=>c.id[0]==="b"&&!on4.includes(c.id)?"off":"");
+  const pile=EXTRA.filter(c=>!added4.includes(c.id));
+  $("pile4").innerHTML=`<p class="bt">붙일 수 있는 따뜻한 카드 (눌러서 붙이기)</p>`+(pile.length?boardHTML(pile):`<span class="empty">모두 붙였어요.</span>`);
+  $("learn4").disabled=!dirty4||busy;$("listen4").disabled=dirty4||!L4||busy;}
+function touch4(){dirty4=true;heard4=false;$("learn4").textContent="다시 공부시키기";render4();
+  const n=cards4().length;if(!n){$("learn4").disabled=true;}}
+$("board4").onclick=e=>{const b=e.target.closest(".bcard");if(!b||busy)return;const id=b.dataset.id;
+  if(id[0]==="b"){on4.includes(id)?on4.splice(on4.indexOf(id),1):on4.push(id);}else added4.splice(added4.indexOf(id),1);touch4();};
+$("pile4").onclick=e=>{const b=e.target.closest(".bcard");if(!b||busy)return;added4.push(b.dataset.id);touch4();};
+$("learn4").onclick=async()=>{if(busy||!dirty4)return;const cs=cards4();if(!cs.length)return;$("learn4").disabled=true;
+  await learnAnim($("board4"),cs,$("mt4"),ratioT(L4||L2));L4=cs;dirty4=false;$("learn4").textContent="공부를 마쳤어요";render4();};
+function listen4(){if(!L4||dirty4)return;set4=pickSet(L4,[],null);res[4]=summary(set4,L4);res[4].cards=L4.filter(c=>tone(c)==="t").length;
+  thermo($("th4"),set4);echoList($("ec4"),set4);const n=res[4].cards,h=res[4].thorn;
+  $("why4").innerHTML=!n?`게시판에 가시 돋친 말이 하나도 없으니, 메아리 AI도 가시 돋친 말을 만들지 않아요. <b>메아리 산이 다시 초록빛이 되었어요.</b>`
+    :h?`게시판에 가시 돋친 카드 ${n}장이 남아 있어서 가시 돋친 메아리가 다시 튀어나왔어요. 조금쯤은 괜찮을까요? 남은 카드도 떼어 보세요.`
+    :`이번에는 나오지 않았지만, 게시판에 가시 돋친 카드 ${n}장이 남아 있어요. 메아리를 몇 번 더 들어 보세요. 언젠가 다시 튀어나와요.`;
+  $("why4").hidden=false;heard4=true;$("next4").disabled=false;$("listen4").textContent="메아리 다시 듣기";}
+$("listen4").onclick=listen4;
+$("next4").onclick=()=>{done.add(4);show(5);};
+
+/* 5단계 */
+const PAIRS=[["왜 이렇게 느려?","천천히 해도 돼."],["그것도 못 해?","같이 해 볼까?"],["쟤랑 같이 놀기 싫어.","우리 같이 놀자!"],["진짜 이상해.","생각이 독특해서 재밌다!"],["파란 모자는 다 느려.","사람마다 빠르기가 달라."]];
+function render5(){const fig=(k,name)=>{const r=res[k];const t=k===2?ratioT(L2):k===3?ratioT(L2):ratioT(L4);
+  return `<figure><svg viewBox="0 -14 200 214" aria-hidden="true">${echoMountain(r?r.t:t)}</svg><figcaption><b>${name}</b>${r?`가시 돋친 메아리 ${r.thorn} / ${NE}${r.blocked?`<br>막힌 메아리 ${r.blocked}`:""}`:"아직 해 보지 않았어요"}</figcaption></figure>`;};
+  $("cmp5").innerHTML=fig(2,"처음")+fig(3,"① 금지어 입마개")+fig(4,"② 게시판 바꾸기");}
+$("opts5").innerHTML=PAIRS.map((p,i)=>`<button class="opt" data-i="${i}" aria-pressed="false"><s>${p[0]}</s> → ${p[1]}</button>`).join("")+`<button class="opt" data-i="own" aria-pressed="false">직접 쓰기</button>`;
+function ready5(){$("done5").disabled=pick5===null||(pick5==="own"&&!($("ownA").value.trim()&&$("ownB").value.trim()));}
+$("opts5").onclick=e=>{const b=e.target.closest(".opt");if(!b)return;pick5=b.dataset.i;$("opts5").querySelectorAll(".opt").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));$("own5").hidden=pick5!=="own";if(pick5==="own")$("ownA").focus();ready5();};
+$("ownA").oninput=ready5;$("ownB").oninput=ready5;
+$("done5").onclick=()=>{if($("done5").disabled)return;const [a,b]=pick5==="own"?[$("ownA").value.trim(),$("ownB").value.trim()]:PAIRS[+pick5];
+  $("mine5").innerHTML=`<s>${esc(a)}</s><b>${esc(b)}</b>`;$("fin5").hidden=false;done.add(5);
+  if(!instant)$("fin5").scrollIntoView({block:"center",behavior:reduce?"auto":"smooth"});};
+
+/* 처음부터 */
+function resetAll(){busy=false;p1=0;done=new Set();L2=L4=set2=set3=set4=null;res={};blocked=new Set();conf3="";on4=BOARD0.map(c=>c.id);added4=[];dirty4=false;heard4=false;pick5=null;
+  $("board2").innerHTML=`<p class="bt">마을 게시판</p>`+boardHTML(BOARD0);
+  $("learn2").disabled=false;$("learn2").textContent="공부시키기";$("listen2").disabled=true;$("listen2").textContent="메아리 듣기";
+  ["ec2","ec3","ec4"].forEach(i=>$(i).innerHTML="");["why2","why3","why4"].forEach(i=>$(i).hidden=true);
+  ["next2","next3","next4","listen3","learn4","listen4"].forEach(i=>$(i).disabled=true);$("listen3").textContent="입마개를 하고 메아리 듣기";$("listen4").textContent="메아리 듣기";$("learn4").textContent="다시 공부시키기";
+  $("chips3").querySelectorAll(".chip").forEach(b=>b.setAttribute("aria-pressed","false"));
+  $("opts5").querySelectorAll(".opt").forEach(b=>b.setAttribute("aria-pressed","false"));$("own5").hidden=true;$("ownA").value="";$("ownB").value="";$("done5").disabled=true;$("fin5").hidden=true;
+  drawComic();show(1);}
+let resetArm=0;
+$("reset").onclick=()=>{if(Date.now()-resetArm>4000){resetArm=Date.now();$("reset").textContent="정말 처음부터 할까요? 한 번 더 누르세요";setTimeout(()=>{$("reset").textContent="처음부터 다시";},4000);return;}
+  resetArm=0;$("reset").textContent="처음부터 다시";resetAll();};
+
+/* 선생님 바로가기: 학생용 주소(github.io)에서는 ?teacher 를 붙였을 때만 보여요 */
+if(!/github\.io$/.test(location.hostname)||/teacher/.test(location.search))$("tbar").hidden=false;
+$("tbar").onclick=async e=>{const b=e.target.closest("button");if(!b||busy)return;const j=+b.dataset.j;instant=true;
+  try{resetAll();if(j===1)return;
+    if(j>=2){if(j===2){show(2);return;}
+      done.add(1);await $("learn2").onclick();listen2();done.add(2);}
+    if(j>=4){["느려","못 해","몰라","싫어","이상해"].forEach(w=>{blocked.add(w);$("chips3").querySelector(`[data-w="${w}"]`).setAttribute("aria-pressed","true");});$("listen3").disabled=false;listen3();done.add(3);}
+    if(j===3){show(3);return;}
+    if(j>=5){on4=BOARD0.filter(c=>tone(c)==="w").map(c=>c.id);added4=EXTRA.map(c=>c.id);dirty4=true;await $("learn4").onclick();listen4();done.add(4);show(5);return;}
+    show(4);
+  }finally{instant=false;window.scrollTo(0,0);}};
+resetAll();
+/* 수업 중 실수로 새로 고침하거나 나가지 않도록 */
+let touched=false;document.addEventListener("pointerdown",()=>{touched=true;},{once:true,capture:true});
+window.addEventListener("beforeunload",e=>{if(touched){e.preventDefault();e.returnValue="";}});
+</script>
+</body>
+</html>
