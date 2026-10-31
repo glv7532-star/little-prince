@@ -13,19 +13,19 @@
   --bg:#efe8d8; --paper:#fbf7ee; --ink:#2f3a2c; --muted:#6c7462; --line:#d8ceb6;
   --baobab:#7a5a2e; --baobab-bg:#efe1c6; --rose:#b23a48; --rose-bg:#f6dcdf;
   --accent:#2d5d7b; --accent-bg:#dde8ef; --ok:#2f7a3d; --bad:#b23a48;
-  --soil:#c4a77a; --leaf:#5c9a4b; --leaf-line:#2f5a24; --stem:#7b9a4e;
+  --soil:#c4a77a; --leaf:#5c9a4b; --leaf-line:#2f5a24; --stem:#7b9a4e;--art-soil:#C9AE7C;--art-trunk:#8A5E38;--art-leaf:#6E9A4E;--art-leaf2:#8DB264;--art-leafd:#5A8540;--art-stem:#7B9A4E;--art-thorn:#2F5A24;--art-bud:#C8463F;--art-rose:#C8463F;--art-rosel:#EE8A80;
   --display:"Gaegu","Gowun Dodum",cursive; --body:"Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#141b26; --paper:#1f2836; --ink:#ece6d6; --muted:#a3a99c; --line:#334156;
   --baobab:#e0b878; --baobab-bg:#3a2f20; --rose:#f08b97; --rose-bg:#3d2329;
   --accent:#8cc0e0; --accent-bg:#1e3446; --ok:#7fd08c; --bad:#f08b97;
-  --soil:#6b5a3e; --leaf:#6fb35b; --leaf-line:#bfe3ae; --stem:#8fb35c; color-scheme:dark}}
+  --soil:#6b5a3e; --leaf:#6fb35b; --leaf-line:#bfe3ae; --stem:#8fb35c;--art-soil:#6b5a3e;--art-trunk:#B5885A;--art-leaf:#78AE58;--art-leaf2:#9CC877;--art-leafd:#5E9146;--art-stem:#8FB35C;--art-thorn:#CFE8BE;--art-bud:#F07C86;--art-rose:#E2585A;--art-rosel:#F6A8A0; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#141b26; --paper:#1f2836; --ink:#ece6d6; --muted:#a3a99c; --line:#334156;
   --baobab:#e0b878; --baobab-bg:#3a2f20; --rose:#f08b97; --rose-bg:#3d2329;
   --accent:#8cc0e0; --accent-bg:#1e3446; --ok:#7fd08c; --bad:#f08b97;
-  --soil:#6b5a3e; --leaf:#6fb35b; --leaf-line:#bfe3ae; --stem:#8fb35c; color-scheme:dark}
+  --soil:#6b5a3e; --leaf:#6fb35b; --leaf-line:#bfe3ae; --stem:#8fb35c;--art-soil:#6b5a3e;--art-trunk:#B5885A;--art-leaf:#78AE58;--art-leaf2:#9CC877;--art-leafd:#5E9146;--art-stem:#8FB35C;--art-thorn:#CFE8BE;--art-bud:#F07C86;--art-rose:#E2585A;--art-rosel:#F6A8A0; color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;
@@ -157,17 +157,19 @@ th{white-space:nowrap}
     <h2>먼저 다 자란 모습을 살펴봐요</h2>
     <p class="note">어린 왕자의 별에서 바오밥나무는 다 자라면 별을 뒤덮을 만큼 커지고, 장미는 꽃을 피워요.</p>
     <div class="pair">
-      <figure class="fig"><svg viewBox="0 0 200 220" role="img" aria-label="다 자란 바오밥나무"><ellipse cx="100" cy="204" rx="80" ry="10" fill="var(--soil)"/>
-<path d="M70 204 C66 170 74 130 82 96 L118 96 C126 130 134 170 130 204 Z" fill="var(--baobab)" stroke="var(--leaf-line)" stroke-width="2"/>
-<path d="M70 204 l-14 8 M130 204 l14 8 M100 206 l0 8" stroke="var(--baobab)" stroke-width="4" stroke-linecap="round"/>
-<path d="M86 100 L66 70 M114 100 L134 70 M100 98 L100 62" stroke="var(--baobab)" stroke-width="7" stroke-linecap="round"/>
-<g fill="var(--leaf)" stroke="var(--leaf-line)" stroke-width="2"><circle cx="58" cy="62" r="24"/><circle cx="142" cy="62" r="24"/><circle cx="100" cy="46" r="28"/><circle cx="78" cy="38" r="20"/><circle cx="122" cy="38" r="20"/><circle cx="34" cy="72" r="14"/><circle cx="166" cy="72" r="14"/></g></svg><figcaption>다 자란 바오밥나무</figcaption></figure>
-      <figure class="fig"><svg viewBox="0 0 200 220" role="img" aria-label="다 자란 장미"><ellipse cx="100" cy="204" rx="60" ry="9" fill="var(--soil)"/>
-<rect x="96" y="70" width="8" height="134" rx="3" fill="var(--stem)" stroke="var(--leaf-line)" stroke-width="2"/>
-<g fill="var(--leaf-line)"><path d="M96 180 l-10 -4 l10 -4Z"/><path d="M104 160 l10 -4 l-10 -4Z"/><path d="M96 138 l-10 -4 l10 -4Z"/><path d="M104 116 l10 -4 l-10 -4Z"/><path d="M96 96 l-10 -4 l10 -4Z"/></g>
-<g fill="var(--leaf)" stroke="var(--leaf-line)" stroke-width="2"><path d="M96 150 C80 136 60 140 50 150 C62 160 82 160 96 154Z"/><path d="M104 126 C120 112 140 116 150 126 C138 136 118 136 104 130Z"/><path d="M96 108 C84 98 70 100 62 108 C72 116 86 116 96 112Z"/></g>
-<g stroke="var(--leaf-line)" stroke-width="2"><circle cx="100" cy="50" r="26" fill="var(--rose)"/><path d="M100 30 C88 38 88 56 100 62 C112 56 112 38 100 30Z" fill="var(--rose)"/><path d="M86 44 C92 52 108 52 114 44" fill="none"/></g>
-<path d="M88 74 L100 68 L112 74" fill="var(--leaf)" stroke="var(--leaf-line)" stroke-width="2"/></svg><figcaption>다 자란 장미</figcaption></figure>
+      <figure class="fig"><svg viewBox="0 0 200 220" role="img" aria-label="다 자란 바오밥나무"><ellipse cx="100" cy="204" rx="80" ry="10" fill="var(--art-soil)"/>
+<path d="M72 202 l-16 9 M128 202 l16 9 M100 205 l0 9" stroke="var(--art-trunk)" stroke-width="5" stroke-linecap="round"/>
+<path d="M88 104 L66 70 M112 104 L134 70 M100 100 L100 60" stroke="var(--art-trunk)" stroke-width="8" stroke-linecap="round"/>
+<path d="M70 204 C64 172 72 132 84 98 L116 98 C128 132 136 172 130 204 Z" fill="var(--art-trunk)"/>
+<g fill="var(--art-leafd)"><circle cx="78" cy="36" r="20"/><circle cx="122" cy="36" r="20"/><circle cx="34" cy="72" r="14"/><circle cx="166" cy="72" r="14"/></g>
+<g fill="var(--art-leaf)"><circle cx="58" cy="64" r="24"/><circle cx="142" cy="64" r="24"/><circle cx="100" cy="50" r="30"/></g></svg><figcaption>다 자란 바오밥나무</figcaption></figure>
+      <figure class="fig"><svg viewBox="0 0 200 220" role="img" aria-label="다 자란 장미"><ellipse cx="100" cy="204" rx="60" ry="9" fill="var(--art-soil)"/>
+<rect x="96" y="64" width="8" height="140" rx="3" fill="var(--art-stem)"/>
+<g fill="var(--art-thorn)"><path d="M96 182 l-10 -4 l10 -4Z"/><path d="M104 162 l10 -4 l-10 -4Z"/><path d="M96 140 l-10 -4 l10 -4Z"/><path d="M104 118 l10 -4 l-10 -4Z"/><path d="M96 96 l-10 -4 l10 -4Z"/></g>
+<path d="M96 152 C80 138 60 142 50 152 C62 162 82 162 96 156Z" fill="var(--art-leaf)"/><path d="M104 128 C120 114 140 118 150 128 C138 138 118 138 104 132Z" fill="var(--art-leaf2)"/><path d="M96 110 C84 100 70 102 62 110 C72 118 86 118 96 114Z" fill="var(--art-leaf)"/>
+<path d="M84 74 L100 64 L116 74 L106 72 L100 78 L94 72Z" fill="var(--art-leaf)"/>
+<path d="M100.0 27.0 Q113.5 21.0 117.2 34.9 Q130.2 41.3 121.4 52.7 Q124.2 66.7 109.5 66.9 Q100.0 78.0 90.5 66.9 Q75.8 66.7 78.6 52.7 Q69.8 41.3 82.8 34.9 Q86.5 21.0 100.0 27.0Z" fill="var(--art-rose)"/>
+<path d="M100 47 C103 45 105 49 102 51 C98 54 93 50 94 45 C95 39 103 37 108 41 C113 46 111 55 104 58 C96 61 87 57 85 49" fill="none" stroke="var(--art-rosel)" stroke-width="3" stroke-linecap="round"/></svg><figcaption>다 자란 장미</figcaption></figure>
     </div>
     <div class="field">
       <label for="myRule">그럼 어릴 때 싹은 어떻게 다를까요? 내가 싹을 구별할 기준을 하나 적어 보세요.</label>
@@ -305,16 +307,17 @@ function vec(s){return [(s.stem-.5)*2,(s.round-.5)*2,(s.leaves-3.5)/1.5,(s.thorn
 function leafPath(L,r){const H=L*(.22+.3*r),c=L*(.75+.25*r);return `M0 0 C${L*.2} ${-H} ${c} ${-H} ${L} 0 C${c} ${H} ${L*.2} ${H} 0 0Z`;}
 function drawSprout(s,small){
   const sw=4+s.stem*12, top=50, base=118, cx=60;
-  let g=`<svg viewBox="0 0 120 140" role="img" aria-label="싹 그림"><rect x="14" y="116" width="92" height="14" rx="6" fill="var(--soil)"/>`;
+  let g=`<svg viewBox="0 0 120 140" role="img" aria-label="싹 그림"><rect x="14" y="116" width="92" height="14" rx="6" fill="var(--art-soil)"/>`;
   g+=`<g transform="rotate(${s.tilt} 60 118)">`;
-  g+=`<rect x="${cx-sw/2}" y="${top}" width="${sw}" height="${base-top}" rx="${sw/2}" fill="var(--stem)" stroke="var(--leaf-line)" stroke-width="1.5"/>`;
-  for(let i=0;i<s.thorns;i++){const y=top+22+i*16,side=i%2?1:-1,x=cx+side*sw/2;g+=`<path d="M${x} ${y-4} L${x+side*7} ${y} L${x} ${y+4}Z" fill="var(--leaf-line)"/>`;}
+  g+=`<rect x="${cx-sw/2}" y="${top}" width="${sw}" height="${base-top}" rx="${sw/2}" fill="var(--art-stem)"/>`;
+  for(let i=0;i<s.thorns;i++){const y=top+22+i*16,side=i%2?1:-1,x=cx+side*sw/2;g+=`<path d="M${x-side} ${y-4.5} L${x+side*8} ${y} L${x-side} ${y+4.5}Z" fill="var(--art-thorn)"/>`;}
+  /* 잎은 단색 면이라, 겹쳐도 몇 장인지 보이게 두 가지 초록을 번갈아 써요 */
   const n=s.leaves, L=18+s.round*8;
   for(let i=0;i<n;i++){
     const t=n===1?0:i/(n-1), ang=-160+t*140, y=top+6+(i%2)*10+(n>3&&i>0&&i<n-1?-8:0);
-    g+=`<path d="${leafPath(L,s.round)}" transform="translate(${cx} ${y}) rotate(${ang})" fill="var(--leaf)" stroke="var(--leaf-line)" stroke-width="1.5"/>`;
+    g+=`<path d="${leafPath(L,s.round)}" transform="translate(${cx} ${y}) rotate(${ang})" fill="var(--art-${i%2?"leaf2":"leaf"})"/>`;
   }
-  if(s.bud) g+=`<path d="M${cx-7} ${top+2} Q${cx-7} ${top-16} ${cx} ${top-20} Q${cx+7} ${top-16} ${cx+7} ${top+2}Z" fill="var(--rose)" stroke="var(--leaf-line)" stroke-width="1.5"/>`;
+  if(s.bud) g+=`<path d="M${cx-7} ${top+2} Q${cx-7} ${top-16} ${cx} ${top-20} Q${cx+7} ${top-16} ${cx+7} ${top+2}Z" fill="var(--art-bud)"/>`;
   return g+`</g></svg>`;
 }
 /* phase: 0 = 기본, 1 = 틀린 이름표 실험 중/후, 2 = 편식 실험 중/후 */

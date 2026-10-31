@@ -235,28 +235,38 @@ function buildScene(svg,labels){
   S.top=el("stop",{offset:"0","stop-color":"#3c82d7"},lg);S.mid=el("stop",{offset:"0.6","stop-color":"#7fb3e6"},lg);S.hor=el("stop",{offset:"1","stop-color":"#aad7f5"},lg);
   const rg=el("radialGradient",{id:id+"g"},defs);el("stop",{offset:"0","stop-color":"#fff4c8","stop-opacity":"0.95"},rg);el("stop",{offset:"0.45","stop-color":"#ffd76a","stop-opacity":"0.55"},rg);el("stop",{offset:"1","stop-color":"#ffd76a","stop-opacity":"0"},rg);
   S.sky=el("rect",{x:0,y:0,width:640,height:230,fill:`url(#${id})`},svg);
-  S.stars=el("g",{opacity:0},svg);[[60,30],[150,60],[260,24],[380,50],[470,30],[580,70],[520,20],[95,90],[430,95],[300,75]].forEach(([x,y])=>el("circle",{cx:x,cy:y,r:1.8,fill:"#f1efe8"},S.stars));
-  S.sun=el("g",{},svg);S.rays=el("g",{},S.sun);for(let k=0;k<12;k++){const a=k*Math.PI/6;el("line",{x1:Math.cos(a)*27,y1:Math.sin(a)*27,x2:Math.cos(a)*37,y2:Math.sin(a)*37,stroke:"#EF9F27","stroke-width":4,"stroke-linecap":"round"},S.rays);}S.disc=el("circle",{cx:0,cy:0,r:21,fill:"#FAC775",stroke:"#EF9F27","stroke-width":2},S.sun);
-  S.moon=el("g",{opacity:0},svg);el("circle",{cx:0,cy:0,r:15,fill:"#d9dce3",stroke:"#b4b8c2","stroke-width":1.5},S.moon);[[-5,-4,3.5],[5,3,2.6],[-2,7,2],[6,-6,1.8]].forEach(([x,y,r])=>el("circle",{cx:x,cy:y,r,fill:"#b4b8c2"},S.moon));
+  S.stars=el("g",{opacity:0},svg);[[60,30,4],[150,60,2.6],[260,24,3.4],[380,50,2.6],[470,30,4],[580,70,3],[520,20,2.4],[95,90,2.4],[430,95,3],[300,75,2.4]].forEach(([x,y,r])=>{const q=r*.18;el("path",{d:`M${x} ${y-r} Q${x+q} ${y-q} ${x+r} ${y} Q${x+q} ${y+q} ${x} ${y+r} Q${x-q} ${y+q} ${x-r} ${y} Q${x-q} ${y-q} ${x} ${y-r}Z`,fill:"#F6E7B8"},S.stars);});
+  S.sun=el("g",{},svg);S.rays=el("g",{},S.sun);for(let k=0;k<8;k++){const a=k*Math.PI/4+Math.PI/8;el("line",{x1:Math.cos(a)*28,y1:Math.sin(a)*28,x2:Math.cos(a)*36,y2:Math.sin(a)*36,stroke:"#F2B33D","stroke-width":4.5,"stroke-linecap":"round"},S.rays);}S.disc=el("circle",{cx:0,cy:0,r:21,fill:"#F6C84E"},S.sun);
+  S.moon=el("g",{opacity:0},svg);el("circle",{cx:0,cy:0,r:15,fill:"#E6E3DA"},S.moon);[[-5,-4,3.5],[5,3,2.6],[-2,7,2],[6,-6,1.8]].forEach(([x,y,r])=>el("circle",{cx:x,cy:y,r,fill:"#CBC7BC"},S.moon));
   S.cloud=el("g",{opacity:0,fill:"#8a94a6"},svg);[[0,0,34],[38,-16,40],[80,0,34],[40,12,36],[-34,8,24],[112,10,24]].forEach(([x,y,r])=>el("circle",{cx:x,cy:y,r},S.cloud));
-  S.ground=el("ellipse",{cx:320,cy:330,rx:420,ry:140,fill:"#639922"},svg);
+  S.ground=el("ellipse",{cx:320,cy:330,rx:420,ry:140,fill:"#6E9A4E"},svg);
   S.lamps=[];const n=labels.length,gap=640/(n+1);
   labels.forEach((lb,i)=>{const x=gap*(i+1),g=el("g",{},svg);
-    const glow=el("ellipse",{cx:x,cy:116,rx:62,ry:44,fill:`url(#${id}g)`,opacity:0},g);
-    el("rect",{x:x-4,y:96,width:8,height:104,fill:"#444441"},g);el("rect",{x:x-20,y:86,width:40,height:13,rx:4,fill:"#444441"},g);
-    const bulb=el("circle",{cx:x,cy:104,r:7,fill:"#888780"},g);
+    const glow=el("ellipse",{cx:x,cy:110,rx:58,ry:44,fill:`url(#${id}g)`,opacity:0},g);
+    /* 등불 모양 가로등 (새 그림체): 켜지면 유리가 노랗게, 꺼지면 회색 */
+    const lp=el("g",{transform:`translate(${x-125} 46.5) scale(.5)`},g),IR="#2C3448";
+    ["M230 308 C232 284 268 284 270 308 C257 311 243 311 230 308Z","M239 292 L244 278 L256 278 L261 292Z","M244.5 280 C245.5 236 246.5 196 247 152 L253 152 C253.5 196 254.5 236 255.5 280Z","M241 216 C241 211 259 211 259 216 C259 220 241 220 241 216Z","M238 152 L262 152 L257 144 L243 144Z"].forEach(d=>el("path",{d,fill:IR},lp));
+    const bulb=el("path",{d:"M242 144 L236 104 L264 104 L258 144Z",fill:"#8A8984"},lp);
+    el("path",{d:"M250 106 L250 142 M243 144 L237 104 M257 144 L263 104",fill:"none",stroke:IR,"stroke-width":2.6,"stroke-linecap":"round"},lp);
+    el("path",{d:"M230 105 C238 96 244 90 250 80 C256 90 262 96 270 105Z",fill:IR},lp);el("circle",{cx:250,cy:76,r:4.5,fill:IR},lp);
     const t=el("text",{x,y:224,"text-anchor":"middle","font-size":"19",fill:"#f1efe8","font-family":"Gowun Dodum, sans-serif"},g);t.textContent=lb;
     S.lamps.push({glow,bulb});});
   /* 1세대 옆에 가로등 켜는 사람 */
   if(labels[0]==="1세대"){const lx=gap,px=lx-38,gy=330-140*Math.sqrt(1-((px-320)/420)**2),P=el("g",{transform:`translate(0 ${gy-200+1})`},svg);
-    el("rect",{x:px-6,y:182,width:5,height:18,rx:2,fill:"#2b2f3a"},P);el("rect",{x:px+1,y:182,width:5,height:18,rx:2,fill:"#2b2f3a"},P);
-    el("rect",{x:px-9,y:156,width:18,height:30,rx:6,fill:"#4a5f8a"},P);
-    el("circle",{cx:px,cy:148,r:8,fill:"#f2d2b0"},P);
-    el("rect",{x:px-9,y:136,width:18,height:7,rx:2,fill:"#3a2f2a"},P);el("rect",{x:px-6,y:128,width:12,height:9,rx:2,fill:"#3a2f2a"},P);
-    const arm=el("g",{},P);el("line",{x1:0,y1:0,x2:0,y2:-16,stroke:"#4a5f8a","stroke-width":5,"stroke-linecap":"round"},arm);
-    el("line",{x1:0,y1:-14,x2:0,y2:-86,stroke:"#8a5a2b","stroke-width":3,"stroke-linecap":"round"},arm);el("circle",{cx:0,cy:-86,r:3,fill:"#EF9F27"},arm);
-    const sweat=el("g",{opacity:0},P);const drop=(x,y,rot,sc)=>el("path",{d:"M0 -7 q6 9 0 13 q-6 -4 0 -13z",fill:"#378ADD",stroke:"#f1efe8","stroke-width":1,transform:`translate(${x} ${y}) rotate(${rot}) scale(${sc})`},sweat);drop(px+13,136,40,1);drop(px+19,128,40,.75);drop(px-13,138,-40,.85);
-    S.person={arm,sweat,sx:px+8,sy:162,reach:Math.atan2(92-162-(gy-200),lx-(px+8))*180/Math.PI+90,px};}
+    /* 새 그림체: 챙 모자, 청록 외투, 막대 끝에 작은 불꽃 */
+    const pth=(d,fill,extra={})=>el("path",Object.assign({d,fill},extra),P);
+    el("rect",{x:px-7,y:194,width:6,height:6,rx:1.5,fill:"#5A3520"},P);el("rect",{x:px+1,y:194,width:7.5,height:6,rx:1.5,fill:"#5A3520"},P);
+    el("rect",{x:px-6,y:180,width:5,height:15,fill:"#2C3448"},P);el("rect",{x:px+1,y:180,width:5,height:15,fill:"#2C3448"},P);
+    pth(`M${px-8} 153 Q${px-11} 170 ${px-12} 186 L${px+12} 186 Q${px+11} 170 ${px+8} 153 Q${px} 149 ${px-8} 153Z`,"#24575B");
+    [162,170,178].forEach(y=>el("circle",{cx:px+1.5,cy:y,r:1.3,fill:"#E9A92C"},P));
+    el("circle",{cx:px,cy:142,r:8,fill:"#F3D2B3"},P);pth(`M${px-8} 139 Q${px-9.5} 146 ${px-5} 148 L${px-3.5} 139Z`,"#6B4A3A");
+    el("circle",{cx:px+3.6,cy:142,r:1.25,fill:"#3A2A22"},P);el("circle",{cx:px+3,cy:146,r:2,fill:"#EBA18E",opacity:.35},P);
+    pth(`M${px-9} 139 Q${px-8} 130 ${px} 130 Q${px+8} 130 ${px+9} 139Z`,"#2C3448");el("rect",{x:px-9,y:136.6,width:18,height:2.2,fill:"#E9A92C"},P);
+    pth(`M${px+5} 138.5 L${px+14} 140 Q${px+9} 141.8 ${px+5} 141.2Z`,"#2C3448");
+    const arm=el("g",{},P);el("line",{x1:0,y1:0,x2:0,y2:-9,stroke:"#24575B","stroke-width":5,"stroke-linecap":"round"},arm);
+    el("line",{x1:0,y1:-8,x2:0,y2:-82,stroke:"#8A5A2B","stroke-width":3,"stroke-linecap":"round"},arm);el("path",{d:"M0 -92 Q4.5 -85 3.2 -82 Q0 -78 -3.2 -82 Q-4.5 -85 0 -92Z",fill:"#E9A92C"},arm);el("circle",{cx:0,cy:-10,r:2.7,fill:"#F3D2B3"},arm);
+    const sweat=el("g",{opacity:0},P);const drop=(x,y,rot,sc)=>el("path",{d:"M0 -7 q6 9 0 13 q-6 -4 0 -13z",fill:"#5E9FD0",stroke:"#f1efe8","stroke-width":1,transform:`translate(${x} ${y}) rotate(${rot}) scale(${sc})`},sweat);drop(px+12,133,40,1);drop(px+18,126,40,.75);drop(px-12,135,-40,.85);
+    S.person={arm,sweat,sx:px+10,sy:160,reach:Math.atan2(100-160-(gy-200),lx-(px+10))*180/Math.PI+90,px};}
   return S;
 }
 /* 해의 높이(e)에 따른 하늘 색: [e, 위, 가운데, 지평선(저녁), 지평선(아침)] */
@@ -278,13 +288,13 @@ function paint(S,light,phase,cloudK,ons,real,cloudX){
   S.top.setAttribute("stop-color",rgb(top));S.mid.setAttribute("stop-color",rgb(mid));S.hor.setAttribute("stop-color",rgb(hor));
   const x=320-Math.cos(ang)*270,y=205-e*165;
   S.sun.setAttribute("transform",`translate(${x} ${y})`);S.sun.setAttribute("opacity",cloudK?.45:1);
-  const low=clamp(e/0.35,0,1);S.disc.setAttribute("fill",rgb(lerp([238,110,60],[250,199,117],low)));S.rays.setAttribute("opacity",clamp(e/0.15,0,1));
+  const low=clamp(e/0.35,0,1);S.disc.setAttribute("fill",rgb(lerp([236,112,62],[246,200,78],low)));S.rays.setAttribute("opacity",clamp(e/0.15,0,1));
   S.moon.setAttribute("transform",`translate(${640-x} ${205+e*165})`);S.moon.setAttribute("opacity",clamp((0.1-e)/0.25,0,1));
   S.stars.setAttribute("opacity",clamp((-e-0.06)/0.2,0,1));
-  S.ground.setAttribute("fill",rgb(lerp([28,46,22],[99,153,34],clamp((e+0.2)/0.5,0,1))));
+  S.ground.setAttribute("fill",rgb(lerp([30,46,32],[110,154,78],clamp((e+0.2)/0.5,0,1))));
   const cOn=cloudX!=null;S.cloud.setAttribute("opacity",cOn?.96:0);
   if(cOn){S.cloud.setAttribute("transform",`translate(${cloudX} 60)`);S.cloud.setAttribute("fill",rgb(lerp([44,50,66],[138,148,166],clamp((e+0.2)/0.4,0,1))));}
-  ons.forEach((on,i)=>{const L=S.lamps[i];L.glow.setAttribute("opacity",on?1:0);L.bulb.setAttribute("fill",on?"#FAC775":"#888780");});
+  ons.forEach((on,i)=>{const L=S.lamps[i];L.glow.setAttribute("opacity",on?1:0);L.bulb.setAttribute("fill",on?"#F6CB5E":"#8A8984");});
 }
 
 /* 시뮬레이션 */
@@ -341,7 +351,7 @@ function step(dt){
 function draw(){
   const v=W.view||{light:lightAt(W.ph%1),ph:W.ph%1,cloudK:0,ons:W.n===1?[false]:W.n===2?[false,false]:[false,false,false],v:null};
   paint(W.S,v.light,v.ph,v.cloudK,v.ons,v.real,v.cloudX);
-  const P=W.S.person;if(P){const t=W.armT??9,k=t<0.5?Math.sin(Math.PI*t/0.5):0,ang=-12+(P.reach+12)*k;
+  const P=W.S.person;if(P){const t=W.armT??9,k=t<0.5?Math.sin(Math.PI*t/0.5):0,ang=8+(P.reach-8)*k;
     P.arm.setAttribute("transform",`translate(${P.sx} ${P.sy}) rotate(${ang})`);
     P.sweat.setAttribute("opacity",W.fat>0.1?1:0);const bob=Math.abs(Math.sin(W.t*7))*2;P.sweat.setAttribute("transform",`translate(${bob} ${-bob})`);
     const bub=$("bub"+W.n);if(bub){if(W.bubT>0){bub.classList.add("on");bub.style.left=`${(P.px-14)/640*100}%`;}else bub.classList.remove("on");}}
