@@ -594,7 +594,7 @@ function fresh(){if(dayOver){newDay();renderGoal(null);}draw();syncRun();}
 const onCmd=e=>{const b=e.target.closest(".cmd");if(!b||running)return;if(cur===1){if(runs1.has(b.dataset.c))return;set.cmd=b.dataset.c;syncCmds();fresh();runDay();return;}set.cmd=b.dataset.c;syncCmds();fresh();$("toast").className="toast";$("toast").textContent=`'${CMDS[set.cmd].t}'를 골랐어요. '하루 보내기'를 눌러 보세요.`;};
 $("cmds1").onclick=onCmd;$("cmds2").onclick=onCmd;
 function afterDay(s){const t=$("toast"),h=harmText(s);
-  if(set.override){afterX(s);return;}
+  if(set.override){t.textContent="";t.className="toast";afterX(s);return;}
   if(cur===1){runs1.add(set.cmd);syncCmds();t.className="toast "+(h?"bad":"ok");
     t.textContent=h?`양 로봇은 시키는 대로 했어요. 그런데 ${h}${josaR(h)} 먹어 버렸어요.`:"";
     if(runs1.size>=2){$("talk1").hidden=false;$("real1").hidden=false;$("next1").disabled=false;done.add(1);}
