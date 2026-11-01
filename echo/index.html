@@ -382,12 +382,16 @@ function show(n){cur=n;
   if(!instant)window.scrollTo({top:0,behavior:reduce?"auto":"smooth"});}
 
 /* 1단계: 만화 칸 */
-/* 말풍선 한 덩어리: 둥근 사각형과 꼬리를 한 선으로 이어 그려요. 꼬리는 말하는 사람 쪽으로 살짝 휘어요. */
-function bubblePath(x,y,w,h,tx,ty,r=16){const b=y+h,ax=Math.max(x+r+14,Math.min(x+w-r-14,tx+(tx<x+w/2?14:-14))),tw=Math.min(26,w/4);
-  const L=ax-tw/2,R=ax+tw/2,dy=ty-b,lean=tx-ax;
-  return `M${x+r} ${y} H${x+w-r} Q${x+w} ${y} ${x+w} ${y+r} V${b-r} Q${x+w} ${b} ${x+w-r} ${b} H${R} Q${R-tw*.15+lean*.35} ${b+dy*.45} ${tx} ${ty} Q${L+tw*.1+lean*.15} ${b+dy*.35} ${L} ${b} H${x+r} Q${x} ${b} ${x} ${b-r} V${y+r} Q${x} ${y} ${x+r} ${y}Z`;}
-function sbub(x,y,w,lines,tx,ty,col,fs=17){const h=lines.length*(fs+6)+14;
-  return `<path d="${bubblePath(x,y,w,h,tx,ty,14)}" fill="#fffdf6" stroke="${col}" stroke-width="2.2" stroke-linejoin="round"/>`
+/* 말풍선 한 덩어리: 둥근 사각형과 꼬리를 한 선으로 이어 그려요.
+   말하는 사람이 왼쪽에 있으면 꼬리의 왼쪽 변이 곧게 서고 오른쪽 변이 비스듬히, 오른쪽에 있으면 그 반대예요. */
+function bubblePath(x,y,w,h,tx,ty,r=16,side){const b=y+h,tw=Math.min(24,w/4),dy=ty-b,left=side?side==="left":tx<x+w/2;let L,R,right,leftEdge;
+  if(left){L=Math.max(x+r+2,Math.min(x+w-r-2-tw,tx));R=L+tw;
+    right=`Q${R+(tx-R)*.55} ${b+dy*.25} ${tx} ${ty}`;leftEdge=`Q${(L+tx)/2} ${b+dy/2} ${L} ${b}`;}
+  else{R=Math.min(x+w-r-2,Math.max(x+r+2+tw,tx));L=R-tw;
+    right=`Q${(R+tx)/2} ${b+dy/2} ${tx} ${ty}`;leftEdge=`Q${L+(tx-L)*.55} ${b+dy*.25} ${L} ${b}`;}
+  return `M${x+r} ${y} H${x+w-r} Q${x+w} ${y} ${x+w} ${y+r} V${b-r} Q${x+w} ${b} ${x+w-r} ${b} H${R} ${right} ${leftEdge} H${x+r} Q${x} ${b} ${x} ${b-r} V${y+r} Q${x} ${y} ${x+r} ${y}Z`;}
+function sbub(x,y,w,lines,tx,ty,col,fs=17,side){const h=lines.length*(fs+6)+14;
+  return `<path d="${bubblePath(x,y,w,h,tx,ty,14,side)}" fill="#fffdf6" stroke="${col}" stroke-width="2.2" stroke-linejoin="round"/>`
    +lines.map((l,i)=>`<text x="${x+w/2}" y="${y+10+fs+i*(fs+6)}" text-anchor="middle" font-size="${fs}" fill="#2f3a2c" font-family="Gaegu, Gowun Dodum, sans-serif" font-weight="700">${l}</text>`).join("");}
 const CAPS=["높은 산에 오른 어린 왕자가 크게 외쳤어요.","산이 어린 왕자의 말을 그대로 따라 해요.","그런데 이 산은 그냥 산이 아니었어요!"];
 function drawComic(){const p=p1;
@@ -399,7 +403,7 @@ function drawComic(){const p=p1;
   <g transform="translate(93 262) scale(.72)">${princeArt(p===1?"shocked":"happy")}</g>`;
   if(p===0)s+=sbub(16,14,120,["안녕!"],86,104,"#b8860b",22)+`<text x="268" y="64" font-size="20" fill="#3d6b7a" opacity=".85" font-family="Gaegu, sans-serif" font-weight="700">안녕…</text><text x="318" y="42" font-size="15" fill="#3d6b7a" opacity=".5" font-family="Gaegu, sans-serif" font-weight="700">안녕…</text>`;
   if(p===1)s+=sbub(14,14,186,["어? 누가","따라 하는 거야?"],86,104,"#b8860b",19)+`<text x="236" y="70" font-size="18" fill="#3d6b7a" opacity=".85" font-family="Gaegu, sans-serif" font-weight="700">…하는 거야…</text><text x="316" y="46" font-size="15" fill="#3d6b7a" opacity=".5" font-family="Gaegu, sans-serif" font-weight="700">거야…</text>`;
-  if(p===2)s+=sbub(150,6,238,["안녕! 나는 메아리 AI야.","마을 게시판에 적힌 말을","배워서 메아리로 돌려줘."],262,128,"#3f8a3a",16);
+  if(p===2)s+=sbub(150,6,238,["안녕! 나는 메아리 AI야.","마을 게시판에 적힌 말을","배워서 메아리로 돌려줘."],262,128,"#3f8a3a",16,"right");
   s+=`</g><rect x="2" y="2" width="392" height="296" rx="16" fill="none" stroke="#4a3f35" stroke-width="3"/>`;
   $("comic").innerHTML=s;$("cap1").textContent=CAPS[p];$("next1a").textContent=p<2?"▶ 다음":"게시판 관리하러 가기";}
 $("next1a").onclick=()=>{if(p1<2){p1++;drawComic();return;}done.add(1);show(2);};
