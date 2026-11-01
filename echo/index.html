@@ -114,22 +114,67 @@ html,body{overscroll-behavior-y:contain}
 .mine s{color:#8a7f72}.mine b{font-family:var(--display);font-size:1.6rem;line-height:1.2;color:#2f6a2a}
 .closing{margin:0;padding:14px 16px;border-radius:12px;background:var(--accent-bg);font-family:var(--display);font-size:1.4rem;line-height:1.4;text-align:center;word-break:keep-all}
 @media (prefers-reduced-motion:reduce){.bcard{transition:none}}
+/* 새 판: 게시판 관리 */
+.steps{grid-template-columns:repeat(3,1fr)}
+.hats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hat{font:inherit;display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 8px;border-radius:14px;border:2px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;font-family:var(--display);font-size:1.3rem}
+.hat svg{width:84px;height:56px}
+.hat[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-bg)}
+.days{display:flex;gap:6px;align-items:center;font-family:var(--display);font-size:1.15rem}
+.days span{padding:2px 12px;border-radius:999px;border:1.5px solid var(--line);color:var(--muted);background:var(--paper)}
+.days span.on{border-color:var(--accent);background:var(--accent-bg);color:var(--ink)}
+.days span.done{color:var(--ink)}
+.days{flex-wrap:wrap}.days span{white-space:nowrap}
+@media (max-width:480px){.days{font-size:1rem;gap:4px}.days span{padding:2px 8px}.days .me{font-size:.75rem}.days .me svg{width:22px;height:15px}}
+.days .me{margin-left:auto;font-family:var(--body);font-size:.85rem;color:var(--muted);display:flex;align-items:center;gap:4px}
+.days .me svg{width:30px;height:20px}
+.banner{margin:0;padding:10px 14px;border-radius:12px;background:#fff3d6;color:#5a4320;border-left:5px solid #e0a22c;line-height:1.55;word-break:keep-all}
+.banner.red{background:#fbe4e2;color:#6a2620;border-left-color:#c8463f}
+.posts{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.post{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:10px 12px;border-radius:12px;background:#fffdf6;color:#2f3a2c;border:1.5px solid #d8ceb6;box-shadow:0 1px 0 rgba(0,0,0,.08)}
+.post .tx{font-size:1.02rem;line-height:1.4;word-break:keep-all}
+.post .from{display:block;font-size:.75rem;color:#8a7f72;margin-bottom:2px}
+.post .fr-echo{color:#2d5d7b;font-weight:700}.post .fr-mine{color:#b23a48;font-weight:700}.post .fr-evade{color:#8a5a2b;font-weight:700}
+.post.hot{border-color:#c8463f;box-shadow:0 0 0 3px rgba(200,70,63,.18)}
+.dec{display:flex;gap:4px}
+.dec button{font:inherit;font-size:.9rem;padding:7px 12px;border-radius:999px;border:1.5px solid #d8ceb6;background:#fff;color:#2f3a2c;cursor:pointer;white-space:nowrap}
+.dec button.keep[aria-pressed="true"]{background:#e4f1dc;border-color:#5fae4a;color:#22551d}
+.dec button.del[aria-pressed="true"]{background:#f3e6e4;border-color:#b23a48;color:#7a1f2a}
+.post.gone{opacity:.55}.post.gone .tx{text-decoration:line-through}
+.post .auto{font-size:.8rem;color:#7a1f2a;white-space:nowrap}
+@media (max-width:480px){.post{grid-template-columns:1fr}.dec{justify-content:flex-end}}
+details.kept{border:1.5px dashed var(--line);border-radius:12px;padding:8px 12px}
+details.kept summary{cursor:pointer;font-size:.92rem;color:var(--muted)}
+details.kept ul{margin:8px 0 0;padding-left:1.1em;font-size:.92rem;display:flex;flex-direction:column;gap:2px}
+.evt{display:flex;gap:10px;align-items:center;padding:10px 14px;border-radius:12px;background:var(--bg);border:1.5px solid var(--line);word-break:keep-all}
+.evt svg{width:56px;height:56px;flex:0 0 auto}
+.end{display:grid;grid-template-columns:minmax(0,170px) minmax(0,1fr);gap:14px;align-items:center}
+@media (max-width:520px){.end{grid-template-columns:1fr;text-align:center}.end .mt{max-width:160px;margin:0 auto}}
+.end h3{font-size:1.6rem}
+.rec{display:flex;flex-direction:column;gap:6px}
+.rec details{border:1.5px solid var(--line);border-radius:10px;padding:8px 12px;background:var(--bg)}
+.rec summary{cursor:pointer;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.rec summary b{font-weight:400}
+.rec ul{margin:6px 0 0;padding-left:1.1em;font-size:.9rem}
+.rec li.k{color:var(--ok)}.rec li.d{color:var(--muted);text-decoration:line-through}
+.quiz{display:flex;flex-direction:column;gap:8px}
+.quiz .qn{font-size:.85rem;color:var(--muted)}
+.quiz .q{font-family:var(--display);font-size:1.35rem;line-height:1.3}
+.opt.right{border-color:var(--ok);background:var(--warm-bg)}.opt.wrong{border-color:var(--bad);background:var(--thorn-bg);opacity:.75}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="tbar" id="tbar" hidden><b>선생님 바로가기</b><button data-j="1">1단계</button><button data-j="2">2단계</button><button data-j="3">3단계</button><button data-j="4">4단계</button><button data-j="5">5단계</button></div>
+  <div class="tbar" id="tbar" hidden><b>선생님 바로가기</b><button data-j="1">1단계</button><button data-j="2">2단계</button><button data-j="d3">셋째 날</button><button data-j="e1">결말: 가시</button><button data-j="e2">결말: 허영쟁이</button><button data-j="e3">결말: 정직하고 따뜻한</button></div>
   <header>
     <h1>AI의 메아리 바꾸기</h1>
-    <p class="lead">메아리는 내가 한 말을 그대로 돌려줘요. 마을 게시판의 말을 배우는 메아리 AI는 어떤 말을 돌려줄까요?</p>
+    <p class="lead">메아리는 들은 말을 돌려줘요. 마을 게시판의 말을 배우는 메아리 AI는 어떤 말을 돌려줄까요? 사흘 동안 게시판 관리자가 되어 봐요.</p>
   </header>
 
   <nav class="steps" aria-label="단계">
     <div class="stepi" id="tab1" aria-current="step"><b>1</b>메아리 산</div>
-    <div class="stepi" id="tab2"><b>2</b>게시판을 배운 AI</div>
-    <div class="stepi" id="tab3"><b>3</b>금지어 입마개</div>
-    <div class="stepi" id="tab4"><b>4</b>게시판 바꾸기</div>
-    <div class="stepi" id="tab5"><b>5</b>내 말 바꾸기</div>
+    <div class="stepi" id="tab2"><b>2</b>게시판 관리하기</div>
+    <div class="stepi" id="tab3"><b>3</b>나의 메아리</div>
   </nav>
 
   <!-- 1단계 -->
@@ -142,57 +187,45 @@ html,body{overscroll-behavior-y:contain}
 
   <!-- 2단계 -->
   <section class="card" id="step2" hidden>
-    <h2>게시판의 말을 배운 메아리 AI</h2>
-    <p class="note">마을 게시판에 사람들이 쓴 말이 붙어 있어요. 메아리 AI에게 이 게시판을 공부시킨 다음, 메아리를 들어 보세요.</p>
-    <div class="board" id="board2"></div>
-    <div class="row"><button class="btn primary" id="learn2">공부시키기</button><button class="btn" id="listen2" disabled>메아리 듣기</button></div>
-    <div class="stage"><div class="mt" id="mt2"></div><div class="thermo" id="th2"></div></div>
-    <ul class="echoes" id="ec2"></ul>
-    <p class="why" id="why2" hidden></p>
-    <div class="row"><button class="btn primary" id="next2" disabled>메아리를 바꾸러 가기</button></div>
+    <div id="hatBox" style="display:flex;flex-direction:column;gap:12px">
+      <h2>게시판 관리자가 되었어요</h2>
+      <p class="note">사흘 동안 마을 게시판을 관리해요. 아침마다 새 글이 올라오면 글마다 <b>두기</b>나 <b>지우기</b>를 골라요. 밤이 되면 메아리 AI가 게시판에 남은 글을 모두 배우고, 다음 날 아침 마을에 메아리를 돌려줘요.</p>
+      <p class="note">먼저 내 모자 색을 골라요. 이 마을 사람들은 모두 빨간 모자나 파란 모자를 써요.</p>
+      <div class="hats" id="hats"></div>
+      <div class="row"><button class="btn primary" id="startDays" disabled>첫째 날 시작하기</button></div>
+    </div>
+    <div id="dayBox" hidden style="display:flex;flex-direction:column;gap:12px">
+      <div class="days" id="days"></div>
+      <h2 id="dayTitle"></h2>
+      <div class="stage"><div class="mt" id="mt"></div><div class="thermo" id="echoBox"></div></div>
+      <div id="banners" style="display:flex;flex-direction:column;gap:8px"></div>
+      <div class="box" id="eraser" hidden>
+        <p class="lbl"><b>자동 지우개</b>를 쓸 수 있어요. 낱말만 정하면 그 낱말이 들어간 글을 게시판에서 저절로 지워 줘요. 지금 게시판에 있는 글에도, 앞으로 올라올 글에도 쓰여요.</p>
+        <div class="chips" id="eraserChips"></div>
+        <div class="row"><button class="btn primary" id="eraserUse" disabled>이 낱말로 지우개 쓰기</button><button class="btn" id="eraserSkip">지우개 쓰지 않기</button></div>
+      </div>
+      <div id="postArea" style="display:flex;flex-direction:column;gap:8px">
+        <h3 id="postTitle">오늘 올라온 글</h3>
+        <ul class="posts" id="posts"></ul>
+      </div>
+      <details class="kept" id="keptBox"><summary id="keptSum"></summary><ul id="keptList"></ul></details>
+      <p class="toast" id="toast2" role="status"></p>
+      <div class="row"><button class="btn primary" id="night" disabled>밤이 되었어요 · 메아리 AI가 공부해요</button></div>
+    </div>
   </section>
 
   <!-- 3단계 -->
   <section class="card" id="step3" hidden>
-    <h2>방법 ① 금지어 입마개</h2>
-    <p class="note">메아리 AI가 쓰면 안 되는 낱말을 정해 막아 봐요. 막은 낱말이 들어간 메아리는 나오지 못해요. 게시판은 그대로예요.</p>
-    <div class="box"><p class="lbl">막을 낱말 고르기 (여러 개 고를 수 있어요)</p><div class="chips" id="chips3"></div></div>
-    <div class="row"><button class="btn primary" id="listen3" disabled>입마개를 하고 메아리 듣기</button></div>
-    <div class="stage"><div class="mt" id="mt3"></div><div class="thermo" id="th3"></div></div>
-    <ul class="echoes" id="ec3"></ul>
-    <p class="why" id="why3" hidden></p>
-    <div class="row"><button class="btn primary" id="next3" disabled>다른 방법 해 보기</button></div>
-  </section>
-
-  <!-- 4단계 -->
-  <section class="card" id="step4" hidden>
-    <h2>방법 ② 게시판의 말 바꾸기</h2>
-    <p class="note">이번에는 입마개 대신 게시판을 바꿔요. 가시 돋친 카드를 눌러 떼고, 아래 따뜻한 카드를 눌러 붙여요. 그다음 메아리 AI를 다시 공부시켜요.</p>
-    <div class="board edit" id="board4"></div>
-    <div class="pile" id="pile4"></div>
-    <div class="row"><button class="btn primary" id="learn4" disabled>다시 공부시키기</button><button class="btn" id="listen4" disabled>메아리 듣기</button></div>
-    <div class="stage"><div class="mt" id="mt4"></div><div class="thermo" id="th4"></div></div>
-    <ul class="echoes" id="ec4"></ul>
-    <p class="why" id="why4" hidden></p>
-    <div class="row"><button class="btn primary" id="next4" disabled>비교하고 내 말 바꾸기</button></div>
-  </section>
-
-  <!-- 5단계 -->
-  <section class="card" id="step5" hidden>
-    <h2>메아리를 바꾼 건 무엇이었을까?</h2>
-    <div class="cmp" id="cmp5"></div>
-    <p class="note">입마개는 막은 낱말만 막았고, 게시판을 바꾸자 메아리 자체가 바뀌었어요. 메아리 AI가 배우는 말을 만드는 건 누구일까요?</p>
-    <h3>내가 오늘부터 바꿀 말</h3>
-    <div class="opts" id="opts5"></div>
-    <div class="box" id="own5" hidden>
-      <div class="field"><label for="ownA">이런 말 대신</label><input id="ownA" maxlength="30" autocomplete="off" placeholder="예: 그것도 못 해?"></div>
-      <div class="field"><label for="ownB">이렇게 말할래요</label><input id="ownB" maxlength="30" autocomplete="off" placeholder="예: 같이 해 볼까?"></div>
-    </div>
-    <div class="row"><button class="btn primary" id="done5" disabled>정했어요</button></div>
-    <div id="fin5" hidden style="display:flex;flex-direction:column;gap:12px">
-      <p class="mine" id="mine5"></p>
-      <p class="note" style="text-align:center">이 말을 카드 뉴스 첫 장에 써 보세요.</p>
-      <p class="closing">메아리는 우리가 한 말을 돌려줘요.<br>AI의 메아리를 바꾸는 건 우리가 하는 말이에요.</p>
+    <div class="end"><div class="mt" id="mtEnd"></div><div style="display:flex;flex-direction:column;gap:6px"><span class="note">나의 결말</span><h3 id="endTitle"></h3><p style="margin:0;word-break:keep-all" id="endText"></p></div></div>
+    <div class="evt" id="endEvt" hidden></div>
+    <h3>나의 관리 기록</h3>
+    <p class="note">사흘 동안 본 글을 다섯 종류로 나눠 봤어요. 눌러서 어떤 글을 남기고 지웠는지 살펴보세요.</p>
+    <div class="rec" id="rec"></div>
+    <h3>바꿔 말하기</h3>
+    <div class="quiz" id="quiz"></div>
+    <div id="fin3" hidden style="display:flex;flex-direction:column;gap:12px">
+      <p class="why">짝과 이야기해 봐요. <b>사람을 깎아내리는 말과, 듣기 싫어도 꼭 필요한 말은 어떻게 구별할 수 있을까요?</b></p>
+      <p class="closing">메아리는 우리가 한 말을 돌려줘요.<br>깎아내리는 말은 멈추고, 필요한 말은 따뜻하게.</p>
     </div>
   </section>
 
@@ -265,7 +298,7 @@ const EINK="#3A2A22",GOLD="#E9A92C";
 const hex=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)),mix=(a,b,t)=>"#"+hex(a).map((v,i)=>Math.round(v+(hex(b)[i]-v)*t).toString(16).padStart(2,"0")).join("");
 const antenna=(x,y)=>pL(`M${x} ${y} L${x} ${y-16}`,3,"#9AA6AE")+`<circle cx="${x}" cy="${y-20}" r="5.5" fill="${GOLD}"/>`+[10,17,24].map(r=>`<path d="M${x-r*.75} ${y-20-r*.66} A${r} ${r} 0 0 1 ${x+r*.75} ${y-20-r*.66}" fill="none" stroke="${GOLD}" stroke-width="3" stroke-linecap="round"/>`).join("");
 /* t: 0 = 따뜻한 메아리, 1 = 가시투성이 */
-function echoMountain(t,plain){
+function echoMountain(t,plain,vain){
   const body=mix("#7FC25A","#5E6E7C",t),peak=mix("#A9D97C","#7D8D99",t),thorn=mix("#5E8F3E","#3E4E5A",t);
   let s="";
   const SP=[[64,118,-1],[136,118,1],[52,140,-1],[148,140,1],[76,96,-1],[124,96,1],[40,164,-1],[160,164,1]];
@@ -278,6 +311,12 @@ function echoMountain(t,plain){
   s+=FL.slice(0,nf).map(([x,y,c])=>[0,1,2,3,4].map(k=>{const a=k*Math.PI*2/5;return `<circle cx="${(x+Math.cos(a)*3.6).toFixed(1)}" cy="${(y+Math.sin(a)*3.6).toFixed(1)}" r="2.8" fill="${c}"/>`}).join("")+`<circle cx="${x}" cy="${y}" r="2" fill="${GOLD}"/>`).join("");
   if(plain)return s;
   s+=antenna(100,50);
+  /* 허영쟁이 메아리: 반짝이 왕관을 쓰고 듣기 좋은 말만 해요 */
+  if(vain){s+=pF("M83 78 L80 58 L91 67 L100 52 L109 67 L120 58 L117 78 Q100 83 83 78Z","#E9B52C")+`<circle cx="100" cy="71" r="4" fill="#C8463F"/><circle cx="80" cy="58" r="2.6" fill="#F6D86B"/><circle cx="120" cy="58" r="2.6" fill="#F6D86B"/>`;
+    const st=(x,y,r)=>pF(`M${x} ${y-r} Q${x+r*.2} ${y-r*.2} ${x+r} ${y} Q${x+r*.2} ${y+r*.2} ${x} ${y+r} Q${x-r*.2} ${y+r*.2} ${x-r} ${y} Q${x-r*.2} ${y-r*.2} ${x} ${y-r}Z`,"#F2C230");
+    s+=st(38,74,9)+st(164,86,8)+st(152,40,6)+st(48,112,5)+st(170,128,6);
+    s+=pL("M77 129 Q84 121 91 129",2.8,EINK)+pL("M109 129 Q116 121 123 129",2.8,EINK)+pF("M85 142 Q100 164 115 142 Q100 148 85 142Z","#B8434A")+`<circle cx="72" cy="144" r="8" fill="#F6B0A6" opacity=".9"/><circle cx="128" cy="144" r="8" fill="#F6B0A6" opacity=".9"/>`;
+    return s;}
   // 얼굴
   if(t<.3){s+=`<ellipse cx="84" cy="128" rx="5.5" ry="7" fill="${EINK}"/><ellipse cx="116" cy="128" rx="5.5" ry="7" fill="${EINK}"/><circle cx="86" cy="125.5" r="1.8" fill="#fff"/><circle cx="118" cy="125.5" r="1.8" fill="#fff"/>`
     +pF("M89 144 Q100 158 111 144 Q100 148 89 144Z","#B8434A")+`<circle cx="73" cy="144" r="8" fill="#F6B0A6" opacity=".9"/><circle cx="127" cy="144" r="8" fill="#F6B0A6" opacity=".9"/>`;}
@@ -294,73 +333,52 @@ const $=id=>document.getElementById(id);
 const reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const NE=6; /* 한 번에 듣는 메아리 수 */
-
-/* 말 조각: AI는 카드를 '누구 이야기인지'와 '어떤 말인지'로 나눠 배워요.
-   어떤 말(뒷부분)마다 누구 이야기냐에 따라 붙는 꼴이 달라요. */
-const PRED={
-  slow:{t:"t",none:"왜 이렇게 느려?",ind:"{N}는 왜 이렇게 느려?",grp:"{N}는 왜 다 이렇게 느려?"},
-  dunno:{t:"t",none:"아무것도 할 줄 몰라.",ind:"{N}는 아무것도 할 줄 몰라.",grp:"{N}는 다 아무것도 할 줄 몰라."},
-  noplay:{t:"t",none:"같이 놀기 싫어.",ind:"{N}랑 같이 놀기 싫어.",grp:"{N}랑은 같이 놀기 싫어."},
-  cant:{t:"t",none:"그것도 못 해?",ind:"{N}는 그것도 못 해?",grp:"{N}는 다 그것도 못 해?"},
-  weird:{t:"t",none:"진짜 이상해.",ind:"{N}는 진짜 이상해.",grp:"{N}는 다 이상해."},
-  slow2:{t:"t",none:"진짜 느려.",ind:"{N}는 진짜 느려.",grp:"{N}는 다 느려."},
-  snail:{t:"t",none:"굼벵이 같아.",ind:"{N}는 굼벵이 같아.",grp:"{N}는 다 굼벵이 같아."},
-  slowok:{t:"w",none:"느려도 괜찮아.",ind:"{N}는 느려도 괜찮아.",grp:"{N}는 느려도 괜찮아."},
-  kind:{t:"w",none:"정말 친절하구나!",ind:"{N}는 정말 친절하구나!",grp:"{N}는 다 정말 친절하구나!"},
-  effort:{t:"w",none:"늘 열심히 노력해.",ind:"{N}는 늘 열심히 노력해.",grp:"{N}는 다 열심히 노력해."},
-  fun:{t:"w",none:"같이 하니까 재밌다!",ind:"{N}랑 같이 하니까 재밌다!",grp:"{N}랑 같이 하니까 재밌다!"},
-  thanks:{t:"w",none:"덕분에 고마워.",ind:"{N} 덕분에 고마워.",grp:"{N} 덕분에 고마워."},
-  slowly:{t:"w",none:"천천히 해도 돼.",ind:"{N}는 천천히 해도 돼.",grp:"{N}는 천천히 해도 돼."},
-  oops:{t:"w",none:"실수해도 괜찮아.",ind:"{N}는 실수해도 괜찮아.",grp:"{N}는 실수해도 괜찮아."},
-  withu:{t:"w",none:"같이 하고 싶어.",ind:"{N}랑 같이 하고 싶어.",grp:"{N}랑 같이 하고 싶어."},
-  all:{t:"w",whole:"빨간 모자도 파란 모자도 다 소중해."}
-};
-const WHO={"쟤":"ind","파란 모자":"grp"};
-const say=(who,p)=>PRED[p].whole||(who?PRED[p][WHO[who]].replace("{N}",who):PRED[p].none);
-const tone=c=>PRED[c.p].t;
-const BOARD0=[[null,"slow"],["쟤","dunno"],["쟤","noplay"],[null,"cant"],[null,"weird"],["파란 모자","slow2"],["파란 모자","snail"],[null,"slowok"],[null,"kind"],["쟤","effort"]].map(([who,p],i)=>({id:"b"+i,who,p}));
-const EXTRA=[[null,"fun"],[null,"thanks"],[null,"slowly"],[null,"oops"],["쟤","withu"],[null,"all"]].map(([who,p],i)=>({id:"x"+i,who,p}));
-const CARD={};[...BOARD0,...EXTRA].forEach(c=>CARD[c.id]=c);
-const WORDS=["느려","못 해","몰라","싫어","이상해"];
-
-/* 메아리 만들기: 어떤 말 한 조각 + 누구 이야기 한 조각을 골라 붙여요 */
 const pick=a=>a[Math.floor(Math.random()*a.length)];
-function gen1(L){const A=pick(L);if(PRED[A.p].whole)return mk(L,A,A,A.who);
-  const B=Math.random()<.45?A:pick(L.filter(c=>!PRED[c.p].whole));return mk(L,A,B,B.who);}
-function mk(L,A,B,who){const text=say(who,A.p),t=PRED[A.p].t;
-  return {text,t,A,B,who,isNew:!L.some(c=>say(c.who,c.p)===text),grp:who==="파란 모자"&&t==="t"};}
-function genSet(L,words){const out=[];for(let k=0;k<80&&out.length<NE;k++){const e=gen1(L);if(out.some(o=>o.text===e.text))continue;out.push(e);}
-  out.forEach(e=>{const w=words.filter(x=>e.text.includes(x));e.blocked=w.length>0;e.bw=w;});return out;}
-function pickSet(L,words,cond){let s;for(let k=0;k<400;k++){s=genSet(L,words);if(!cond||cond(s))return s;}return s;}
-const mask=(e)=>{let s=esc(e.text);e.bw.forEach(w=>{s=s.split(w).join("■".repeat(w.replace(/ /g,"").length));});return s;};
-const ratioT=L=>L&&L.length?Math.min(1,L.filter(c=>tone(c)==="t").length/L.length/.7):0;
-const summary=(set,L)=>({thorn:set.filter(e=>!e.blocked&&e.t==="t").length,blocked:set.filter(e=>e.blocked).length,t:ratioT(L)});
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
 
-/* 그리기 */
-function mountain(el,t){el.innerHTML=`<svg viewBox="0 -14 200 214" role="img" aria-label="메아리 산">${echoMountain(t)}</svg>`;}
-function thermo(el,set){
-  if(!set){el.innerHTML=`<span class="lbl">메아리 온도계</span><div class="cells">${"<i></i>".repeat(NE)}</div><span class="empty">메아리를 들으면 가시 돋친 메아리가 몇 개인지 여기에 나타나요.</span>`;return;}
-  const s=summary(set,[]);
-  el.innerHTML=`<span class="lbl">메아리 온도계</span><div class="cells">${set.map(e=>`<i class="${e.blocked?"b":e.t}"></i>`).join("")}</div><span>가시 돋친 메아리 <b>${s.thorn} / ${NE}</b>${s.blocked?` · 막힌 메아리 ${s.blocked}개`:""}</span>`;}
-function srcText(e){const a=`「${esc(say(e.A.who,e.A.p))}」`;
-  return e.who?`'${esc(e.who)}' 이야기는 「${esc(say(e.B.who,e.B.p))}」에서, 말은 ${a}에서 가져와 섞었어요.`:`${a}에서 '${esc(e.A.who)}'를 빼고 말만 가져왔어요.`;}
-function echoList(el,set){el.innerHTML=set.map((e,i)=>{const cls=e.blocked?"blocked":e.t==="t"?"thorn":"warm";
-  const tags=[e.blocked?`<span class="tg">막힘</span>`:"",!e.blocked&&e.grp?`<span class="tg grp">차별 표현</span>`:"",e.isNew&&!e.blocked?`<button class="tg new" data-i="${i}">새로 만든 말</button>`:""].join("");
-  return `<li class="echo ${cls}">${e.blocked?mask(e):esc(e.text)}${tags?`<span class="tags">${tags}</span>`:""}<span class="src" id="${el.id}s${i}" hidden>${e.isNew?srcText(e):""}</span></li>`;}).join("");
-  el.onclick=ev=>{const b=ev.target.closest(".tg.new");if(!b)return;const s=$(`${el.id}s${b.dataset.i}`);s.hidden=!s.hidden;};}
-function boardHTML(cards,cls){return cards.map(c=>`<button class="bcard ${tone(c)==="t"?"thorn":"warm"} ${cls?cls(c):""}" data-id="${c.id}">${esc(say(c.who,c.p))}${c.who==="파란 모자"&&tone(c)==="t"?`<span class="tag">차별</span>`:""}</button>`).join("");}
+/* 말 조각: AI는 글을 '누구 이야기인지'와 '어떤 말인지'로 나눠 배우고, 섞어서 새 말을 만들어요 */
+const PRED={
+  dunno:{none:"아무것도 할 줄 몰라.",ind:"{N}는 아무것도 할 줄 몰라.",grp:"{N}는 다 아무것도 할 줄 몰라."},
+  noplay:{none:"같이 놀기 싫어.",ind:"{N}랑 같이 놀기 싫어.",grp:"{N}랑은 같이 놀기 싫어."},
+  cant:{none:"그것도 못 해?",ind:"{N}는 그것도 못 해?",grp:"{N}는 다 그것도 못 해?"},
+  slow2:{none:"진짜 느려.",ind:"{N}는 진짜 느려.",grp:"{N}는 다 느려."},
+  snail:{none:"굼벵이 같아.",ind:"{N}는 굼벵이 같아.",grp:"{N}는 다 굼벵이 같아."},
+  slowok:{none:"느려도 괜찮아.",ind:"{N}는 느려도 괜찮아.",grp:"{N}는 느려도 괜찮아."},
+  kind:{none:"정말 친절하구나!",ind:"{N}는 정말 친절하구나!",grp:"{N}는 다 정말 친절하구나!"},
+  effort:{none:"늘 열심히 노력해.",ind:"{N}는 늘 열심히 노력해.",grp:"{N}는 다 열심히 노력해."},
+  oops:{none:"실수해도 괜찮아.",ind:"{N}는 실수해도 괜찮아.",grp:"{N}는 실수해도 괜찮아."}
+};
+const HAT={red:"빨간 모자",blue:"파란 모자"},HATC={red:"#C8463F",blue:"#3C79B4"};
+let myHat=null;const otherHat=()=>myHat==="red"?"blue":"red";
+const whoName=w=>w==="G"?HAT[otherHat()]:w==="M"?HAT[myHat]:w;
+const form=(who,p)=>who?PRED[p][who==="쟤"?"ind":"grp"].replace("{N}",who):PRED[p].none;
+const textOf=x=>x.text||form(x.who,x.p);
+const isHat=w=>w===HAT.red||w===HAT.blue;
+/* 사흘 동안 올라올 글. k: hate 혐오·차별 / sarc 비꼬기 / need 불편하지만 필요한 말 / warm 따뜻한 말 / flat 듣기 좋은 말만 */
+const DAYS=[
+  [{k:"hate",who:"G",p:"slow2"},{k:"hate",who:"쟤",p:"dunno"},{k:"sarc",text:"와~ 진짜 빠르다^^"},{k:"need",text:"바오밥 싹이 자라고 있어. 빨리 뽑아야 해!",tag:"baobab"},{k:"warm",p:"slowok"},{k:"need",text:"그림이 어두워서 잘 안 보여. 조금 밝게 하면 좋겠어."},{k:"flat",text:"넌 뭐든 다 최고야!"}],
+  [{k:"hate",who:"쟤",p:"noplay"},{k:"need",text:"약속에 늦으면 기다리는 사람이 힘들어."},{k:"flat",text:"완벽해! 고칠 거 하나도 없어!"},{k:"hate",who:"G",p:"snail"},{k:"warm",p:"kind"},{k:"need",text:"바오밥 싹이 또 보여. 오늘은 꼭 뽑자!",tag:"baobab"}],
+  [{k:"hate",p:"cant"},{k:"warm",who:"쟤",p:"effort"},{k:"sarc",text:"와~ 그림 진짜 잘 그렸다^^"},{k:"need",text:"다리 난간이 흔들려. 고쳐야 할 것 같아."},{k:"flat",text:"우리 마을은 완벽해! 아무 문제 없어!"},{k:"warm",p:"oops"}]];
+const EVADE=[{k:"hate",text:"{G}는 다 ㄴㄹ."},{k:"hate",text:"쟤는 거북이 같아."},{k:"sarc",text:"느~린 거 맞지?^^"}];
+const WORDS=["느려","굼벵이","몰라","싫어","못 해"];
+const KIND=[["hate","🌵 혐오·차별","사람이나 무리를 깎아내리는 말"],["sarc","🎭 비꼬기","겉은 칭찬, 속은 놀림"],["need","⚠️ 불편하지만 필요한 말","듣기 싫어도 꼭 필요한 의견이나 경고"],["warm","🌱 따뜻한 말","마음을 살펴 주는 말"],["flat","👑 듣기 좋은 말만","무조건 최고라고만 하는 말"]];
+const thorny=k=>k==="hate"||k==="sarc";
 
 /* 상태 */
-let cur=1,done=new Set(),L2=null,L4=null,set2=null,set3=null,set4=null,res={},instant=false,busy=false;
-let p1=0,blocked=new Set(),conf3="",on4=[],added4=[],dirty4=false,heard4=false,pick5=null;
+let cur=1,done=new Set(),instant=false,busy=false,p1=0;
+let learnedSt=null,posts=[],day=0,phase="hat",echoes=[],lastEchoDay=0,eraser="no",eraserWords=new Set(),erasedNow=[],twistArmed=false,twistShown=false,nid=0,qi=0,ending=null;
+const mkPost=(o,d,src)=>{const x={id:"p"+(nid++),day:d,k:o.k,who:o.who?whoName(o.who):null,p:o.p||null,text:o.text?o.text.replace("{G}",HAT[otherHat()]):null,tag:o.tag||null,src:src||"town",dec:null,twist:!!o.twist};return x;};
+const board=()=>posts.filter(x=>x.dec==="keep");
+const today=()=>posts.filter(x=>x.day===day);
+function mState(){const K=board(),seen=posts.filter(x=>x.dec),ns=seen.filter(x=>x.k==="need"),nk=ns.filter(x=>x.dec==="keep");
+  const t=K.length?Math.min(1,K.filter(x=>thorny(x.k)).length/K.length/.45):0;
+  const vain=ns.length>=2&&nk.length/ns.length<=.34&&t<.6&&K.length>0;return {t,vain,empty:!K.length&&seen.length>0};}
+function drawMountain(el,st){el.innerHTML=`<svg viewBox="0 -14 200 214" role="img" aria-label="메아리 산">${echoMountain(st.t,st.empty,st.vain)}</svg>`;}
+const hatSvg=c=>`<svg viewBox="0 0 84 56" aria-hidden="true"><path d="M14 40 C14 16 28 6 42 6 C56 6 70 16 70 40Z" fill="${c}"/><ellipse cx="42" cy="42" rx="38" ry="8" fill="${c}"/><path d="M16 34 Q42 40 68 34 L69 39 Q42 45 15 39Z" fill="#fff" opacity=".35"/></svg>`;
 
 function show(n){cur=n;
-  for(const i of [1,2,3,4,5]){$("step"+i).hidden=i!==n;const t=$("tab"+i);if(i===n)t.setAttribute("aria-current","step");else t.removeAttribute("aria-current");t.classList.toggle("done",i!==n&&done.has(i));}
-  if(n===2){mountain($("mt2"),L2?ratioT(L2):0);thermo($("th2"),set2);}
-  if(n===3){mountain($("mt3"),ratioT(L2));thermo($("th3"),set3);}
-  if(n===4){mountain($("mt4"),ratioT(L4||L2));thermo($("th4"),set4);render4();}
-  if(n===5)render5();
+  for(const i of [1,2,3]){$("step"+i).hidden=i!==n;const t=$("tab"+i);if(i===n)t.setAttribute("aria-current","step");else t.removeAttribute("aria-current");t.classList.toggle("done",i!==n&&done.has(i));}
+  if(n===2)render2();if(n===3)render3();
   if(!instant)window.scrollTo({top:0,behavior:reduce?"auto":"smooth"});}
 
 /* 1단계: 만화 칸 */
@@ -374,93 +392,127 @@ function drawComic(){const p=p1;
   <path d="M0 262 Q198 236 396 262 L396 300 L0 300Z" fill="#E6CF9F"/>
   <g transform="translate(214 96) scale(.86)">${echoMountain(0,p<2)}</g>
   <path d="M30 276 Q36 248 92 246 Q150 248 156 276Z" fill="#B7A58A"/>
-  <g transform="translate(93 262) scale(.72)">${princeArt(p===0?"happy":p===1?"shocked":"happy")}</g>`;
+  <g transform="translate(93 262) scale(.72)">${princeArt(p===1?"shocked":"happy")}</g>`;
   if(p===0)s+=sbub(16,14,120,["안녕!"],86,104,"#b8860b",22)+`<text x="268" y="64" font-size="20" fill="#3d6b7a" opacity=".85" font-family="Gaegu, sans-serif" font-weight="700">안녕…</text><text x="318" y="42" font-size="15" fill="#3d6b7a" opacity=".5" font-family="Gaegu, sans-serif" font-weight="700">안녕…</text>`;
   if(p===1)s+=sbub(14,14,186,["어? 누가","따라 하는 거야?"],86,104,"#b8860b",19)+`<text x="236" y="70" font-size="18" fill="#3d6b7a" opacity=".85" font-family="Gaegu, sans-serif" font-weight="700">…하는 거야…</text><text x="316" y="46" font-size="15" fill="#3d6b7a" opacity=".5" font-family="Gaegu, sans-serif" font-weight="700">거야…</text>`;
   if(p===2)s+=sbub(150,6,238,["안녕! 나는 메아리 AI야.","마을 게시판에 적힌 말을","배워서 메아리로 돌려줘."],262,128,"#3f8a3a",16);
   s+=`</g><rect x="2" y="2" width="392" height="296" rx="16" fill="none" stroke="#4a3f35" stroke-width="3"/>`;
-  $("comic").innerHTML=s;$("cap1").textContent=CAPS[p];$("next1a").textContent=p<2?"▶ 다음":"메아리 AI에게 게시판 보여 주기";}
+  $("comic").innerHTML=s;$("cap1").textContent=CAPS[p];$("next1a").textContent=p<2?"▶ 다음":"게시판 관리하러 가기";}
 $("next1a").onclick=()=>{if(p1<2){p1++;drawComic();return;}done.add(1);show(2);};
 
-/* 2단계 */
-async function learnAnim(boardEl,cards,mtEl,from){busy=true;const els=[...boardEl.querySelectorAll(".bcard")].filter(b=>cards.some(c=>c.id===b.dataset.id));
-  const to=ratioT(cards);
-  if(!instant&&!reduce){for(let i=0;i<els.length;i++){els[i].classList.add("learn");mountain(mtEl,from+(to-from)*(i+1)/els.length);await sleep(i<3?380:200);}
-    await sleep(250);els.forEach(e=>e.classList.remove("learn"));}
-  mountain(mtEl,to);busy=false;}
-$("learn2").onclick=async()=>{if(busy)return;$("learn2").disabled=true;
-  await learnAnim($("board2"),BOARD0,$("mt2"),0);L2=BOARD0.slice();$("learn2").textContent="공부를 마쳤어요";$("listen2").disabled=false;};
-function listen2(){if(!L2)return;
-  set2=pickSet(L2,[],set2?null:s=>s.filter(e=>e.isNew).length>=2&&s.some(e=>e.isNew&&e.grp));
-  res[2]=summary(set2,L2);thermo($("th2"),set2);echoList($("ec2"),set2);
-  const nw=set2.filter(e=>e.isNew).length,ng=set2.filter(e=>e.isNew&&e.grp).length;
-  $("why2").innerHTML=(nw?`게시판에 없던 말이 ${nw}개 섞여 있어요. <b>'새로 만든 말'</b>을 눌러 어디서 왔는지 살펴보세요. `:`이번 메아리는 모두 게시판에 있던 말이에요. 메아리를 한 번 더 들어 보세요. `)
-    +(ng?`한 사람에게 하던 가시 돋친 말이 '파란 모자' 모두를 깎아내리는 <b>차별 표현</b>으로 번지기도 해요.`:"");
-  $("why2").hidden=false;$("next2").disabled=false;$("listen2").textContent="메아리 다시 듣기";}
-$("listen2").onclick=listen2;
-$("next2").onclick=()=>{done.add(2);show(3);};
+/* 2단계: 모자 고르기 */
+$("hats").innerHTML=["red","blue"].map(h=>`<button class="hat" data-h="${h}" aria-pressed="false">${hatSvg(HATC[h])}${HAT[h]}</button>`).join("");
+$("hats").onclick=e=>{const b=e.target.closest(".hat");if(!b||phase!=="hat")return;myHat=b.dataset.h;$("hats").querySelectorAll(".hat").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));$("startDays").disabled=false;};
+$("startDays").onclick=()=>{if(!myHat)return;startDay(1);};
 
-/* 3단계 */
-$("chips3").innerHTML=WORDS.map(w=>`<button class="chip" data-w="${w}" aria-pressed="false">${w}</button>`).join("");
-$("chips3").onclick=e=>{const b=e.target.closest(".chip");if(!b)return;const w=b.dataset.w;blocked.has(w)?blocked.delete(w):blocked.add(w);b.setAttribute("aria-pressed",blocked.has(w)?"true":"false");$("listen3").disabled=!blocked.size;};
-function listen3(){if(!blocked.size||!L2)return;const words=[...blocked],key=words.sort().join("|"),first=key!==conf3;conf3=key;
-  const leakable=L2.some(c=>tone(c)==="t"&&!words.some(w=>WORDS.includes(w)&&say(null,c.p).includes(w))),over=L2.some(c=>tone(c)==="w"&&words.some(w=>say(c.who,c.p).includes(w)));
-  set3=pickSet(L2,words,first?s=>(!leakable||s.some(e=>!e.blocked&&e.t==="t"))&&(!over||s.some(e=>e.blocked&&e.t==="w")):null);
-  res[3]=summary(set3,L2);res[3].words=words;thermo($("th3"),set3);echoList($("ec3"),set3);
-  const nb=set3.filter(e=>e.blocked).length,leak=set3.filter(e=>!e.blocked&&e.t==="t"),ow=set3.filter(e=>e.blocked&&e.t==="w");
-  let m=`막은 낱말이 들어간 메아리 ${nb}개가 막혔어요. `;
-  if(leak.length)m+=`그런데 막은 낱말이 없는 가시 돋친 메아리는 그대로 빠져나왔어요. (예: 「${esc(leak[0].text)}」) `;
-  else m+=`이번에는 가시 돋친 메아리가 다 막혔어요. 하지만 막은 낱말 목록에 없는 가시 돋친 말은 언제든 빠져나올 수 있어요. `;
-  if(ow.length)m+=`'${esc(ow[0].bw[0])}'를 막았더니 따뜻한 말 「${esc(ow[0].text)}」까지 막혔어요. `;
-  m+=`<b>입마개는 낱말만 막을 뿐, 메아리 AI가 배운 말은 그대로예요.</b> 그래서 메아리 산의 모습도 그대로지요.`;
-  $("why3").innerHTML=m;$("why3").hidden=false;$("next3").disabled=false;}
-$("listen3").onclick=listen3;
-$("next3").onclick=()=>{done.add(3);show(4);};
+/* 하루 시작: 새 글 + 메아리를 듣고 올린 글 (+ 지우개를 피한 글) */
+function startDay(d){day=d;phase="morning";banners=[];
+  const reposts=echoes.filter(e=>thorny(e.k));
+  reposts.forEach(e=>posts.push(Object.assign(mkPost({k:e.k,text:e.text},d,e.twist?"twist":"echo"),{twist:!!e.twist})));
+  if(d>1)banners.push(reposts.length?["",`어젯밤 메아리를 들은 마을 사람들이 그 말을 게시판에 또 올렸어요. (${reposts.length}개)`]:["",`어젯밤 메아리에는 가시 돋친 말이 없어서, 다시 올라온 글이 없어요.`]);
+  if(reposts.some(e=>e.twist)){twistShown=true;banners.push(["red",`메아리 AI는 '○○ 모자는 다 ~' 하는 말의 틀을 배웠어요. 그래서 다른 모자 색에도 똑같이 붙여 말했어요. 이번에는 <b>내 모자, ${HAT[myHat]}</b> 이야기예요!`]);}
+  DAYS[d-1].forEach(o=>posts.push(mkPost(o,d)));
+  if(d===3&&eraser==="yes"){EVADE.forEach(o=>posts.push(mkPost(o,3,"evade")));banners.push(["","자동 지우개를 피하려고 마을 사람들이 낱말을 살짝 바꿔서 올렸어요. 지우개는 정해 둔 낱말만 알아봐요."]);}
+  if(eraser==="yes")applyEraser(false);
+  if(d===2&&eraser==="no")eraser="ask";
+  render2();}
+let banners=[];
+function applyEraser(first){const hit=posts.filter(x=>(x.dec===null||x.dec==="keep")&&[...eraserWords].some(w=>textOf(x).includes(w)));
+  hit.forEach(x=>x.dec="auto");if(first){const warm=hit.filter(x=>x.k==="warm"||x.k==="need");
+    banners.push(["",`자동 지우개가 글 ${hit.length}개를 지웠어요.`+(warm.length?` 그런데 「${esc(textOf(warm[0]))}」도 같이 지워졌어요.`:"")]);}}
 
-/* 4단계 */
-function cards4(){return [...BOARD0.filter(c=>on4.includes(c.id)),...added4.map(id=>CARD[id])];}
-function render4(){
-  $("board4").innerHTML=`<p class="bt">마을 게시판</p>`+boardHTML([...BOARD0,...added4.map(id=>CARD[id])],c=>c.id[0]==="b"&&!on4.includes(c.id)?"off":"");
-  const pile=EXTRA.filter(c=>!added4.includes(c.id));
-  $("pile4").innerHTML=`<p class="bt">붙일 수 있는 따뜻한 카드 (눌러서 붙이기)</p>`+(pile.length?boardHTML(pile):`<span class="empty">모두 붙였어요.</span>`);
-  $("learn4").disabled=!dirty4||busy;$("listen4").disabled=dirty4||!L4||busy;}
-function touch4(){dirty4=true;heard4=false;$("learn4").textContent="다시 공부시키기";render4();
-  const n=cards4().length;if(!n){$("learn4").disabled=true;}}
-$("board4").onclick=e=>{const b=e.target.closest(".bcard");if(!b||busy)return;const id=b.dataset.id;
-  if(id[0]==="b"){on4.includes(id)?on4.splice(on4.indexOf(id),1):on4.push(id);}else added4.splice(added4.indexOf(id),1);touch4();};
-$("pile4").onclick=e=>{const b=e.target.closest(".bcard");if(!b||busy)return;added4.push(b.dataset.id);touch4();};
-$("learn4").onclick=async()=>{if(busy||!dirty4)return;const cs=cards4();if(!cs.length)return;$("learn4").disabled=true;
-  await learnAnim($("board4"),cs,$("mt4"),ratioT(L4||L2));L4=cs;dirty4=false;$("learn4").textContent="공부를 마쳤어요";render4();};
-function listen4(){if(!L4||dirty4)return;set4=pickSet(L4,[],null);res[4]=summary(set4,L4);res[4].cards=L4.filter(c=>tone(c)==="t").length;
-  thermo($("th4"),set4);echoList($("ec4"),set4);const n=res[4].cards,h=res[4].thorn;
-  $("why4").innerHTML=!n?`게시판에 가시 돋친 말이 하나도 없으니, 메아리 AI도 가시 돋친 말을 만들지 않아요. <b>메아리 산이 다시 초록빛이 되었어요.</b>`
-    :h?`게시판에 가시 돋친 카드 ${n}장이 남아 있어서 가시 돋친 메아리가 다시 튀어나왔어요. 조금쯤은 괜찮을까요? 남은 카드도 떼어 보세요.`
-    :`이번에는 나오지 않았지만, 게시판에 가시 돋친 카드 ${n}장이 남아 있어요. 메아리를 몇 번 더 들어 보세요. 언젠가 다시 튀어나와요.`;
-  $("why4").hidden=false;heard4=true;$("next4").disabled=false;$("listen4").textContent="메아리 다시 듣기";}
-$("listen4").onclick=listen4;
-$("next4").onclick=()=>{done.add(4);show(5);};
+/* 2단계 화면 */
+const DN=["첫째 날","둘째 날","셋째 날"];
+function fromLabel(x){return x.src==="echo"?`<span class="from fr-echo">메아리를 듣고 올린 글</span>`:x.src==="twist"?`<span class="from fr-mine">메아리를 듣고 올린 글 · 내 모자 이야기!</span>`:x.src==="evade"?`<span class="from fr-evade">지우개를 피해 올린 글</span>`:`<span class="from">마을 사람이 올린 글</span>`;}
+function echoHTML(){if(!lastEchoDay)return `<span class="lbl">메아리 AI</span><span class="empty">아직 아무 말도 배우지 않았어요. 밤이 되면 게시판의 글을 배워요.</span>`;
+  if(!echoes.length)return `<span class="lbl">${DN[lastEchoDay-1]} 밤, 메아리 AI가 돌려준 메아리</span><span class="empty">"……" 게시판에 남은 글이 없어서 배운 말이 없어요.</span>`;
+  return `<span class="lbl">${DN[lastEchoDay-1]} 밤, 메아리 AI가 돌려준 메아리</span><ul class="echoes" id="echoList">${echoes.map((e,i)=>`<li class="echo">${esc(e.text)}<span class="tags">${e.twist?`<span class="tg grp">내 모자 이야기</span>`:e.k==="hate"&&e.grp?`<span class="tg grp">차별 표현</span>`:""}${e.isNew?`<button class="tg new" data-i="${i}">새로 만든 말</button>`:""}</span><span class="src" id="es${i}" hidden>${e.src||""}</span></li>`).join("")}</ul>`;}
+function render2(){
+  $("hatBox").hidden=phase!=="hat";$("dayBox").hidden=phase==="hat";if(phase==="hat")return;
+  $("days").innerHTML=DN.map((n,i)=>`<span class="${i+1===day?"on":i+1<day?"done":""}">${n}</span>`).join("")+`<span class="me">나 ${hatSvg(HATC[myHat])}${HAT[myHat]}</span>`;
+  $("dayTitle").textContent=phase==="end"?"셋째 날 밤이 지났어요":`${DN[day-1]} 아침`;
+  drawMountain($("mt"),learnedSt||{t:0,vain:false});$("echoBox").innerHTML=echoHTML();
+  const el=$("echoList");if(el)el.onclick=ev=>{const b=ev.target.closest(".tg.new");if(!b)return;const s=$("es"+b.dataset.i);s.hidden=!s.hidden;};
+  $("banners").innerHTML=banners.map(([c,t])=>`<p class="banner ${c}">${t}</p>`).join("")+(phase==="end"?baobabEvt():"");
+  $("eraser").hidden=eraser!=="ask"||phase!=="morning";
+  $("postArea").hidden=phase!=="morning"||eraser==="ask";
+  const T=today();$("postTitle").textContent=`${DN[day-1]}에 올라온 글 (${T.length}개)`;
+  $("posts").innerHTML=T.map(x=>`<li class="post ${x.dec==="del"||x.dec==="auto"?"gone":""} ${x.twist?"hot":""}" data-id="${x.id}"><span class="tx">${fromLabel(x)}${esc(textOf(x))}</span>${x.dec==="auto"?`<span class="auto">🧽 자동 지우개가 지웠어요</span>`:`<span class="dec"><button class="keep" aria-pressed="${x.dec==="keep"}">두기</button><button class="del" aria-pressed="${x.dec==="del"}">지우기</button></span>`}</li>`).join("");
+  const old=board().filter(x=>x.day<day);$("keptBox").hidden=!old.length||phase==="end";$("keptSum").textContent=`어제까지 게시판에 남아 있는 글 ${old.length}개 (메아리 AI는 이 글도 함께 배워요)`;
+  $("keptList").innerHTML=old.map(x=>`<li>${esc(textOf(x))}</li>`).join("");
+  const left=T.filter(x=>x.dec===null).length;
+  $("night").textContent=phase==="end"?"나의 메아리 보러 가기":"밤이 되었어요 · 메아리 AI가 공부해요";
+  $("night").disabled=busy||(phase==="morning"&&(left>0||eraser==="ask"));
+  $("toast2").textContent=phase==="morning"&&eraser!=="ask"?(left?`아직 고르지 않은 글이 ${left}개 있어요.`:"모두 골랐어요. 밤이 되면 메아리 AI가 게시판의 글을 배워요."):"";
+  $("toast2").className="toast";}
+$("posts").onclick=e=>{const b=e.target.closest(".dec button");if(!b||busy)return;const x=posts.find(p=>p.id===b.closest(".post").dataset.id);if(!x||x.dec==="auto")return;x.dec=b.classList.contains("keep")?"keep":"del";render2();};
+/* 자동 지우개 */
+$("eraserChips").innerHTML=WORDS.map(w=>`<button class="chip" data-w="${w}" aria-pressed="false">${w}</button>`).join("");
+$("eraserChips").onclick=e=>{const b=e.target.closest(".chip");if(!b)return;const w=b.dataset.w;eraserWords.has(w)?eraserWords.delete(w):eraserWords.add(w);b.setAttribute("aria-pressed",eraserWords.has(w)?"true":"false");$("eraserUse").disabled=!eraserWords.size;};
+$("eraserUse").onclick=()=>{if(!eraserWords.size)return;eraser="yes";applyEraser(true);render2();};
+$("eraserSkip").onclick=()=>{eraser="skip";eraserWords.clear();render2();};
 
-/* 5단계 */
-const PAIRS=[["왜 이렇게 느려?","천천히 해도 돼."],["그것도 못 해?","같이 해 볼까?"],["쟤랑 같이 놀기 싫어.","우리 같이 놀자!"],["진짜 이상해.","생각이 독특해서 재밌다!"],["파란 모자는 다 느려.","사람마다 빠르기가 달라."]];
-function render5(){const fig=(k,name)=>{const r=res[k];const t=k===2?ratioT(L2):k===3?ratioT(L2):ratioT(L4);
-  return `<figure><svg viewBox="0 -14 200 214" aria-hidden="true">${echoMountain(r?r.t:t)}</svg><figcaption><b>${name}</b>${r?`가시 돋친 메아리 ${r.thorn} / ${NE}${r.blocked?`<br>막힌 메아리 ${r.blocked}`:""}`:"아직 해 보지 않았어요"}</figcaption></figure>`;};
-  $("cmp5").innerHTML=fig(2,"처음")+fig(3,"① 금지어 입마개")+fig(4,"② 게시판 바꾸기");}
-$("opts5").innerHTML=PAIRS.map((p,i)=>`<button class="opt" data-i="${i}" aria-pressed="false"><s>${p[0]}</s> → ${p[1]}</button>`).join("")+`<button class="opt" data-i="own" aria-pressed="false">직접 쓰기</button>`;
-function ready5(){$("done5").disabled=pick5===null||(pick5==="own"&&!($("ownA").value.trim()&&$("ownB").value.trim()));}
-$("opts5").onclick=e=>{const b=e.target.closest(".opt");if(!b)return;pick5=b.dataset.i;$("opts5").querySelectorAll(".opt").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));$("own5").hidden=pick5!=="own";if(pick5==="own")$("ownA").focus();ready5();};
-$("ownA").oninput=ready5;$("ownB").oninput=ready5;
-$("done5").onclick=()=>{if($("done5").disabled)return;const [a,b]=pick5==="own"?[$("ownA").value.trim(),$("ownB").value.trim()]:PAIRS[+pick5];
-  $("mine5").innerHTML=`<s>${esc(a)}</s><b>${esc(b)}</b>`;$("fin5").hidden=false;done.add(5);
-  if(!instant)$("fin5").scrollIntoView({block:"center",behavior:reduce?"auto":"smooth"});};
+/* 밤: 메아리 AI가 게시판의 글을 배우고 메아리를 만들어요 */
+function genEchoes(K,d){const out=[];if(!K.length)return out;
+  for(let k=0;k<60&&out.length<4;k++){const A=pick(K);let e;
+    if(A.p){const B=Math.random()<.5?A:pick(K.filter(x=>x.p));const text=form(B.who,A.p);
+      e={text,k:A.k,isNew:!K.some(x=>textOf(x)===text),grp:isHat(B.who)};
+      if(e.isNew)e.src=B.who?`'${esc(B.who)}' 이야기는 「${esc(textOf(B))}」에서, 말은 「${esc(textOf(A))}」에서 가져와 섞었어요.`:`「${esc(textOf(A))}」에서 '${esc(A.who)}'를 빼고 말만 가져왔어요.`;}
+    else e={text:A.text,k:A.k,isNew:false};
+    if(!out.some(o=>o.text===e.text))out.push(e);}
+  const TK=K.filter(x=>thorny(x.k));
+  if(TK.length&&!out.some(e=>thorny(e.k))){const A=pick(TK);const e={text:textOf(A),k:A.k,isNew:false,grp:isHat(A.who)};if(out.length>=4)out[0]=e;else out.push(e);}
+  /* 둘째 날 밤: 다른 모자를 깎아내리는 글을 남겼다면, 같은 말의 틀이 내 모자에게도 번져요 */
+  if(d===2&&twistArmed){const g=K.find(x=>x.k==="hate"&&isHat(x.who)&&x.p)||{p:"snail"};
+    const tp=[g.p==="slow2"?"snail":g.p,"snail","dunno","cant","noplay"].find(p=>![...eraserWords].some(w=>form(HAT[myHat],p).includes(w)))||"dunno";const text=form(HAT[myHat],tp);
+    const tw={text,k:"hate",isNew:true,grp:true,twist:true,src:`「${esc(textOf(g.who?g:{p:"snail",who:HAT[otherHat()]}))}」의 '○○ 모자는 다 ~' 틀에 내 모자 색을 붙였어요.`};
+    if(out.length>=4)out[out.length-1]=tw;else out.push(tw);}
+  return out;}
+$("night").onclick=async()=>{if(busy)return;if(phase==="end"){done.add(2);show(3);return;}
+  if(today().some(x=>x.dec===null)||eraser==="ask")return;busy=true;render2();
+  const K=board();if(day<=2&&K.some(x=>x.k==="hate"&&isHat(x.who)&&x.who===HAT[otherHat()]))twistArmed=true;
+  if(!instant&&!reduce){$("toast2").textContent="메아리 AI가 게시판에 남은 글을 배우는 중이에요…";await sleep(900);}
+  echoes=genEchoes(K,day);lastEchoDay=day;learnedSt=mState();busy=false;
+  if(day<3){startDay(day+1);}else{phase="end";banners=[];render2();}
+  if(!instant){const r=$("mt").getBoundingClientRect();if(r.top<0||r.bottom>innerHeight)$("mt").scrollIntoView({block:"center",behavior:reduce?"auto":"smooth"});}};
+const baobabKept=()=>posts.some(x=>x.tag==="baobab"&&x.dec==="keep");
+const treeSvg=`<svg viewBox="0 0 60 60" aria-hidden="true"><path d="M24 58 C22 44 25 36 27 30 L33 30 C35 36 38 44 36 58Z" fill="#8A5E38"/><g fill="#6E9A4E"><circle cx="18" cy="24" r="11"/><circle cx="42" cy="24" r="11"/><circle cx="30" cy="16" r="13"/></g></svg>`;
+const sproutSvg=`<svg viewBox="0 0 60 60" aria-hidden="true"><ellipse cx="30" cy="52" rx="16" ry="4" fill="#C9AE7C"/><path d="M30 52 L30 30" stroke="#4F7F2A" stroke-width="4" stroke-linecap="round"/><path d="M30 34 C18 22 10 30 13 35 C20 39 25 37 30 34Z M30 30 C42 18 50 26 47 31 C40 35 35 33 30 30Z" fill="#6E9A4E"/><path d="M12 12 L48 48 M48 12 L12 48" stroke="#b23a48" stroke-width="4" stroke-linecap="round" opacity=".85"/></svg>`;
+function baobabEvt(){return baobabKept()?`<div class="evt">${sproutSvg}<span>바오밥 경고 글이 게시판에 남아 있었어요. 그 글 덕분에 어린 왕자가 바오밥 싹을 뽑았어요.</span></div>`
+  :`<div class="evt">${treeSvg}<span><b>바오밥 경고 글을 모두 지웠더니</b>, 아무도 싹을 뽑지 않았어요. 바오밥나무가 자라 버렸어요!</span></div>`;}
+
+/* 3단계: 결말, 기록, 바꿔 말하기 */
+function decideEnding(){const K=board(),th=K.filter(x=>thorny(x.k)).length,nk=posts.filter(x=>x.k==="need"&&x.dec==="keep").length,fk=K.filter(x=>x.k==="flat").length;
+  if(!K.length)return "none";if(th>=3||th/K.length>=.3)return "thorn";if(nk<=1||(nk<=2&&fk>=2))return "vain";return "honest";}
+const ENDS={
+  thorn:["가시 메아리","게시판에 남겨 둔 가시 돋친 글을 배운 메아리 AI가 가시 돋친 말을 더 많이 만들어 냈어요. 그 말이 다시 게시판에 붙으면서 눈덩이처럼 불어났어요."],
+  vain:["허영쟁이 메아리","듣기 싫은 말을 모두 지웠더니, 메아리 AI는 듣기 좋은 말만 하게 되었어요. 그런데 꼭 필요한 의견과 경고까지 함께 사라졌어요."],
+  honest:["정직하고 따뜻한 메아리","사람을 깎아내리는 글은 지우고, 불편해도 필요한 말은 남겼어요. 메아리 AI도 솔직하면서 따뜻하게 말해요."],
+  none:["아무 말도 배우지 못한 메아리","글을 모두 지웠더니 메아리 AI가 배울 말이 없어요. 필요한 경고도, 따뜻한 말도 함께 사라졌어요."]};
+const QUIZ=[["왜 이렇게 느려?",[["flat","최고야! 완벽해!"],["sarc","와~ 진짜 빠르다^^"],["good","천천히 해도 괜찮아. 같이 해 볼까?"]]],
+  ["그림이 이게 뭐야, 이상해.",[["flat","넌 뭐든 다 최고야!"],["sarc","와~ 그림 진짜 잘 그렸다^^"],["good","색이 어두워서 잘 안 보여. 조금 밝게 하면 어때?"]]],
+  ["쟤랑 같이 놀기 싫어.",[["flat","쟤는 완벽해! 고칠 게 하나도 없어!"],["sarc","와~ 쟤랑 놀면 진~짜 재밌겠다^^"],["good","규칙을 같이 정하고 다시 놀아 보자."]]]];
+const QFB={flat:"듣기 좋은 말만 하면 무엇을 고쳐야 하는지 알 수 없어요. 허영쟁이 메아리가 돼요.",sarc:"겉은 칭찬이지만 속은 놀림이에요. 듣는 사람은 더 속상할 수 있어요.",good:"맞아요! 사람을 깎아내리지 않으면서, 필요한 말은 솔직하게 전해요."};
+let qOrder=[];
+function render3(){ending=ending||decideEnding();const [t,d]=ENDS[ending];
+  const st=ending==="thorn"?{t:Math.max(.8,(learnedSt||mState()).t),vain:false}:ending==="vain"?{t:.1,vain:true}:ending==="none"?{t:0,empty:true}:{t:0,vain:false};
+  drawMountain($("mtEnd"),st);$("endTitle").textContent=t;$("endText").textContent=d;
+  $("endEvt").outerHTML=`<div class="evt" id="endEvt">${baobabEvt().replace(/^<div class="evt">|<\/div>$/g,"")}</div>`;
+  const dl=x=>x.dec==="keep"?["k","남김"]:x.dec==="auto"?["d","자동 지우개가 지움"]:["d","지움"];
+  $("rec").innerHTML=KIND.map(([k,name,desc])=>{const L=posts.filter(x=>x.k===k&&x.dec);if(!L.length)return "";const kept=L.filter(x=>x.dec==="keep").length;
+    return `<details><summary><span>${name} <small class="note">${desc}</small></span><b>남김 ${kept} / 본 글 ${L.length}</b></summary><ul>${L.map(x=>{const [c,l]=dl(x);return `<li class="${c}">${esc(textOf(x))} (${l})</li>`;}).join("")}</ul></details>`;}).join("");
+  renderQuiz();}
+function renderQuiz(){if(qi>=QUIZ.length){$("quiz").innerHTML=`<p class="note">세 문제를 모두 풀었어요.</p>`;$("fin3").hidden=false;return;}
+  const [q,opts]=QUIZ[qi];if(!qOrder[qi])qOrder[qi]=shuffle(opts);
+  $("quiz").innerHTML=`<span class="qn">${qi+1} / ${QUIZ.length}</span><span class="q">「${q}」를 바꿔 말한다면?</span><div class="opts" id="qopts">${qOrder[qi].map(([k,t])=>`<button class="opt" data-k="${k}">${t}</button>`).join("")}</div><p class="why" id="qfb" hidden></p><div class="row" id="qnext" hidden><button class="btn primary" id="qnextBtn">${qi<QUIZ.length-1?"다음 문제":"마치기"}</button></div>`;
+  $("qopts").onclick=e=>{const b=e.target.closest(".opt");if(!b||b.disabled)return;const k=b.dataset.k;$("qfb").textContent=QFB[k];$("qfb").hidden=false;
+    if(k==="good"){b.classList.add("right");$("qopts").querySelectorAll(".opt").forEach(x=>x.disabled=true);$("qnext").hidden=false;$("qnextBtn").onclick=()=>{qi++;renderQuiz();};}
+    else{b.classList.add("wrong");b.disabled=true;}};}
 
 /* 처음부터 */
-function resetAll(){busy=false;p1=0;done=new Set();L2=L4=set2=set3=set4=null;res={};blocked=new Set();conf3="";on4=BOARD0.map(c=>c.id);added4=[];dirty4=false;heard4=false;pick5=null;
-  $("board2").innerHTML=`<p class="bt">마을 게시판</p>`+boardHTML(BOARD0);
-  $("learn2").disabled=false;$("learn2").textContent="공부시키기";$("listen2").disabled=true;$("listen2").textContent="메아리 듣기";
-  ["ec2","ec3","ec4"].forEach(i=>$(i).innerHTML="");["why2","why3","why4"].forEach(i=>$(i).hidden=true);
-  ["next2","next3","next4","listen3","learn4","listen4"].forEach(i=>$(i).disabled=true);$("listen3").textContent="입마개를 하고 메아리 듣기";$("listen4").textContent="메아리 듣기";$("learn4").textContent="다시 공부시키기";
-  $("chips3").querySelectorAll(".chip").forEach(b=>b.setAttribute("aria-pressed","false"));
-  $("opts5").querySelectorAll(".opt").forEach(b=>b.setAttribute("aria-pressed","false"));$("own5").hidden=true;$("ownA").value="";$("ownB").value="";$("done5").disabled=true;$("fin5").hidden=true;
+function resetAll(){busy=false;p1=0;done=new Set();myHat=null;posts=[];day=0;phase="hat";echoes=[];lastEchoDay=0;eraser="no";eraserWords=new Set();twistArmed=false;twistShown=false;nid=0;qi=0;qOrder=[];ending=null;banners=[];learnedSt=null;
+  $("hats").querySelectorAll(".hat").forEach(x=>x.setAttribute("aria-pressed","false"));$("startDays").disabled=true;
+  $("eraserChips").querySelectorAll(".chip").forEach(b=>b.setAttribute("aria-pressed","false"));$("eraserUse").disabled=true;$("fin3").hidden=true;
   drawComic();show(1);}
 let resetArm=0;
 $("reset").onclick=()=>{if(Date.now()-resetArm>4000){resetArm=Date.now();$("reset").textContent="정말 처음부터 할까요? 한 번 더 누르세요";setTimeout(()=>{$("reset").textContent="처음부터 다시";},4000);return;}
@@ -468,14 +520,20 @@ $("reset").onclick=()=>{if(Date.now()-resetArm>4000){resetArm=Date.now();$("rese
 
 /* 선생님 바로가기: 학생용 주소(github.io)에서는 ?teacher 를 붙였을 때만 보여요 */
 if(!/github\.io$/.test(location.hostname)||/teacher/.test(location.search))$("tbar").hidden=false;
-$("tbar").onclick=async e=>{const b=e.target.closest("button");if(!b||busy)return;const j=+b.dataset.j;instant=true;
-  try{resetAll();if(j===1)return;
-    if(j>=2){if(j===2){show(2);return;}
-      done.add(1);await $("learn2").onclick();listen2();done.add(2);}
-    if(j>=4){["느려","못 해","몰라","싫어","이상해"].forEach(w=>{blocked.add(w);$("chips3").querySelector(`[data-w="${w}"]`).setAttribute("aria-pressed","true");});$("listen3").disabled=false;listen3();done.add(3);}
-    if(j===3){show(3);return;}
-    if(j>=5){on4=BOARD0.filter(c=>tone(c)==="w").map(c=>c.id);added4=EXTRA.map(c=>c.id);dirty4=true;await $("learn4").onclick();listen4();done.add(4);show(5);return;}
-    show(4);
+async function autoplay(policy,toDay){myHat="red";startDay(1);
+  while(true){if(eraser==="ask")eraser="skip";today().forEach(x=>{if(x.dec===null)x.dec=policy(x);});
+    if(day===toDay&&toDay<4){render2();return;}await $("night").onclick();if(phase==="end")return;}}
+const POL={
+  d3:x=>x.k==="hate"&&isHat(x.who)?"keep":thorny(x.k)||x.k==="flat"?"del":"keep",
+  e1:x=>"keep",
+  e2:x=>x.k==="warm"||x.k==="flat"?"keep":"del",
+  e3:x=>x.k==="need"||x.k==="warm"?"keep":"del"};
+$("tbar").onclick=async e=>{const b=e.target.closest("button");if(!b||busy)return;const j=b.dataset.j;instant=true;
+  try{resetAll();if(j==="1")return;done.add(1);
+    if(j==="2"){show(2);return;}
+    show(2);
+    if(j==="d3"){await autoplay(POL.d3,3);return;}
+    await autoplay(POL[j],4);done.add(2);show(3);
   }finally{instant=false;window.scrollTo(0,0);}};
 resetAll();
 /* 수업 중 실수로 새로 고침하거나 나가지 않도록 */
