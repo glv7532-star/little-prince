@@ -440,8 +440,8 @@ function gCloud(x,y,lines){const L=lines.flatMap(l=>wrapK(l,15)),w=Math.max(...L
   const hit=P.x+14>bx&&P.x-14<bx+w&&P.y+20>by&&P.y-26<by+h;if(hit&&y+30+h<392)by=y+30;
   return `<g class="popin"><circle cx="${x+6}" cy="${by>y?y+16:y-24}" r="3" fill="#fffdf6" stroke="#2d5d7b" stroke-width="1.5"/><circle cx="${x+12}" cy="${by>y?y+24:y-36}" r="4.5" fill="#fffdf6" stroke="#2d5d7b" stroke-width="1.5"/>
   <rect x="${bx}" y="${by}" width="${w}" height="${h}" rx="16" fill="#fffdf6" stroke="#2d5d7b" stroke-width="2"/>${L.map((l,i)=>`<text x="${bx+w/2}" y="${by+21+i*17}" text-anchor="middle" font-size="13" fill="${l.startsWith("→")?(l.includes("안 먹")||l.includes("못")?"#b23a48":"#2f7a3d"):"#2f3a2c"}" font-weight="${l.startsWith("→")?700:400}">${l}</text>`).join("")}</g>`;}
-function gSay(x,y,t,col){const L=wrapK(t,14),w=Math.max(...L.map(l=>l.length))*13+20,h=L.length*17+12,bx=Math.max(4,Math.min(392-w,x-w/2)),by=Math.max(4,y-30-h);
-  return `<g class="popin"><rect x="${bx}" y="${by}" width="${w}" height="${h}" rx="10" fill="#fffdf6" stroke="${col}" stroke-width="2"/>${L.map((l,i)=>`<text x="${bx+w/2}" y="${by+20+i*17}" text-anchor="middle" font-size="13.5" fill="#2f3a2c">${l}</text>`).join("")}</g>`;}
+function gSay(x,y,t,col){const L=wrapK(t,14),w=Math.max(...L.map(l=>l.length))*13+20,h=L.length*17+12,bx=Math.max(4,Math.min(392-w,x-w/2)),by=Math.max(4,y-40-h);
+  return `<g class="popin"><path d="${bubblePath(bx,by,w,h,x,Math.max(by+h+8,y-22),10)}" fill="#fffdf6" stroke="${col}" stroke-width="2" stroke-linejoin="round"/>${L.map((l,i)=>`<text x="${bx+w/2}" y="${by+20+i*17}" text-anchor="middle" font-size="13.5" fill="#2f3a2c">${l}</text>`).join("")}</g>`;}
 const muzOn=()=>set.muz.size>0||set.abs;
 function draw(){const night=phase==="night";let s=`<circle cx="${C0}" cy="${C0}" r="190" fill="#ead9b0" stroke="#c8b080" stroke-width="3"/><circle cx="120" cy="300" r="10" fill="#dcc89c"/><circle cx="300" cy="80" r="7" fill="#dcc89c"/><circle cx="260" cy="320" r="5" fill="#dcc89c"/>`;
   for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(inside(r,c)&&!isVolc(r,c)&&!reserved(r,c)&&!(r===START[0]&&c===START[1]))s+=`<rect class="gridc" x="${c*CS+2}" y="${r*CS+2}" width="${CS-4}" height="${CS-4}" rx="6" fill="none" stroke="transparent"/>`;
@@ -467,11 +467,14 @@ function drawPrince(){const a=(P.mode==="brush"?"b":"")+(P.sad?"s":"");
 /* 만화 칸: 원작 삽화를 따라 그리지 않은, 이 프로그램만의 그림이에요 */
 function comicPrince(mood){const cls=mood==="devastated"?"shake":mood==="happy"?"hop":"";return `<g transform="translate(110 336) scale(.92)"><g class="${cls}">${princeArt(mood)}</g></g>`;}
 function comicSheep(mood){return `<g transform="translate(292 330)"><g class="${mood==="confused"?"wob":""}" transform="scale(-1.45 1.45)">${sheepArt(muzOn(),mood)}</g>${mood==="confused"?`<text x="-70" y="-150" font-size="34" font-weight="700" fill="#b8860b">?</text>`:""}</g>`;}
+/* 말풍선 한 덩어리: 둥근 사각형과 꼬리를 한 선으로 이어 그려요. 꼬리는 말하는 사람 쪽으로 살짝 휘어요. */
+function bubblePath(x,y,w,h,tx,ty,r=16){const b=y+h,ax=Math.max(x+r+14,Math.min(x+w-r-14,tx+(tx<x+w/2?14:-14))),tw=Math.min(26,w/4);
+  const L=ax-tw/2,R=ax+tw/2,dy=ty-b,lean=tx-ax;
+  return `M${x+r} ${y} H${x+w-r} Q${x+w} ${y} ${x+w} ${y+r} V${b-r} Q${x+w} ${b} ${x+w-r} ${b} H${R} Q${R-tw*.15+lean*.35} ${b+dy*.45} ${tx} ${ty} Q${L+tw*.1+lean*.15} ${b+dy*.35} ${L} ${b} H${x+r} Q${x} ${b} ${x} ${b-r} V${y+r} Q${x} ${y} ${x+r} ${y}Z`;}
 function comicBubble(who,text){const L=wrapK(text,13),w=Math.min(372,Math.max(...L.map(l=>l.length))*18+34),h=L.length*25+22,
   tx=who==="prince"?118:240,ty=who==="prince"?152:196,bx=who==="prince"?14:382-w,by=Math.max(14,(who==="prince"?40:96));
   const col=who==="prince"?"#b8860b":"#2d5d7b",ax=Math.max(bx+24,Math.min(bx+w-24,tx));
-  return `<g class="popin"><path d="M${ax-10} ${by+h-2} L${tx+(who==="prince"?6:-6)} ${Math.min(ty-6,by+h+34)} L${ax+10} ${by+h-2}Z" fill="#fffdf6" stroke="${col}" stroke-width="2.5" stroke-linejoin="round"/>
-  <rect x="${bx}" y="${by}" width="${w}" height="${h}" rx="18" fill="#fffdf6" stroke="${col}" stroke-width="2.5"/><rect x="${ax-11}" y="${by+h-4}" width="22" height="5" fill="#fffdf6"/>
+  return `<g class="popin"><path d="${bubblePath(bx,by,w,h,tx+(who==="prince"?6:-6),Math.min(ty-6,by+h+34),18)}" fill="#fffdf6" stroke="${col}" stroke-width="2.5" stroke-linejoin="round"/>
   <text x="${bx+14}" y="${by+20}" font-size="12" fill="${col}" font-weight="700">${who==="prince"?"어린 왕자":"양 로봇"}</text>
   ${L.map((l,i)=>`<text x="${bx+w/2}" y="${by+42+i*25}" text-anchor="middle" font-size="19" fill="#2f3a2c" font-family="Gaegu, Gowun Dodum, sans-serif" font-weight="700">${l}</text>`).join("")}</g>`;}
 let cState={night:false,pm:"normal",sm:"normal",who:null,text:"",solo:false};

@@ -382,8 +382,12 @@ function show(n){cur=n;
   if(!instant)window.scrollTo({top:0,behavior:reduce?"auto":"smooth"});}
 
 /* 1단계: 만화 칸 */
-function sbub(x,y,w,lines,tx,ty,col,fs=17){const h=lines.length*(fs+6)+14,ax=Math.max(x+20,Math.min(x+w-20,tx));
-  return `<path d="M${ax-9} ${y+h-2} L${tx} ${ty} L${ax+9} ${y+h-2}Z" fill="#fffdf6" stroke="${col}" stroke-width="2.2" stroke-linejoin="round"/><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="14" fill="#fffdf6" stroke="${col}" stroke-width="2.2"/><rect x="${ax-10}" y="${y+h-4}" width="20" height="5" fill="#fffdf6"/>`
+/* 말풍선 한 덩어리: 둥근 사각형과 꼬리를 한 선으로 이어 그려요. 꼬리는 말하는 사람 쪽으로 살짝 휘어요. */
+function bubblePath(x,y,w,h,tx,ty,r=16){const b=y+h,ax=Math.max(x+r+14,Math.min(x+w-r-14,tx+(tx<x+w/2?14:-14))),tw=Math.min(26,w/4);
+  const L=ax-tw/2,R=ax+tw/2,dy=ty-b,lean=tx-ax;
+  return `M${x+r} ${y} H${x+w-r} Q${x+w} ${y} ${x+w} ${y+r} V${b-r} Q${x+w} ${b} ${x+w-r} ${b} H${R} Q${R-tw*.15+lean*.35} ${b+dy*.45} ${tx} ${ty} Q${L+tw*.1+lean*.15} ${b+dy*.35} ${L} ${b} H${x+r} Q${x} ${b} ${x} ${b-r} V${y+r} Q${x} ${y} ${x+r} ${y}Z`;}
+function sbub(x,y,w,lines,tx,ty,col,fs=17){const h=lines.length*(fs+6)+14;
+  return `<path d="${bubblePath(x,y,w,h,tx,ty,14)}" fill="#fffdf6" stroke="${col}" stroke-width="2.2" stroke-linejoin="round"/>`
    +lines.map((l,i)=>`<text x="${x+w/2}" y="${y+10+fs+i*(fs+6)}" text-anchor="middle" font-size="${fs}" fill="#2f3a2c" font-family="Gaegu, Gowun Dodum, sans-serif" font-weight="700">${l}</text>`).join("");}
 const CAPS=["높은 산에 오른 어린 왕자가 크게 외쳤어요.","산이 어린 왕자의 말을 그대로 따라 해요.","그런데 이 산은 그냥 산이 아니었어요!"];
 function drawComic(){const p=p1;
