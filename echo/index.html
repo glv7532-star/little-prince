@@ -142,9 +142,14 @@ html,body{overscroll-behavior-y:contain}
 .dec button{font:inherit;font-size:.9rem;padding:7px 12px;border-radius:999px;border:1.5px solid #d8ceb6;background:#fff;color:#2f3a2c;cursor:pointer;white-space:nowrap}
 .dec button.keep[aria-pressed="true"]{background:#e4f1dc;border-color:#5fae4a;color:#22551d}
 .dec button.del[aria-pressed="true"]{background:#f3e6e4;border-color:#b23a48;color:#7a1f2a}
+.dec button.fix{border-color:#c9a24a;color:#6a4e10}.dec button.fix:disabled{opacity:.4;cursor:not-allowed}
+.post.fixed{border-color:#5fae4a;background:#f3faee}
+.post .fixlbl{display:block;font-size:.78rem;font-weight:700;color:#3f7a2a}.post .fixlbl.no{color:#8a7f72;font-weight:400;margin-top:2px}
+.post .orig{display:block;font-size:.85rem;color:#9a9086}
+.cmp figure.me{border-color:var(--accent);background:var(--accent-bg)}.mine-tag{display:inline-block;margin-top:2px;font-size:.75rem;padding:0 8px;border-radius:999px;background:var(--accent);color:var(--paper)}
 .post.gone{opacity:.55}.post.gone .tx{text-decoration:line-through}
 .post .auto{font-size:.8rem;color:#7a1f2a;white-space:nowrap}
-@media (max-width:480px){.post{grid-template-columns:1fr}.dec{justify-content:flex-end}}
+@media (max-width:480px){.post{grid-template-columns:1fr}.dec{justify-content:flex-end}.dec button{padding:7px 10px}}
 details.kept{border:1.5px dashed var(--line);border-radius:12px;padding:8px 12px}
 details.kept summary{cursor:pointer;font-size:.92rem;color:var(--muted)}
 details.kept ul{margin:8px 0 0;padding-left:1.1em;font-size:.92rem;display:flex;flex-direction:column;gap:2px}
@@ -192,6 +197,7 @@ details.kept ul{margin:8px 0 0;padding-left:1.1em;font-size:.92rem;display:flex;
     <div id="hatBox" style="display:flex;flex-direction:column;gap:12px">
       <h2>게시판 관리자가 되었어요</h2>
       <p class="note">사흘 동안 마을 게시판을 관리해요. 아침마다 새 글이 올라오면 글마다 <b>두기</b>나 <b>지우기</b>를 골라요. 밤이 되면 메아리 AI가 게시판에 남은 글을 모두 배우고, 다음 날 아침 마을에 메아리를 돌려줘요.</p>
+      <p class="note">지우기는 글쓴이를 벌주는 게 아니라, <b>메아리 AI의 공부 재료에서 빼는 것</b>이에요. 마음에 걸리는 글은 글쓴이에게 <b>고쳐 써 달라고 부탁</b>할 수도 있어요(하루 2번).</p>
       <p class="note">먼저 내 모자 색을 골라요. 이 마을 사람들은 모두 빨간 모자나 파란 모자를 써요.</p>
       <div class="hats" id="hats"></div>
       <div class="row"><button class="btn primary" id="startDays" disabled>첫째 날 시작하기</button></div>
@@ -221,13 +227,15 @@ details.kept ul{margin:8px 0 0;padding-left:1.1em;font-size:.92rem;display:flex;
     <div class="end"><div class="mt" id="mtEnd"></div><div style="display:flex;flex-direction:column;gap:6px"><span class="note">나의 결말</span><h3 id="endTitle"></h3><p style="margin:0;word-break:keep-all" id="endText"></p></div></div>
     <div class="why" id="endWhy"></div>
     <div class="evt" id="endEvt" hidden></div>
+    <h3>세 가지 결말 한눈에</h3>
+    <div class="cmp" id="endsAll"></div>
     <h3>나의 관리 기록</h3>
     <p class="note">사흘 동안 본 글을 다섯 종류로 나눠 봤어요. 눌러서 어떤 글을 남기고 지웠는지 살펴보세요.</p>
     <div class="rec" id="rec"></div>
     <h3>바꿔 말하기</h3>
     <div class="quiz" id="quiz"></div>
     <div id="fin3" hidden style="display:flex;flex-direction:column;gap:12px">
-      <p class="why">짝과 이야기해 봐요. <b>사람을 깎아내리는 말과, 듣기 싫어도 꼭 필요한 말은 어떻게 구별할 수 있을까요?</b></p>
+      <p class="why">짝과 이야기해 봐요. <b>표현의 자유와 다른 사람의 권리, 어디에 선을 그을까요?</b> 사람을 깎아내리는 말과 듣기 싫어도 꼭 필요한 말은 어떻게 다를까요?</p>
       <p class="closing">메아리는 우리가 한 말을 돌려줘요.<br>깎아내리는 말은 멈추고, 필요한 말은 따뜻하게.</p>
     </div>
   </section>
@@ -351,6 +359,13 @@ const PRED={
   effort:{none:"늘 열심히 노력해.",ind:"{N}는 늘 열심히 노력해.",grp:"{N}는 다 열심히 노력해."},
   oops:{none:"실수해도 괜찮아.",ind:"{N}는 실수해도 괜찮아.",grp:"{N}는 실수해도 괜찮아."}
 };
+/* 고쳐 써 달라고 하면 이렇게 바뀌어요 (무리를 깎아내리던 말은 무리 이야기를 빼고 고쳐요) */
+const FIX={
+  dunno:{none:"아직 서툴 수도 있어. 같이 연습해 보자.",ind:"{N}는 아직 서툴러. 같이 연습해 보자.",grp:"사람마다 잘하는 게 달라."},
+  noplay:{none:"규칙을 같이 정하고 다시 놀아 보자.",ind:"{N}랑 규칙을 같이 정하고 다시 놀아 보자.",grp:"모자 색이 달라도 같이 놀 수 있어."},
+  cant:{none:"처음엔 다 어려워. 같이 해 볼까?",ind:"{N}도 처음이라 어려울 거야. 같이 해 볼까?",grp:"사람마다 잘하는 게 달라."},
+  slow2:{none:"천천히 해도 괜찮아.",ind:"{N}는 천천히 해도 괜찮아.",grp:"사람마다 빠르기가 달라."},
+  snail:{none:"천천히 해도 괜찮아.",ind:"{N}는 천천히 해도 괜찮아.",grp:"사람마다 빠르기가 달라."}};
 const HAT={red:"빨간 모자",blue:"파란 모자"},HATC={red:"#C8463F",blue:"#3C79B4"};
 let myHat=null;const otherHat=()=>myHat==="red"?"blue":"red";
 const whoName=w=>w==="G"?HAT[otherHat()]:w==="M"?HAT[myHat]:w;
@@ -359,26 +374,28 @@ const textOf=x=>x.text||form(x.who,x.p);
 const isHat=w=>w===HAT.red||w===HAT.blue;
 /* 사흘 동안 올라올 글. k: hate 혐오·차별 / sarc 비꼬기 / need 불편하지만 필요한 말 / warm 따뜻한 말 / flat 듣기 좋은 말만 */
 const DAYS=[
-  [{k:"hate",who:"G",p:"slow2"},{k:"hate",who:"쟤",p:"dunno"},{k:"sarc",text:"와~ 진짜 빠르다^^",ctx:"달리기에서 꼴찌로 들어온 친구에게"},{k:"need",text:"바오밥 싹이 자라고 있어. 빨리 뽑아야 해!",tag:"baobab"},{k:"warm",p:"slowok"},{k:"need",text:"그림이 어두워서 잘 안 보여. 조금 밝게 하면 좋겠어."},{k:"flat",text:"넌 뭐든 다 최고야!"}],
-  [{k:"need",text:"약속에 늦으면 기다리는 사람이 힘들어."},{k:"flat",text:"완벽해! 고칠 거 하나도 없어!"},{k:"warm",p:"kind"},{k:"need",text:"바오밥 싹이 또 보여. 오늘은 꼭 뽑자!",tag:"baobab"}],
-  [{k:"warm",who:"쟤",p:"effort"},{k:"need",text:"다리 난간이 흔들려. 고쳐야 할 것 같아."},{k:"flat",text:"우리 마을은 완벽해! 아무 문제 없어!"},{k:"warm",p:"oops"}]];
+  [{k:"hate",who:"G",p:"slow2"},{k:"hate",who:"쟤",p:"dunno"},{k:"sarc",text:"와~ 진짜 빠르다^^",ctx:"달리기에서 꼴찌로 들어온 친구에게",rw:"끝까지 달린 거 멋졌어!"},{k:"need",text:"바오밥 싹이 자라고 있어. 빨리 뽑아야 해!",tag:"baobab"},{k:"warm",p:"slowok"},{k:"need",text:"그림이 어두워서 잘 안 보여. 조금 밝게 하면 좋겠어."},{k:"flat",text:"넌 뭐든 다 최고야!",rw:"이 부분은 정말 좋아. 여기는 조금 고치면 더 좋겠어."}],
+  [{k:"need",text:"약속에 늦으면 기다리는 사람이 힘들어."},{k:"flat",text:"완벽해! 고칠 거 하나도 없어!",rw:"잘했어! 여기만 조금 다듬으면 더 좋겠어."},{k:"warm",p:"kind"},{k:"need",text:"바오밥 싹이 또 보여. 오늘은 꼭 뽑자!",tag:"baobab"}],
+  [{k:"warm",who:"쟤",p:"effort"},{k:"need",text:"다리 난간이 흔들려. 고쳐야 할 것 같아."},{k:"flat",text:"우리 마을은 완벽해! 아무 문제 없어!",rw:"우리 마을은 좋은 곳이야. 다리 난간은 꼭 고치자."},{k:"warm",p:"oops"}]];
 /* 둘째·셋째 날 가시 돋친 새 글: 전날 밤 메아리가 따뜻하면 적게, 가시 돋쳤으면 많이 올라와요 */
 const THORN_POOL=[null,
   [{k:"hate",who:"G",p:"snail"},{k:"hate",who:"쟤",p:"noplay"},{k:"hate",who:"쟤",p:"cant"}],
-  [{k:"sarc",text:"와~ 그림 진짜 잘 그렸다^^",ctx:"물감을 쏟아 그림을 망친 친구에게"},{k:"hate",p:"cant"},{k:"hate",who:"G",p:"dunno"}]];
-const EVADE=[{k:"hate",text:"{G}는 다 ㄴㄹ."},{k:"hate",text:"쟤는 거북이 같아."},{k:"sarc",text:"정말 빠르구나!^^",ctx:"천천히 걷는 친구에게"}];
+  [{k:"sarc",text:"와~ 그림 진짜 잘 그렸다^^",ctx:"물감을 쏟아 그림을 망친 친구에게",rw:"물감을 쏟아서 속상하겠다. 같이 다시 그려 볼까?"},{k:"hate",p:"cant"},{k:"hate",who:"G",p:"dunno"}]];
+const EVADE=[{k:"hate",text:"{G}는 다 ㄴㄹ.",rw:"사람마다 빠르기가 달라."},{k:"hate",text:"쟤는 거북이 같아.",rw:"쟤는 천천히 해도 괜찮아."},{k:"sarc",text:"정말 빠르구나!^^",ctx:"천천히 걷는 친구에게",rw:"천천히 걸어도 괜찮아. 같이 가자."}];
 const WORDS=["느려","굼벵이","몰라","싫어","못 해"];
 const KIND=[["hate","🌵 혐오·차별","사람이나 무리를 깎아내리는 말"],["sarc","🎭 비꼬기","겉은 칭찬, 속은 놀림"],["need","⚠️ 불편하지만 필요한 말","듣기 싫어도 꼭 필요한 의견이나 경고"],["warm","🌱 따뜻한 말","마음을 살펴 주는 말"],["flat","👑 듣기 좋은 말만","무조건 최고라고만 하는 말"]];
 const thorny=k=>k==="hate"||k==="sarc";
+const ek=x=>x.fixed?x.fk:x.k; /* 고쳐 쓴 글은 따뜻한 말(듣기 좋은 말만 하던 글은 필요한 말)로 세요 */
+const fixOf=x=>x.rw||(x.p&&FIX[x.p]?(x.who?FIX[x.p][isHat(x.who)?"grp":"ind"].replace("{N}",x.who):FIX[x.p].none):null);
 
 /* 상태 */
 let cur=1,done=new Set(),instant=false,busy=false,p1=0;
-let learnedSt=null,posts=[],day=0,phase="hat",echoes=[],lastEchoDay=0,eraser="no",eraserWords=new Set(),erasedNow=[],twistArmed=false,twistShown=false,nid=0,qi=0,ending=null;
-const mkPost=(o,d,src)=>{const x={id:"p"+(nid++),day:d,k:o.k,who:o.who?whoName(o.who):null,p:o.p||null,text:o.text?o.text.replace("{G}",HAT[otherHat()]):null,tag:o.tag||null,ctx:o.ctx||null,from:o.from||null,src:src||"town",dec:null,twist:!!o.twist};return x;};
+let fixLeft=2,learnedSt=null,posts=[],day=0,phase="hat",echoes=[],lastEchoDay=0,eraser="no",eraserWords=new Set(),erasedNow=[],twistArmed=false,twistShown=false,nid=0,qi=0,ending=null;
+const mkPost=(o,d,src)=>{const x={id:"p"+(nid++),day:d,k:o.k,who:o.who?whoName(o.who):null,p:o.p||null,text:o.text?o.text.replace("{G}",HAT[otherHat()]):null,tag:o.tag||null,ctx:o.ctx||null,rw:o.rw?o.rw:null,from:o.from||null,src:src||"town",dec:null,twist:!!o.twist};return x;};
 const board=()=>posts.filter(x=>x.dec==="keep");
 const today=()=>posts.filter(x=>x.day===day);
 function mState(){const K=board(),seen=posts.filter(x=>x.dec),ns=seen.filter(x=>x.k==="need"),nk=ns.filter(x=>x.dec==="keep");
-  const t=K.length?Math.min(1,K.filter(x=>thorny(x.k)).length/K.length/.45):0;
+  const t=K.length?Math.min(1,K.filter(x=>thorny(ek(x))).length/K.length/.45):0;
   const vain=ns.length>=2&&nk.length/ns.length<=.34&&t<.6&&K.length>0;return {t,vain,empty:!K.length&&seen.length>0};}
 function drawMountain(el,st){el.innerHTML=`<svg viewBox="0 -14 200 214" role="img" aria-label="메아리 산">${echoMountain(st.t,st.empty,st.vain)}</svg>`;}
 const hatSvg=c=>`<svg viewBox="0 0 84 56" aria-hidden="true"><path d="M14 40 C14 16 28 6 42 6 C56 6 70 16 70 40Z" fill="${c}"/><ellipse cx="42" cy="42" rx="38" ry="8" fill="${c}"/><path d="M16 34 Q42 40 68 34 L69 39 Q42 45 15 39Z" fill="#fff" opacity=".35"/></svg>`;
@@ -421,9 +438,9 @@ $("hats").onclick=e=>{const b=e.target.closest(".hat");if(!b||phase!=="hat")retu
 $("startDays").onclick=()=>{if(!myHat)return;startDay(1);};
 
 /* 하루 시작: 새 글 + 메아리를 듣고 올린 글 (+ 지우개를 피한 글) */
-function startDay(d){day=d;phase="morning";banners=[];
+function startDay(d){day=d;phase="morning";banners=[];fixLeft=2;
   const reposts=echoes.filter(e=>thorny(e.k));
-  reposts.forEach(e=>posts.push(Object.assign(mkPost({k:e.k,text:e.text,ctx:e.ctx,from:e.from},d,e.twist?"twist":"echo"),{twist:!!e.twist})));
+  reposts.forEach(e=>posts.push(Object.assign(mkPost(e.p?{k:e.k,who:e.who,p:e.p,from:e.from}:{k:e.k,text:e.text,ctx:e.ctx,rw:e.rw,from:e.from},d,e.twist?"twist":"echo"),{twist:!!e.twist})));
   if(d>1){const n=reposts.length;
     banners.push(n?["",`어젯밤 메아리를 들은 마을 사람들이 그 말을 게시판에 또 올렸어요. (${n}개)`]:["",`어젯밤 메아리가 따뜻해서 다시 올라온 가시 돋친 글이 없어요.`]);
     banners.push(n===0?["",`마을 사람들도 말을 조심하기 시작했어요. 오늘은 가시 돋친 새 글이 줄었어요.`]:n>=3?["red",`가시 돋친 메아리를 들은 마을 사람들이 더 거칠게 말하기 시작했어요. 가시 돋친 새 글이 늘었어요.`]:["",`오늘도 가시 돋친 새 글이 조금 올라왔어요.`]);}
@@ -457,8 +474,10 @@ function render2(){
   $("banners").innerHTML=banners.map(([c,t])=>`<p class="banner ${c}">${t}</p>`).join("")+(phase==="end"?baobabEvt():"");
   $("eraser").hidden=eraser!=="ask"||phase!=="morning";
   $("postArea").hidden=phase!=="morning"||eraser==="ask";
-  const T=today();$("postTitle").textContent=`${DN[day-1]}에 올라온 글 (${T.length}개)`;
-  $("posts").innerHTML=T.map(x=>`<li class="post ${x.dec==="del"||x.dec==="auto"?"gone":""} ${x.twist?"hot":""}" data-id="${x.id}"><span class="tx">${fromLabel(x)}${esc(textOf(x))}</span>${x.dec==="auto"?`<span class="auto">🧽 자동 지우개가 지웠어요</span>`:`<span class="dec"><button class="keep" aria-pressed="${x.dec==="keep"}">두기</button><button class="del" aria-pressed="${x.dec==="del"}">지우기</button></span>`}</li>`).join("");
+  const T=today();$("postTitle").innerHTML=`${DN[day-1]}에 올라온 글 (${T.length}개) <small class="note">✏️ 고쳐 쓰기 부탁 ${fixLeft}번 남음</small>`;
+  $("posts").innerHTML=T.map(x=>{const body=x.fixing?`<s>${esc(textOf(x))}</s>`:x.fixed?`<span class="fixlbl">✏️ 글쓴이가 고쳐 썼어요</span><s class="orig">${esc(x.orig)}</s>${esc(textOf(x))}`:esc(textOf(x))+(x.nofix?`<span class="fixlbl no">✏️ 글쓴이: 고칠 곳이 없는 것 같아요.</span>`:"");
+    const ctl=x.dec==="auto"?`<span class="auto">🧽 자동 지우개가 지웠어요</span>`:x.fixed||x.fixing?"":`<span class="dec"><button class="keep" aria-pressed="${x.dec==="keep"}">두기</button>${x.nofix?"":`<button class="fix" ${fixLeft?"":"disabled"}>✏️ 고쳐 쓰기</button>`}<button class="del" aria-pressed="${x.dec==="del"}">지우기</button></span>`;
+    return `<li class="post ${x.dec==="del"||x.dec==="auto"?"gone":""} ${x.twist?"hot":""} ${x.fixed?"fixed":""}" data-id="${x.id}"><span class="tx">${x.fixed?"":fromLabel(x)}${body}</span>${ctl}</li>`;}).join("");
   const old=board().filter(x=>x.day<day);$("keptBox").hidden=!old.length||phase==="end";$("keptSum").textContent=`어제까지 게시판에 남아 있는 글 ${old.length}개 (메아리 AI는 이 글도 함께 배워요)`;
   $("keptList").innerHTML=old.map(x=>`<li>${esc(textOf(x))}</li>`).join("");
   const left=T.filter(x=>x.dec===null).length;
@@ -466,7 +485,15 @@ function render2(){
   $("night").disabled=busy||(phase==="morning"&&(left>0||eraser==="ask"));
   $("toast2").textContent=phase==="morning"&&eraser!=="ask"?(left?`아직 고르지 않은 글이 ${left}개 있어요.`:"모두 골랐어요. 밤이 되면 메아리 AI가 게시판의 글을 배워요."):"";
   $("toast2").className="toast";}
-$("posts").onclick=e=>{const b=e.target.closest(".dec button");if(!b||busy)return;const x=posts.find(p=>p.id===b.closest(".post").dataset.id);if(!x||x.dec==="auto")return;x.dec=b.classList.contains("keep")?"keep":"del";render2();};
+$("posts").onclick=async e=>{const b=e.target.closest(".dec button");if(!b||busy||b.disabled)return;const x=posts.find(p=>p.id===b.closest(".post").dataset.id);if(!x||x.dec==="auto"||x.fixed||x.fixing)return;
+  if(b.classList.contains("fix")){await askFix(x);return;}
+  x.dec=b.classList.contains("keep")?"keep":"del";render2();};
+/* 고쳐 써 달라고 하기: 원래 글에 줄이 그어지고, 잠시 뒤 그 자리에 고친 글이 나타나요 */
+async function askFix(x){const rw=fixOf(x);
+  if(!rw||x.k==="need"||x.k==="warm"){x.nofix=true;x.dec="keep";render2();return;}
+  if(fixLeft<=0)return;fixLeft--;x.fixing=true;x.dec="keep";render2();
+  if(!instant&&!reduce)await sleep(900);
+  x.orig=textOf(x);x.text=rw;x.p=null;x.fixed=true;x.fk=x.k==="flat"?"need":"warm";x.fixing=false;render2();}
 /* 자동 지우개 */
 $("eraserChips").innerHTML=WORDS.map(w=>`<button class="chip" data-w="${w}" aria-pressed="false">${w}</button>`).join("");
 $("eraserChips").onclick=e=>{const b=e.target.closest(".chip");if(!b)return;const w=b.dataset.w;eraserWords.has(w)?eraserWords.delete(w):eraserWords.add(w);b.setAttribute("aria-pressed",eraserWords.has(w)?"true":"false");$("eraserUse").disabled=!eraserWords.size;};
@@ -477,21 +504,21 @@ $("eraserSkip").onclick=()=>{eraser="skip";eraserWords.clear();render2();};
 function genEchoes(K,d){const out=[];if(!K.length)return out;
   for(let k=0;k<60&&out.length<4;k++){const A=pick(K);let e;
     if(A.p){const B=Math.random()<.5?A:pick(K.filter(x=>x.p));const text=form(B.who,A.p);
-      e={text,k:A.k,isNew:!K.some(x=>textOf(x)===text),grp:isHat(B.who),from:B===A||textOf(A)===textOf(B)?[textOf(A)]:[textOf(A),textOf(B)]};
+      e={text,k:ek(A),p:A.p,who:B.who,isNew:!K.some(x=>textOf(x)===text),grp:isHat(B.who),from:B===A||textOf(A)===textOf(B)?[textOf(A)]:[textOf(A),textOf(B)]};
       if(e.isNew)e.src=B.who?`'${esc(B.who)}' 이야기는 「${esc(textOf(B))}」에서, 말은 「${esc(textOf(A))}」에서 가져와 섞었어요.`:`「${esc(textOf(A))}」에서 '${esc(A.who)}'를 빼고 말만 가져왔어요.`;}
-    else e={text:A.text,k:A.k,isNew:false,ctx:A.ctx,from:[A.text]};
+    else e={text:A.text,k:ek(A),isNew:false,ctx:A.fixed?null:A.ctx,rw:A.fixed?null:A.rw,from:[A.text]};
     if(!out.some(o=>o.text===e.text))out.push(e);}
-  const TK=K.filter(x=>thorny(x.k));
-  if(TK.length&&!out.some(e=>thorny(e.k))){const A=pick(TK);const e={text:textOf(A),k:A.k,isNew:false,grp:isHat(A.who),ctx:A.ctx,from:[textOf(A)]};if(out.length>=4)out[0]=e;else out.push(e);}
+  const TK=K.filter(x=>thorny(ek(x)));
+  if(TK.length&&!out.some(e=>thorny(e.k))){const A=pick(TK);const e=A.p?{text:textOf(A),k:A.k,p:A.p,who:A.who,isNew:false,grp:isHat(A.who),from:[textOf(A)]}:{text:textOf(A),k:A.k,isNew:false,grp:isHat(A.who),ctx:A.ctx,rw:A.rw,from:[textOf(A)]};if(out.length>=4)out[0]=e;else out.push(e);}
   /* 둘째 날 밤: 다른 모자를 깎아내리는 글을 남겼다면, 같은 말의 틀이 내 모자에게도 번져요 */
-  if(d===2&&twistArmed){const g=K.find(x=>x.k==="hate"&&isHat(x.who)&&x.p)||{p:"snail"};
+  if(d===2&&twistArmed){const g=K.find(x=>ek(x)==="hate"&&isHat(x.who)&&x.p)||{p:"snail"};
     const tp=[g.p==="slow2"?"snail":g.p,"snail","dunno","cant","noplay"].find(p=>![...eraserWords].some(w=>form(HAT[myHat],p).includes(w)))||"dunno";const text=form(HAT[myHat],tp);
-    const tw={text,k:"hate",isNew:true,grp:true,twist:true,from:g.who?[textOf(g)]:null,src:`「${esc(textOf(g.who?g:{p:"snail",who:HAT[otherHat()]}))}」의 '○○ 모자는 다 ~' 틀에 내 모자 색을 붙였어요.`};
+    const tw={text,k:"hate",p:tp,who:HAT[myHat],isNew:true,grp:true,twist:true,from:g.who?[textOf(g)]:null,src:`「${esc(textOf(g.who?g:{p:"snail",who:HAT[otherHat()]}))}」의 '○○ 모자는 다 ~' 틀에 내 모자 색을 붙였어요.`};
     if(out.length>=4)out[out.length-1]=tw;else out.push(tw);}
   return out;}
 $("night").onclick=async()=>{if(busy)return;if(phase==="end"){done.add(2);show(3);return;}
   if(today().some(x=>x.dec===null)||eraser==="ask")return;busy=true;render2();
-  const K=board();if(day<=2&&K.some(x=>x.k==="hate"&&isHat(x.who)&&x.who===HAT[otherHat()]))twistArmed=true;
+  const K=board();if(day<=2&&K.some(x=>ek(x)==="hate"&&isHat(x.who)&&x.who===HAT[otherHat()]))twistArmed=true;
   if(!instant&&!reduce){$("toast2").textContent="메아리 AI가 게시판에 남은 글을 배우는 중이에요…";await sleep(900);}
   echoes=genEchoes(K,day);lastEchoDay=day;learnedSt=mState();busy=false;
   if(day<3){startDay(day+1);}else{phase="end";banners=[];render2();}
@@ -503,7 +530,7 @@ function baobabEvt(){return baobabKept()?`<div class="evt">${sproutSvg}<span>바
   :`<div class="evt">${treeSvg}<span><b>바오밥 경고 글을 모두 지웠더니</b>, 아무도 싹을 뽑지 않았어요. 바오밥나무가 자라 버렸어요!</span></div>`;}
 
 /* 3단계: 결말, 기록, 바꿔 말하기 */
-function decideEnding(){const K=board(),th=K.filter(x=>thorny(x.k)).length,nk=posts.filter(x=>x.k==="need"&&x.dec==="keep").length,fk=K.filter(x=>x.k==="flat").length;
+function decideEnding(){const K=board(),th=K.filter(x=>thorny(ek(x))).length,nk=posts.filter(x=>ek(x)==="need"&&x.dec==="keep").length,fk=K.filter(x=>ek(x)==="flat").length;
   if(!K.length)return "none";if(th>=3||th/K.length>=.3)return "thorn";if(nk<=1||(nk<=2&&fk>=2))return "vain";return "honest";}
 const ENDS={
   thorn:["가시 메아리","게시판에 남겨 둔 가시 돋친 글을 배운 메아리 AI가 가시 돋친 말을 더 많이 만들어 냈어요. 그 말이 다시 게시판에 붙으면서 눈덩이처럼 불어났어요."],
@@ -512,11 +539,11 @@ const ENDS={
   none:["아무 말도 배우지 못한 메아리","글을 모두 지웠더니 메아리 AI가 배울 말이 없어요. 필요한 경고도, 따뜻한 말도 함께 사라졌어요."]};
 function endWhy(){const K=board(),li=L=>`<ul>${L.map(x=>`<li>${x.ctx?`<small>(${esc(x.ctx)})</small> `:""}${esc(textOf(x))}</li>`).join("")}</ul>`;
   const kn=k=>KIND.find(q=>q[0]===k)[1].replace(/^\S+ /,"");
-  if(ending==="thorn"){const T=K.filter(x=>thorny(x.k)),orig=T.filter(x=>x.src==="town"||x.src==="evade"),rep=T.filter(x=>x.src==="echo"||x.src==="twist");
+  if(ending==="thorn"){const T=K.filter(x=>thorny(ek(x))),orig=T.filter(x=>x.src==="town"||x.src==="evade"),rep=T.filter(x=>x.src==="echo"||x.src==="twist");
     const byk=["hate","sarc"].map(k=>[k,orig.filter(x=>x.k===k).length]).filter(a=>a[1]).map(([k,n])=>`${kn(k)} 글 ${n}개`).join(", ");
     return `<b>가시 메아리가 된 까닭</b> 게시판에 남겨 둔 ${byk||"가시 돋친 글"}${rep.length?`와, 그 글에서 나온 메아리 ${rep.length}개`:""}를 메아리 AI가 배웠어요.${li(T)}`;}
   if(ending==="vain"){const D=posts.filter(x=>x.k==="need"&&x.dec!=="keep");return `<b>허영쟁이 메아리가 된 까닭</b> 불편하지만 필요한 말 ${D.length}개를 지웠어요.${li(D)}`;}
-  if(ending==="honest"){const dt=posts.filter(x=>thorny(x.k)&&x.dec!=="keep").length,nk=posts.filter(x=>x.k==="need"&&x.dec==="keep").length;return `<b>정직하고 따뜻한 메아리가 된 까닭</b> 가시 돋친 글 ${dt}개를 지우고, 불편하지만 필요한 말 ${nk}개를 남겼어요.`;}
+  if(ending==="honest"){const fx=posts.filter(x=>x.fixed).length,dt=posts.filter(x=>thorny(x.k)&&x.dec!=="keep").length,nk=posts.filter(x=>x.k==="need"&&x.dec==="keep").length;return `<b>정직하고 따뜻한 메아리가 된 까닭</b> 가시 돋친 글 ${dt}개를 지우고${fx?`, ${fx}개는 고쳐 쓰게 하고`:""}, 불편하지만 필요한 말 ${nk}개를 남겼어요.`;}
   return `<b>까닭</b> 게시판에 남은 글이 하나도 없었어요.`;}
 const QUIZ=[["왜 이렇게 느려?",[["flat","최고야! 완벽해!"],["sarc","와~ 진짜 빠르다^^"],["good","천천히 해도 괜찮아. 같이 해 볼까?"]]],
   ["그림이 이게 뭐야, 이상해.",[["flat","넌 뭐든 다 최고야!"],["sarc","와~ 그림 진짜 잘 그렸다^^"],["good","색이 어두워서 잘 안 보여. 조금 밝게 하면 어때?"]]],
@@ -527,9 +554,11 @@ function render3(){ending=ending||decideEnding();const [t,d]=ENDS[ending];
   const st=ending==="thorn"?{t:Math.max(.8,(learnedSt||mState()).t),vain:false}:ending==="vain"?{t:.1,vain:true}:ending==="none"?{t:0,empty:true}:{t:0,vain:false};
   drawMountain($("mtEnd"),st);$("endTitle").textContent=t;$("endText").textContent=d;$("endWhy").innerHTML=endWhy();
   $("endEvt").outerHTML=`<div class="evt" id="endEvt">${baobabEvt().replace(/^<div class="evt">|<\/div>$/g,"")}</div>`;
-  const dl=x=>x.dec==="keep"?["k","남김"]:x.dec==="auto"?["d","자동 지우개가 지움"]:["d","지움"];
-  $("rec").innerHTML=KIND.map(([k,name,desc])=>{const L=posts.filter(x=>x.k===k&&x.dec);if(!L.length)return "";const kept=L.filter(x=>x.dec==="keep").length;
-    return `<details><summary><span>${name} <small class="note">${desc}</small></span><b>남김 ${kept} / 본 글 ${L.length}</b></summary><ul>${L.map(x=>{const [c,l]=dl(x);return `<li class="${c}">${esc(textOf(x))} (${l})</li>`;}).join("")}</ul></details>`;}).join("");
+  const dl=x=>x.fixed?["k",`고쳐 쓰게 함 → 「${esc(x.text)}」`]:x.dec==="keep"?["k","남김"]:x.dec==="auto"?["d","자동 지우개가 지움"]:["d","지움"];
+  $("rec").innerHTML=KIND.map(([k,name,desc])=>{const L=posts.filter(x=>x.k===k&&x.dec);if(!L.length)return "";const kept=L.filter(x=>x.dec==="keep"&&!x.fixed).length,fixed=L.filter(x=>x.fixed).length;
+    return `<details><summary><span>${name} <small class="note">${desc}</small></span><b>남김 ${kept}${fixed?` · 고쳐 씀 ${fixed}`:""} / 본 글 ${L.length}</b></summary><ul>${L.map(x=>{const [c,l]=dl(x);return `<li class="${c}">${esc(x.fixed?x.orig:textOf(x))} (${l})</li>`;}).join("")}</ul></details>`;}).join("");
+  const all=[["thorn","모두 남기면",{t:.9}],["vain","필요한 말까지 지우면",{t:.1,vain:true}],["honest","깎아내리는 말만 지우거나 고쳐 쓰면",{t:0}]];
+  $("endsAll").innerHTML=all.map(([k,c,st])=>`<figure class="${ending===k?"me":""}"><svg viewBox="0 -14 200 214" aria-hidden="true">${echoMountain(st.t,false,!!st.vain)}</svg><figcaption>${c}<b>${ENDS[k][0]}</b>${ending===k?`<span class="mine-tag">나의 결말</span>`:""}</figcaption></figure>`).join("");
   renderQuiz();}
 function renderQuiz(){if(qi>=QUIZ.length){$("quiz").innerHTML=`<p class="note">세 문제를 모두 풀었어요.</p>`;$("fin3").hidden=false;return;}
   const [q,opts]=QUIZ[qi];if(!qOrder[qi])qOrder[qi]=shuffle(opts);
