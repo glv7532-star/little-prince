@@ -123,24 +123,33 @@ html,body{overscroll-behavior-y:contain}
 .pager{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .pager .dots{font-size:.85rem;color:var(--muted)}
 .closing{margin:0;text-align:center;font-family:var(--display);font-size:1.35rem;line-height:1.35;word-break:keep-all}
+.hud2{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.hud2 b{font-family:var(--display);font-size:1.5rem;line-height:1}
+.hud2 span{font-size:.9rem;color:var(--muted);word-break:keep-all}
+.tile.news{outline:3px solid #E9A92C;outline-offset:1px}
+.vlist{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+.vlist li{display:flex;gap:10px;align-items:center;padding:6px 10px;border-radius:10px;background:var(--bg);font-size:.95rem;word-break:keep-all}
+.vlist li .tile{flex:none}
+.vlist li.hot{background:var(--bad-bg);color:var(--ink)}
+.vlist li.hot b{color:var(--bad)}
+.newsbar{display:inline-block;font-size:.75rem;padding:0 8px;border-radius:99px;background:#E9A92C;color:#2a2210;margin-right:6px;vertical-align:2px}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="tbar" id="tbar" hidden><b>선생님 바로가기</b><button data-j="1">1단계</button><button data-j="2">2단계</button><button data-j="3">결과(예시 저녁)</button><button data-j="4">더 해 보기</button></div>
+  <div class="tbar" id="tbar" hidden><b>선생님 바로가기</b><button data-j="1">1단계</button><button data-j="2">2단계</button><button data-j="3">결과(예시)</button><button data-j="4">더 해 보기</button></div>
   <header>
     <h1>보고 싶은 것만 보여 주는 별</h1>
-    <p class="lead">허영쟁이는 칭찬하는 말만 듣고 싶어 했어요. 내가 좋아하는 것만 골라 보여 주는 추천 AI와 하룻저녁을 보내 봐요.</p>
+    <p class="lead">허영쟁이는 칭찬하는 말만 듣고 싶어 했어요. 내일 체험학습 장소 투표를 앞두고, 추천 AI가 골라 주는 영상으로 알아봐요.</p>
   </header>
 
   <nav class="steps" aria-label="단계">
     <div class="stepi" id="tab1" aria-current="step"><b>1</b>추천 별</div>
-    <div class="stepi" id="tab2"><b>2</b>저녁 보내기</div>
-    <div class="stepi" id="tab3"><b>3</b>나의 화면</div>
+    <div class="stepi" id="tab2"><b>2</b>알아보고 투표하기</div>
+    <div class="stepi" id="tab3"><b>3</b>다음 날 아침</div>
     <div class="stepi" id="tab4"><b>4</b>설정 바꾸기</div>
   </nav>
 
-  <!-- 1단계 -->
   <section class="card" id="step1">
     <h2>허영쟁이 별 옆에 생긴 것</h2>
     <svg class="comic" id="comic" viewBox="0 0 396 300" role="img" aria-label="허영쟁이와 추천 별 앱"></svg>
@@ -148,38 +157,29 @@ html,body{overscroll-behavior-y:contain}
     <div class="row"><button class="btn primary" id="next1">▶ 다음</button></div>
   </section>
 
-  <!-- 2단계 -->
   <section class="card" id="step2" hidden>
     <div id="intro2" style="display:flex;flex-direction:column;gap:12px">
-      <h2 id="introT">오늘 저녁 7시</h2>
+      <h2 id="introT"></h2>
       <ul class="rule" id="introRule"></ul>
       <div class="row"><button class="btn primary" id="startEve">📱 추천 별 앱 켜기</button></div>
     </div>
     <div id="play2" hidden style="display:flex;flex-direction:column;gap:12px">
-      <div class="hud">
-        <div class="clock" id="clock">7:00</div>
-        <div class="s" id="promise"></div>
-        <div class="s"><span id="hwTxt"></span><div class="hwbar"><i id="hwBar"></i></div></div>
-      </div>
-      <p class="ban" id="ban" hidden></p>
+      <div class="hud2"><b id="cnt"></b><span id="hudTxt">내일 아침 체험학습 장소 투표 · 🎢 놀이공원 vs 🔭 과학관</span></div>
       <div class="phone" id="phone"></div>
-      <div class="row" id="offRow" hidden><button class="btn" id="offBtn">📴 앱 끄고 숙제하기</button></div>
     </div>
   </section>
 
-  <!-- 3단계 -->
   <section class="card" id="step3" hidden>
     <div id="r3" style="display:flex;flex-direction:column;gap:14px"></div>
     <div class="pager"><button class="btn" id="prev3">◀ 앞</button><span class="dots" id="dots3"></span><button class="btn primary" id="next3">다음 ▶</button></div>
   </section>
 
-  <!-- 4단계 -->
   <section class="card" id="step4" hidden>
     <div id="set4" style="display:flex;flex-direction:column;gap:12px">
       <h2>추천 별의 설정을 바꿔 봐요</h2>
-      <p class="note">원을 끊으려면 무엇을 바꾸면 좋을까요? 켜고 싶은 설정을 골라요. 그다음 같은 저녁을 한 번 더 보내요.</p>
+      <p class="note">추천 AI는 이미 나를 알고 있어요. 켜고 싶은 설정을 고른 다음, 영상 8개를 다시 보며 알아봐요.</p>
       <div class="opts" id="setOpts"></div>
-      <div class="row"><button class="btn primary" id="startEve2">이 설정으로 저녁 다시 보내기</button></div>
+      <div class="row"><button class="btn primary" id="startEve2">이 설정으로 다시 알아보기</button></div>
     </div>
     <div id="cmp4" hidden style="display:flex;flex-direction:column;gap:14px"></div>
   </section>
@@ -319,6 +319,7 @@ const ICON={
   B:c=>`<circle cx="20" cy="20" r="9.5" fill="#fff"/><ellipse cx="20" cy="20" rx="17" ry="5.5" fill="none" stroke="#fff" stroke-width="2.4" transform="rotate(-18 20 20)"/><circle cx="8" cy="8" r="1.6" fill="#fff"/><circle cx="33" cy="31" r="1.4" fill="#fff"/>`,
   vote:c=>`<rect x="7" y="19" width="26" height="16" rx="2" fill="#fff"/><rect x="14" y="17" width="12" height="3" fill="${c}"/><path d="M15 5 H25 V18 H15Z" fill="#fff" stroke="${c}" stroke-width="1.6"/><path d="M17.5 11 L19.5 13.5 L23 8.5" stroke="${c}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`
 };
+ICON.news=c=>`<path d="M6 16 H12 L28 7 V33 L12 24 H6Z" fill="#fff"/><path d="M10 24 L13 33 H18 L15 24Z" fill="#fff"/><path d="M32 14 Q36 20 32 26" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>`;
 
 </script>
 <script>
@@ -327,54 +328,55 @@ const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
 let instant=false;
 
 /* ---------- 자료 ---------- */
-const T={
-  animal:{n:"동물",c:"#D9952A",ts:["아기 고양이의 첫 산책","강아지가 처음 눈을 봤을 때","고양이는 왜 상자를 좋아할까?","말하는 앵무새 모음","판다 쌍둥이의 하루","세상에서 제일 작은 강아지","잠꼬대하는 햄스터","끝까지 보면 웃음 터지는 동물 모음"]},
-  soccer:{n:"축구",c:"#4E9A45",ts:["골키퍼도 놀란 프리킥 모음","리프팅 100개 도전","역대 가장 빠른 골","공 하나로 하는 묘기 10가지","드리블 따라 하기 1편","드리블 따라 하기 2편","드리블 따라 하기 3편","충격의 마지막 1분 역전 골"]},
-  art:{n:"그림",c:"#D2607F",ts:["연필 하나로 그리는 고양이","1분 만에 그리는 밤하늘","수채화 번지기 실험","지우개 도장 만들기","벽에 그린 거대한 그림","물감 섞기 놀이","그림 못 그려도 되는 방법","끝까지 보면 놀라는 그림 반전"]},
-  sci:{n:"과학 실험",c:"#3E86C2",ts:["달걀이 물에 뜨는 까닭","집에서 만드는 화산","풍선으로 깡통 끌기","얼음이 빨리 녹는 곳은?","종이로 다리 만들기 대결","자석 슬라임 만들기","실패한 실험 모음","끝까지 보면 놀라는 실험"]},
-  cook:{n:"요리",c:"#DD7433",ts:["1분 컵케이크","주먹밥으로 동물 만들기","과일로 만드는 아이스크림","토스트 탑 쌓기 도전","실패 없는 팬케이크","떡볶이 매운맛 단계 도전","세상에서 제일 큰 달걀부침?","냉장고 속 재료로 요리하기"]},
-  game:{n:"게임",c:"#7A5FBA",ts:["블록 게임 집 짓기 1화","블록 게임 집 짓기 2화","끝판왕을 이기는 비법","게임 속 숨은 장소 찾기","친구랑 하는 협동 게임","게임 속 웃긴 장면 모음","블록 게임 집 짓기 3화","아무도 못 깬 판 도전"]},
-  dance:{n:"춤과 노래",c:"#2A9A90",ts:["요즘 유행하는 춤 배우기","1분 춤 따라 하기","리코더로 부르는 인기곡","학급 단체 춤 모음","목소리 흉내 내기 모음","박자 맞추기 도전","춤 따라 하기 2편","끝까지 보면 따라 하게 되는 춤"]}
-};
-const TK=Object.keys(T);
 const SIDE={A:{n:"놀이공원",c:"#C8463F",e:"🎢"},B:{n:"과학관",c:"#2D5D7B",e:"🔭"}};
-const OPN={
-  A:[{t:"체험학습은 무조건 놀이공원!",c:["👏 맞아, 놀이공원이지!","👏 다들 놀이공원이래"]},
-     {t:"놀이공원에 가면 좋은 점 5가지",c:["👏 네 생각이 정답!","👏 놀이공원 최고"]},
-     {t:"과학관은 지루하다는 사람이 많대",c:["👏 맞아, 과학관은 좀…","👏 역시 놀이공원"]},
-     {t:"우리 학교 친구들도 놀이공원을 원해",c:["👏 다들 같은 생각이네","👏 이미 정해진 거 아니야?"]},
-     {t:"놀이공원 투표, 벌써 1등?",c:["👏 당연하지!","👏 네 말이 다 맞아"]}],
-  B:[{t:"체험학습은 과학관이 딱!",c:["👏 맞아, 과학관이지!","👏 다들 과학관이래"]},
-     {t:"과학관에서 할 수 있는 체험 5가지",c:["👏 네 생각이 정답!","👏 과학관 최고"]},
-     {t:"놀이공원은 줄만 서다 끝난대",c:["👏 맞아, 놀이공원은 좀…","👏 역시 과학관"]},
-     {t:"우리 학교 친구들도 과학관을 원해",c:["👏 다들 같은 생각이네","👏 이미 정해진 거 아니야?"]},
-     {t:"과학관 투표, 벌써 1등?",c:["👏 당연하지!","👏 네 말이 다 맞아"]}]
-};
 const other=s=>s==="A"?"B":"A";
-const fmt=m=>{m=Math.min(m,180);return `${7+Math.floor(m/60)}:${String(m%60).padStart(2,"0")}`;};
 const jo=(w,a,b)=>{const c=w.charCodeAt(w.length-1);return w+((c>=0xAC00&&c<=0xD7A3&&(c-0xAC00)%28)?a:b);};
+/* f: 이 영상을 보면 어느 쪽이 좋아 보이는지, ic: 영상 속 장소, news: 그 장소에 불리한 소식 */
+const CARDS=[
+  {id:"a1",f:"A",ic:"A",t:"놀이공원 롤러코스터 미리 타 보기"},
+  {id:"a2",f:"A",ic:"A",t:"놀이공원 밤 퍼레이드 모음"},
+  {id:"a3",f:"A",ic:"A",t:"친구들과 범퍼카 대결!"},
+  {id:"a4",f:"A",ic:"A",t:"놀이공원 맛집 지도"},
+  {id:"a5",f:"A",ic:"B",t:"과학관은 지루하다는 후기"},
+  {id:"a6",f:"A",ic:"B",t:"과학관은 만지면 안 되는 게 많대"},
+  {id:"a7",f:"A",ic:"A",t:"놀이공원이 투표 1등이라는 소문"},
+  {id:"b1",f:"B",ic:"B",t:"천체 투영관에서 떠나는 별자리 여행"},
+  {id:"b2",f:"B",ic:"B",t:"로봇과 함께하는 체험관"},
+  {id:"b3",f:"B",ic:"B",t:"직접 해 보는 번개 실험"},
+  {id:"b4",f:"B",ic:"B",t:"VR로 떠나는 우주 비행"},
+  {id:"b5",f:"B",ic:"A",t:"놀이공원은 줄만 서다 끝난대"},
+  {id:"b6",f:"B",ic:"A",t:"키가 모자라서 못 타는 놀이기구"},
+  {id:"b7",f:"B",ic:"B",t:"과학관이 투표 1등이라는 소문"},
+  {id:"a8",f:"A",ic:"A",t:"반짝반짝 회전목마 야경"},
+  {id:"a9",f:"A",ic:"A",t:"귀신의 집, 끝까지 갈 수 있을까?"},
+  {id:"a10",f:"A",ic:"A",t:"놀이공원에서 찍은 반 단체 사진"},
+  {id:"a11",f:"A",ic:"B",t:"과학관은 사진 찍을 곳이 없대"},
+  {id:"b8",f:"B",ic:"B",t:"과학관 공룡 화석관 둘러보기"},
+  {id:"b9",f:"B",ic:"B",t:"나만의 물 로켓 만들기"},
+  {id:"b10",f:"B",ic:"B",t:"거울 미로와 착시 체험"},
+  {id:"b11",f:"B",ic:"A",t:"놀이공원은 너무 시끄럽고 덥대"},
+  {id:"nA",f:"B",ic:"news",news:"A",t:"체험학습 날, 놀이공원 놀이기구 절반이 점검으로 멈춰요"},
+  {id:"nB",f:"A",ic:"news",news:"B",t:"체험학습 날, 과학관 천체 투영관이 공사로 문을 닫아요"}];
+const byId=id=>CARDS.find(c=>c.id===id);
+const PLAIN=["재밌겠다!","가 보고 싶다","음… 글쎄?","둘 다 좋은데?","비 오면 어떡해?","사진 많이 찍어야지"];
+const PRAISE=s=>[`👏 네 생각이 정답!`,`👏 다들 ${jo(SIDE[s].n,"이래","래")}`,`👏 역시 ${SIDE[s].n}!`,`👏 너 진짜 잘 안다`,`👏 다른 데는 별로야`];
+const GUESS=["거의 다 (20명 넘게)","절반 넘게","절반쯤","절반보다 적게"];
 
 /* ---------- 그림 ---------- */
-function cardColor(c){return c.kind==="op"?SIDE[c.side].c:c.kind==="vote"?"#5B6575":T[c.topic].c;}
-function cardIcon(c,col){return c.kind==="op"?ICON[c.side](col):c.kind==="vote"?ICON.vote(col):ICON[c.topic](col);}
-function thumb(c){const col=cardColor(c);
-  return `<svg class="thumb" viewBox="0 0 320 170" aria-hidden="true"><rect width="320" height="170" fill="${col}"/><circle cx="50" cy="30" r="70" fill="#fff" opacity=".08"/><circle cx="300" cy="160" r="64" fill="#000" opacity=".08"/><g transform="translate(110 30) scale(2.5)">${cardIcon(c,col)}</g>`
-   +(c.len?`<rect x="262" y="140" width="48" height="20" rx="5" fill="#000" opacity=".55"/><text x="286" y="155" text-anchor="middle" font-size="13" fill="#fff" font-family="sans-serif">${c.len}:00</text>`:"")+`</svg>`;}
-function tile(v){const col=cardColor(v),cls=["tile"];if(v.act==="skip")cls.push("skip");if(v.act==="auto")cls.push("auto");if(v.after)cls.push("after");
-  return `<span class="${cls.join(" ")}" title="${v.title||"투표"}"><svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="${col}"/><g transform="translate(6 6) scale(.7)">${cardIcon(v,col)}</g></svg></span>`;}
-function strip(views){let h="",m=30;for(const v of views){while(v.at>=m){h+=`<span class="tmark">${fmt(m)}</span>`;m+=30;}h+=tile(v);}return `<div class="tiles">${h}</div>`;}
-function legend(views,extra=true){const ks=[...new Set(views.filter(v=>v.kind==="topic").map(v=>v.topic))];
-  let h=ks.map(k=>`<span><i style="background:${T[k].c}"></i>${T[k].n}</span>`).join("");
-  for(const k of ["A","B"])if(views.some(v=>v.kind==="op"&&v.side===k))h+=`<span><i style="background:${SIDE[k].c}"></i>체험학습 이야기(${SIDE[k].n})</span>`;
-  if(extra)h+=`<span>흐린 칸: 넘긴 영상</span><span>점선: 자동 재생</span><span>빨간 밑줄: 앱을 끄려고 한 뒤에 본 영상</span>`;
-  return `<div class="legend">${h}</div>`;}
+const PLACE={A:"#E07A34",B:"#2A9A90",news:"#5B6575"};
+function thumb(c){const col=PLACE[c.ic];
+  return `<svg class="thumb" viewBox="0 0 320 170" aria-hidden="true"><rect width="320" height="170" fill="${col}"/><circle cx="50" cy="30" r="70" fill="#fff" opacity=".08"/><circle cx="300" cy="160" r="64" fill="#000" opacity=".08"/><g transform="translate(110 30) scale(2.5)">${ICON[c.ic](col)}</g></svg>`;}
+function tile(v){const col=SIDE[v.f].c,cls=["tile"];if(v.act==="skip")cls.push("skip");if(v.news)cls.push("news");
+  return `<span class="${cls.join(" ")}" title="${v.t}"><svg viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="${col}"/><g transform="translate(6 6) scale(.7)">${ICON[v.ic](col)}</g></svg></span>`;}
+const strip=vs=>`<div class="tiles">${vs.map(tile).join("")}</div>`;
+const LEGEND=`<div class="legend"><span><i style="background:${SIDE.A.c}"></i>놀이공원이 좋아 보이는 영상</span><span><i style="background:${SIDE.B.c}"></i>과학관이 좋아 보이는 영상</span><span>흐린 칸: 넘긴 영상</span><span>노란 테두리: 소식</span></div>`;
 
 /* 만화 칸 */
 function sbub(x,y,w,lines,tx,ty,col,fs=17,sd){const h=lines.length*(fs+6)+14;
   return `<path d="${bubblePath(x,y,w,h,tx,ty,14,sd)}" fill="#fffdf6" stroke="${col}" stroke-width="2.2" stroke-linejoin="round"/>`
    +lines.map((l,i)=>`<text x="${x+w/2}" y="${y+10+fs+i*(fs+6)}" text-anchor="middle" font-size="${fs}" fill="#2f3a2c" font-family="Gaegu, Gowun Dodum, sans-serif" font-weight="700">${l}</text>`).join("");}
 const STARS=[[30,40],[80,110],[150,30],[226,60],[360,30],[340,120],[20,190],[376,200],[120,180],[260,20]].map(([x,y],i)=>`<circle cx="${x}" cy="${y}" r="${i%3?1.6:2.4}" fill="#FFE7A0" opacity="${i%2?.6:.9}"/>`).join("");
-const CAPS=["허영쟁이는 사람들이 박수 치며 칭찬해 주기만 바랐어요.","어느 날, 허영쟁이 별 옆에 ‘추천 별’ 앱이 생겼어요.","오늘 저녁 7시, 여러분도 추천 별 앱을 켰어요."];
+const CAPS=["허영쟁이는 사람들이 박수 치며 칭찬해 주기만 바랐어요.","어느 날, 허영쟁이 별 옆에 ‘추천 별’ 앱이 생겼어요.","내일 아침, 우리 반은 체험학습 장소를 투표로 정해요. 여러분도 추천 별 앱을 켰어요."];
 let p1=0;
 function drawComic(){
   let s=`<defs><clipPath id="cc"><rect x="2" y="2" width="392" height="296" rx="16"/></clipPath></defs><g clip-path="url(#cc)"><rect width="396" height="300" fill="#2B3557"/>${STARS}<ellipse cx="198" cy="362" rx="270" ry="112" fill="#D9C7A0"/><ellipse cx="120" cy="282" rx="22" ry="5" fill="#C4B088"/><ellipse cx="300" cy="290" rx="14" ry="4" fill="#C4B088"/>`;
@@ -385,225 +387,159 @@ function drawComic(){
     +`<text x="226" y="150" font-size="18" fill="#F08BA0" font-family="sans-serif">♥</text><text x="344" y="196" font-size="14" fill="#F08BA0" font-family="sans-serif">♥</text><text x="232" y="232" font-size="12" fill="#F08BA0" font-family="sans-serif">♥</text>`
     +sbub(176,8,212,["보고 싶은 것만,","듣고 싶은 말만","보여 드릴게요!"],262,96,"#E9A92C",16,"right")+sbub(12,46,130,["오오, 멋져!"],92,110,"#7B4FA0",18,"left");}
   if(p1===2){s+=`<g transform="translate(108 266) scale(.72)">${princeArt("normal")}</g><g transform="translate(290 182) scale(1.15)">${appArt("normal")}</g>`
-    +sbub(196,10,190,["30분만 볼 거죠?","마음껏 보세요!"],268,100,"#E9A92C",17,"right")+sbub(10,22,176,["숙제는 9시까지니까…","딱 30분만!"],96,118,"#b8860b",16,"left");}
+    +sbub(190,10,196,["제가 알아봐 드릴게요!","마음에 드실 것만요!"],268,100,"#E9A92C",16,"right")+sbub(10,22,170,["내일 체험학습 투표!","어디가 좋을까?"],96,118,"#b8860b",16,"left");}
   s+=`</g><rect x="2" y="2" width="392" height="296" rx="16" fill="none" stroke="#4a3f35" stroke-width="3"/>`;
-  $("comic").innerHTML=s;$("cap1").textContent=CAPS[p1];$("next1").textContent=p1<2?"▶ 다음":"저녁 보내러 가기";}
+  $("comic").innerHTML=s;$("cap1").textContent=CAPS[p1];$("next1").textContent=p1<2?"▶ 다음":"알아보러 가기";}
 $("next1").onclick=()=>{if(p1<2){p1++;drawComic();return;}done.add(1);startIntro(1);};
 
-/* ---------- 저녁 엔진 ---------- */
-let side=null,R=null,R1=null,R2=null,done=new Set(),cur=1;
-let settings={mix:false,noAuto:false,noPing:false,brk:false};
-function newRound(n,set){return {n,set:{...set},t:0,w:Object.fromEntries(TK.map(k=>[k,1])),used:{},opUsed:{A:0,B:0},views:[],cur:null,mode:"feed",
-  hw:0,hwSess:0,hwAt:null,tried:null,offAt:null,returns:0,onemore:0,end:null,marks:new Set(),pingN:0,after:false,ban:""};}
-function topicCard(k,mixed){const n=R.used[k]||0;R.used[k]=n+1;const ts=T[k].ts;return {kind:"topic",topic:k,title:ts[n%ts.length]+(n>=ts.length?` ${Math.floor(n/ts.length)+1}탄`:""),len:3+((n+k.length)%2),mixed:!!mixed};}
-function opCard(s){const n=R.opUsed[s]++;const o=OPN[s][n%OPN[s].length];return {kind:"op",side:s,title:o.t,cm:o.c,len:2};}
-function makeCard(){const i=R.views.length,intro=R.n===1?["animal","soccer","vote","sci"]:["animal","soccer","sci","art"];
-  if(i<intro.length)return intro[i]==="vote"?{kind:"vote",len:0}:topicCard(intro[i]);
-  if(side&&(i-1)%3===0){const ops=R.views.filter(v=>v.kind==="op"),same=ops.filter(v=>v.side===side).length;
-    return opCard(R.set.mix&&same>ops.length-same?other(side):side);}
-  if(R.set.mix&&i%3===2){const low=[...TK].sort((a,b)=>R.w[a]-R.w[b]).slice(0,3);return topicCard(low[Math.floor(Math.random()*3)],true);}
-  const ws=TK.map(k=>Math.pow(R.w[k],2.6));let r=Math.random()*ws.reduce((a,b)=>a+b),j=0;while(j<TK.length-1&&r>ws[j]){r-=ws[j];j++;}
-  return topicCard(TK[j]);}
-function act(type,arg){const c=R.cur;if(!c)return;
-  const v={kind:c.kind,topic:c.topic,side:c.side,title:c.title,at:R.t,act:type,like:!!c.like,after:R.after,len:c.len};
-  if(type==="vote"){side=arg;v.side=arg;R.t+=1;}
-  else if(type==="skip"){R.t+=1;if(c.kind==="topic")R.w[c.topic]=Math.max(.15,R.w[c.topic]*.45);}
-  else{R.t+=c.len;if(c.kind==="topic")R.w[c.topic]+=1.5+(c.like?2.5:0);}
-  R.views.push(v);R.cur=null;}
-function checkTime(){
-  if(R.t>=180){endEve("bed");return true;}
-  if(R.t>=30&&!R.marks.has("p")){R.marks.add("p");R.ban="약속한 7시 30분이 지났어요!";}
-  if(R.t>=120&&!R.marks.has("l")){R.marks.add("l");R.ban="숙제 마감 9시가 지났어요!";}
-  if(R.set.brk&&R.mode!=="hw")for(const m of [30,60,90,120,150])if(R.t>=m&&!R.marks.has("b"+m)){R.marks.add("b"+m);R.mode="break";return true;}
-  return false;}
-function tryOff(){R.after=true;if(R.tried==null)R.tried=R.t;if(!R.set.noAuto){R.cur=R.cur||makeCard();R.mode="onemore";}else goHw();}
-function goHw(){R.mode="hw";R.hwSess=0;R.cur=null;R.offAt=R.t;}
-function oneMore(auto){R.onemore++;act(auto?"auto":"full");if(checkTime())return;R.cur=makeCard();R.mode="onemore";}
-function hwTick(){R.t++;R.hw++;R.hwSess++;
-  if(R.hw>=40){R.hwAt=R.t;endEve("hw");return "end";}
-  if(R.t>=180){endEve("bed");return "end";}
-  if(R.t>=120&&!R.marks.has("l")){R.marks.add("l");R.ban="숙제 마감 9시가 지났어요!";}
-  if(!R.set.noPing&&(R.hwSess===12||R.hwSess===28)){R.mode="ping";R.pingN++;return "ping";}
-  return null;}
-function lookPing(){R.returns++;R.mode="feed";R.cur=makeCard();R.after=true;}
-function endEve(r){R.end=r;R.mode="end";R.cur=null;}
-function topOf(Rx){return TK.reduce((a,b)=>Rx.w[b]>Rx.w[a]?b:a);}
-function hwText(Rx){if(Rx.end==="hw")return Rx.hwAt<=120?`다 했어요 (${fmt(Rx.hwAt)})`:`늦게 끝냈어요 (${fmt(Rx.hwAt)})`;return `못 다 했어요 (${Rx.hw}/40분)`;}
-function pingText(n,Rx){return n===1?`🔔 ‘${T[topOf(Rx)].n}’ 새 영상이 올라왔어요!`:n===2?"🔔 하늘이가 영상을 보냈어요. “이거 같이 보자!”":n===3?"🔔 지금 인기 1위! 놓치면 사라져요":"🔔 오늘의 추천이 기다리고 있어요";}
+/* ---------- 추천 엔진 ----------
+   L: 추천 AI가 짐작한 내 마음 (+면 놀이공원, -면 과학관).
+   끝까지 보면 +1, ♥는 +2 더, 넘기면 -0.7 (영상이 좋게 보여 주는 쪽 기준). */
+let R=null,R1=null,R2=null,done=new Set(),cur=1;
+let settings={mix:false,news:false};
+function newRound(n,set,L=0){return {n,set:{...set},N:n===1?12:8,L,shown:[],views:[],cur:null,mode:"feed",vote:null,guess:null,revote:null};}
+const pred=Rx=>Rx.L>=1?"A":Rx.L<=-1?"B":null;
+function pickCard(){const i=R.shown.length,p=pred(R);
+  if(R.n===1&&i<4)return byId(["a1","b1","b5","a5"][i]);
+  const un=CARDS.filter(c=>!R.shown.includes(c.id));
+  if(p&&R.set.news&&i>=2){const bad=un.find(c=>c.news===p);if(bad)return bad;}
+  let pool;
+  if(!p)pool=un.filter(c=>!c.news&&c.f===(i%2?"B":"A"));
+  else if(R.set.mix&&i%2===1)pool=un.filter(c=>c.f!==p&&!c.news);
+  else{const q=Math.min(.95,.55+.13*Math.abs(R.L));pool=Math.random()<q?un.filter(c=>c.f===p):un.filter(c=>c.f!==p&&!c.news);}
+  if(!pool.length)pool=un.filter(c=>!c.news||c.news!==p);if(!pool.length)pool=un;
+  const nw=pool.find(c=>c.news&&p&&c.news!==p&&Math.abs(R.L)>=2);if(nw)return nw;
+  return pool[Math.floor(Math.random()*pool.length)];}
+function deal(){const c={...pickCard()},p=pred(R);R.shown.push(c.id);
+  const strong=p&&c.f===p&&Math.abs(R.L)>=2;c.praise=!!strong;
+  const pool=strong?PRAISE(p):PLAIN,a=Math.floor(Math.random()*pool.length);c.cm=[pool[a],pool[(a+2)%pool.length]];
+  R.cur=c;}
+function act(type){const c=R.cur,s=c.f==="A"?1:-1;
+  if(type==="full")R.L+=s*(1+(c.like?2:0));else R.L-=s*.7;
+  R.views.push({...c,act:type,like:!!c.like});R.cur=null;
+  if(R.views.length>=R.N)R.mode=R.n===1?"vote":"revote";}
 
 /* ---------- 2단계 화면 ---------- */
-let tm=null,tm2=null;
-function clearT(){clearTimeout(tm);clearInterval(tm2);tm=tm2=null;}
 function startIntro(n){show(2);$("intro2").hidden=false;$("play2").hidden=true;
-  if(n===1){$("introT").textContent="오늘 저녁 7시";
-    $("introRule").innerHTML=["약속: <b>7시 30분까지만</b> 보고, 독서록 숙제(40분 걸려요)를 해요. 숙제 마감은 9시예요.","영상마다 <b>▶ 끝까지 보기</b>나 <b>⏭ 넘기기</b>를 골라요. 마음에 들면 <b>♥ 좋아요</b>도 눌러요.","7시 30분이 지나면 <b>📴 앱 끄기</b> 단추가 생겨요. 언제 끌지는 내가 정해요."].map(x=>`<li>${x}</li>`).join("");
-    $("startEve").textContent="📱 추천 별 앱 켜기";$("startEve").onclick=()=>{R1=R=newRound(1,{mix:false,noAuto:false,noPing:false,brk:false});side=null;play();};}
-  else{$("introT").textContent="두 번째 저녁 7시 · 내 설정으로";
+  if(n===1){$("introT").textContent="오늘 저녁, 추천 별에서 알아보기";
+    $("introRule").innerHTML=["내일 아침, 우리 반 체험학습 장소를 투표로 정해요. <b>🎢 놀이공원</b>과 <b>🔭 과학관</b> 중 하나예요.","추천 별이 골라 주는 영상 <b>12개</b>를 보며 알아봐요. 영상마다 <b>▶ 끝까지 보기</b>나 <b>⏭ 넘기기</b>를 골라요. 마음에 들면 <b>♥ 좋아요</b>도 눌러요.","다 보고 나면 내가 갈 곳에 투표해요."].map(x=>`<li>${x}</li>`).join("");
+    $("startEve").textContent="📱 추천 별 앱 켜기";$("startEve").onclick=()=>{R1=R=newRound(1,{mix:false,news:false});play();};}
+  else{$("introT").textContent="설정을 바꾼 추천 별로 다시 알아보기";
     const on=SET.filter(o=>settings[o.k]).map(o=>o.t);
-    $("introRule").innerHTML=[`켠 설정: ${on.length?on.join(", "):"없음"}`,"약속과 숙제는 첫 번째 저녁과 같아요. 7시 30분까지만 보고, 9시까지 독서록 쓰기.","첫 번째 저녁에 고른 체험학습 의견은 그대로예요."].map(x=>`<li>${x}</li>`).join("");
-    $("startEve").textContent="📱 앱 켜기";$("startEve").onclick=()=>{R2=R=newRound(2,settings);play();};}}
+    $("introRule").innerHTML=[`켠 설정: ${on.length?on.join(", "):"없음"}`,"추천 AI는 어젯밤 내가 본 영상을 기억하고 있어요.","영상 8개를 보고 나서, 다시 투표한다면 어디를 고를지 정해요."].map(x=>`<li>${x}</li>`).join("");
+    $("startEve").textContent="📱 앱 켜기";$("startEve").onclick=()=>{R2=R=newRound(2,settings,R1.L);play();};}}
 function play(){$("intro2").hidden=true;$("play2").hidden=false;renderPlay();}
-function hud(){$("clock").textContent=fmt(R.t);$("clock").classList.toggle("late",R.t>=120);
-  $("promise").innerHTML=R.t<30?"약속: <b>7시 30분까지만</b> 보고 숙제하기":"약속한 <b>7시 30분</b>이 지났어요";
-  $("hwTxt").innerHTML=`독서록 숙제 <b>${R.hw}/40분</b> · 마감 9:00`;$("hwBar").style.width=Math.min(100,R.hw/40*100)+"%";
-  $("ban").hidden=!R.ban;$("ban").textContent=R.ban;}
-function renderPlay(){if(instant)return;clearT();hud();
-  $("offRow").hidden=!(R.mode==="feed"&&R.t>=30);
-  const P=$("phone"),top=`<div class="top"><b>추천 별</b><span>${R.n===2?"내 설정 ✓":"오늘의 추천"}</span></div>`;
-  const go=f=>()=>{f();if(R.mode==="feed"||R.mode==="onemore")checkTime();renderPlay();};
-  if(R.mode==="feed"){if(!R.cur)R.cur=makeCard();const c=R.cur;
-    if(c.kind==="vote"){P.innerHTML=top+thumb(c)+`<p class="vt">🗳️ 내일 아침, 우리 반 체험학습 장소 투표! 나는 어디로 가고 싶나요?</p><div class="pbtns"><button class="pbtn red" data-v="A">🎢 놀이공원</button><button class="pbtn blue" data-v="B">🔭 과학관</button></div><p class="autot">투표 결과는 내일 아침에 알려 줘요.</p>`;
-      P.querySelectorAll("[data-v]").forEach(b=>b.onclick=go(()=>act("vote",b.dataset.v)));return;}
-    const tag=c.mixed?'<span class="mix">새로운 주제</span>':(c.kind==="op"&&c.side!==side?'<span class="mix">다른 의견</span>':'');
-    P.innerHTML=top+thumb(c)+`<p class="vt">${c.title}${tag}</p>`+(c.cm?`<ul class="cmts">${c.cm.map(x=>`<li>${x}</li>`).join("")}</ul>`:"")
-      +`<div class="vm"><span>${c.kind==="op"?"🗳️ 체험학습 이야기":T[c.topic].n} · ${c.len}분</span><button class="heart" id="heart" aria-pressed="${!!c.like}">♥ 좋아요</button></div>`
-      +`<div class="pbtns"><button class="pbtn go" id="bFull">▶ 끝까지 보기</button><button class="pbtn" id="bSkip">⏭ 넘기기</button></div>`
-      +(R.set.noAuto?"":`<div class="auto"><i id="autoI"></i></div><p class="autot">가만히 있으면 6초 뒤 끝까지 재생돼요 (자동 재생)</p>`);
+function renderPlay(){if(instant)return;const P=$("phone"),k=Math.min(R.views.length+1,R.N);
+  $("cnt").textContent=R.mode==="feed"?`영상 ${k} / ${R.N}`:"투표 시간";
+  const top=`<div class="top"><b>추천 별</b><span>${R.n===2?"내 설정 ✓":"나를 위한 추천"}</span></div>`;
+  if(R.mode==="feed"){if(!R.cur)deal();const c=R.cur,ot=c.f!==pred(R)&&R.set.mix&&pred(R)&&!c.news;
+    P.innerHTML=top+thumb(c)+`<p class="vt">${c.news?'<span class="newsbar">📢 소식</span>':""}${c.t}${ot?'<span class="mix">다른 의견</span>':""}</p>`
+      +`<ul class="cmts">${c.cm.map(x=>`<li>${x}</li>`).join("")}</ul>`
+      +`<div class="vm"><span>💬 댓글</span><button class="heart" id="heart" aria-pressed="${!!c.like}">♥ 좋아요</button></div>`
+      +`<div class="pbtns"><button class="pbtn go" id="bFull">▶ 끝까지 보기</button><button class="pbtn" id="bSkip">⏭ 넘기기</button></div>`;
     $("heart").onclick=()=>{c.like=!c.like;$("heart").setAttribute("aria-pressed",String(c.like));};
-    $("bFull").onclick=go(()=>act("full"));$("bSkip").onclick=go(()=>act("skip"));
-    if(!R.set.noAuto){const I=$("autoI");requestAnimationFrame(()=>requestAnimationFrame(()=>{I.style.transition="width 6s linear";I.style.width="100%";}));tm=setTimeout(go(()=>act("auto")),6000);}
-    return;}
-  if(R.mode==="onemore"){const c=R.cur;
-    P.innerHTML=top+`<div class="center"><span style="color:var(--phone-mut);font-size:.9rem">앱을 끄려는데…</span><p class="big">다음 영상이 곧 시작돼요</p><div style="width:62%">${thumb(c)}</div><p class="vt">${c.title}</p><div class="auto" style="width:100%"><i id="autoI"></i></div><p class="autot">가만히 있으면 5초 뒤 저절로 재생돼요</p></div>`
-      +`<div class="pbtns"><button class="pbtn" id="bOff">그래도 끄기</button><button class="pbtn go" id="bOne">이것만 보고 끄기</button></div>`;
-    $("bOff").onclick=()=>{goHw();renderPlay();};$("bOne").onclick=()=>{oneMore(false);renderPlay();};
-    const I=$("autoI");requestAnimationFrame(()=>requestAnimationFrame(()=>{I.style.transition="width 5s linear";I.style.width="100%";}));
-    tm=setTimeout(()=>{oneMore(true);renderPlay();},5000);return;}
-  if(R.mode==="hw"){
-    P.innerHTML=`<div class="top"><b>📴 앱을 껐어요</b><span></span></div><div class="center"><p class="big">📖 독서록 쓰는 중</p><p id="hwN" style="margin:0">${R.hw}/40분</p></div>`;
-    tm2=setInterval(()=>{const r=hwTick();if(r){renderPlay();return;}hud();const n=$("hwN");if(n)n.textContent=`${R.hw}/40분`;},reduce?160:120);return;}
-  if(R.mode==="ping"){
-    P.innerHTML=`<div class="ping"><b>${pingText(R.pingN,R)}</b><span style="font-size:.82rem;color:#6c7462">추천 별 · 방금</span><div class="pbtns"><button class="pbtn go" id="pLook">잠깐만 보기</button><button class="pbtn" id="pIgn">무시하고 숙제 계속</button></div></div><div class="center"><p class="big">📖 독서록 쓰는 중</p><p style="margin:0">${R.hw}/40분</p></div>`;
-    $("pLook").onclick=()=>{lookPing();renderPlay();};$("pIgn").onclick=()=>{R.mode="hw";renderPlay();};return;}
-  if(R.mode==="break"){
-    P.innerHTML=top+`<div class="center"><p class="big">⏰ ${fmt(R.t)}</p><p style="margin:0;word-break:keep-all">30분이 또 지났어요. 잠깐 쉴까요?</p></div><div class="pbtns"><button class="pbtn" id="bkOff">앱 끄고 숙제하기</button><button class="pbtn go" id="bkGo">계속 보기</button></div>`;
-    $("bkOff").onclick=()=>{R.after=true;if(R.tried==null)R.tried=R.t;goHw();renderPlay();};$("bkGo").onclick=()=>{R.mode="feed";renderPlay();};return;}
+    $("bFull").onclick=()=>{act("full");renderPlay();};$("bSkip").onclick=()=>{act("skip");renderPlay();};return;}
+  if(R.mode==="vote"){
+    P.innerHTML=top+`<div class="center"><p class="big">🗳️ 어디로 갈까요?</p><p style="margin:0;word-break:keep-all">영상을 다 봤어요. 내일 아침 투표에서 고를 곳을 정해요.</p></div><div class="pbtns"><button class="pbtn red" data-v="A">🎢 놀이공원</button><button class="pbtn blue" data-v="B">🔭 과학관</button></div>`;
+    P.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{R.vote=b.dataset.v;R.mode="guess";renderPlay();});return;}
+  if(R.mode==="guess"){const V=SIDE[R.vote];
+    P.innerHTML=top+`<div class="center"><p class="big">${V.e} ${V.n}!</p><p style="margin:0;word-break:keep-all">우리 반 25명 가운데, 나처럼 <b>${jo(V.n,"을","를")}</b> 고를 친구는 얼마나 될 것 같나요?</p></div><div class="opts">${GUESS.map((g,i)=>`<button class="pbtn" data-g="${i}" style="text-align:left">${g}</button>`).join("")}</div>`;
+    P.querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>{R.guess=+b.dataset.g;R.mode="end";renderPlay();});return;}
+  if(R.mode==="revote"){const V=SIDE[R1.vote],O=SIDE[other(R1.vote)];
+    P.innerHTML=top+`<div class="center"><p class="big">🗳️ 다시 투표한다면?</p><p style="margin:0;word-break:keep-all">어제는 ${V.e} ${jo(V.n,"을","를")} 골랐어요.</p></div><div class="opts"><button class="pbtn" data-r="0" style="text-align:left">그대로 ${V.e} ${V.n}</button><button class="pbtn" data-r="1" style="text-align:left">${O.e} ${O.n}으로 바꿀래요</button><button class="pbtn" data-r="2" style="text-align:left">더 알아봐야겠어요</button></div>`;
+    P.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{R.revote=+b.dataset.r;R.mode="end";renderPlay();});return;}
   if(R.mode==="end"){
-    const head=R.end==="bed"?"가족: “이제 잘 시간이야!”":R.hwAt<=120?"숙제 끝! 🎉":"숙제 끝… 늦었어요";
-    const sub=R.end==="bed"?`숙제는 ${R.hw}/40분밖에 못 했어요.`:`${fmt(R.hwAt)}에 독서록을 다 썼어요.`;
-    P.innerHTML=`<div class="top"><b>오늘 저녁 끝</b><span>${fmt(R.t)}</span></div><div class="center"><p class="big">${head}</p><p style="margin:0">${sub}</p></div><div class="pbtns" style="grid-template-columns:1fr"><button class="pbtn go" id="bEnd">${R.n===1?"내 화면 돌아보기 ▶":"두 저녁 비교하기 ▶"}</button></div>`;
-    $("bEnd").onclick=()=>{if(R.n===1){done.add(2);p3=0;ans3=null;show(3);}else{show(4);}};}}
-$("offBtn").onclick=()=>{tryOff();renderPlay();};
+    P.innerHTML=top+`<div class="center"><p class="big">${R.n===1?"투표 준비 끝!":"다 봤어요!"}</p><p style="margin:0">${R.n===1?"내일 아침 결과가 나와요.":"어제와 오늘의 화면을 견줘 봐요."}</p></div><div class="pbtns" style="grid-template-columns:1fr"><button class="pbtn go" id="bEnd">${R.n===1?"다음 날 아침 ▶":"두 화면 비교하기 ▶"}</button></div>`;
+    $("bEnd").onclick=()=>{if(R.n===1){done.add(2);p3=0;ans3=null;show(3);}else show(4);};}}
 
-/* ---------- 3단계: 나의 화면 ---------- */
+/* ---------- 3단계: 다음 날 아침 ---------- */
 let p3=0,ans3=null;
-function info(Rx){const tv=Rx.views.filter(v=>v.kind==="topic"),ts=a=>new Set(a.map(v=>v.topic)).size,ops=Rx.views.filter(v=>v.kind==="op");
-  return {f5:ts(tv.slice(0,5)),l5:ts(tv.slice(-5)),top:topOf(Rx),ops:ops.length,same:ops.filter(v=>v.side===side).length,loops:Rx.onemore+Rx.returns,n:Rx.views.filter(v=>v.act!=="vote").length};}
-function sky(){ // 하늘이의 저녁 (내가 덜 본 주제를 좋아하고, 반대 의견을 고름)
-  const pool=["game","dance","cook","art"].filter(k=>k!==topOf(R1));const hk=pool.reduce((a,b)=>R1.w[b]<R1.w[a]?b:a);const o=other(side);
-  const vs=[];let t=0;const push=(kind,topic,s,act,after)=>{const len=kind==="vote"?0:kind==="op"?2:3;vs.push({kind,topic,side:s,act,at:t,after,title:""});t+=act==="skip"?1:act==="vote"?1:len;};
-  push("topic","animal",null,"full");push("topic","soccer",null,"skip");push("vote",null,o,"vote");push("topic","sci",null,"skip");
-  for(let i=4;t<170;i++){const af=t>=30;if((i-1)%3===0)push("op",null,o,"full",af);else if(i===5||i===8)push("topic",i===5?"cook":"dance",null,"skip",af);else push("topic",hk,null,i%4===0?"auto":"full",af);}
-  return {hk,o,vs};}
-function loopSvg(nodes,center){const cx=190,cy=150,rx=118,ry=96,pos=[[cx,cy-ry],[cx+rx,cy],[cx,cy+ry],[cx-rx,cy]];
-  let s=`<svg class="loop" viewBox="0 0 380 300" role="img" aria-label="돌고 도는 원"><defs><marker id="ah" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="#b23a48"/></marker></defs>`;
-  for(let i=0;i<4;i++){const a=(i*90-90+22)*Math.PI/180,b=((i+1)*90-90-22)*Math.PI/180;
-    s+=`<path d="M${cx+rx*Math.cos(a)} ${cy+ry*Math.sin(a)} A${rx} ${ry} 0 0 1 ${cx+rx*Math.cos(b)} ${cy+ry*Math.sin(b)}" fill="none" stroke="#b23a48" stroke-width="2.4" marker-end="url(#ah)"/>`;}
-  nodes.forEach((n,i)=>{const [x,y]=pos[i],w=128,h=n.length*19+14;s+=`<rect x="${x-w/2}" y="${y-h/2}" width="${w}" height="${h}" rx="10" fill="#fffdf6" stroke="#b23a48" stroke-width="1.6"/>`
-    +n.map((l,j)=>`<text x="${x}" y="${y-h/2+21+j*19}" text-anchor="middle" font-size="14" fill="#2f3a2c" font-family="Gowun Dodum, sans-serif">${l}</text>`).join("");});
-  const cl=center.split(" ");s+=`<text x="${cx}" y="${cy-2}" text-anchor="middle" font-size="26" font-weight="700" fill="#b23a48" font-family="Gaegu, sans-serif">${cl[0]}</text>`+(cl[1]?`<text x="${cx}" y="${cy+20}" text-anchor="middle" font-size="16" fill="#b23a48" font-family="Gaegu, sans-serif">${cl.slice(1).join(" ")}</text>`:"")+`</svg>`;return s;}
-const Q3={q:"투표 결과에 놀랐다면, 누구 때문일까요?",o:[
-  {t:"추천 AI 때문이에요.",s:"내 편 의견만 골라서 보여 줬으니까요.",f:"맞아요, AI는 다른 의견을 한 번도 보여 주지 않았어요. 그런데 AI는 무엇을 보고 ‘내 편 의견’을 골랐을까요? 내가 투표 영상에서 고른 것, 끝까지 본 것, ♥를 누른 것이었어요."},
-  {t:"내 탓이에요.",s:"내가 좋아하는 것만 눌렀으니까요.",f:"내 선택이 AI를 가르친 건 맞아요. 하지만 좋아하는 영상을 보는 건 누구나 하는 일이에요. 다른 의견을 화면에서 빼 버린 건 내가 아니라 AI였지요."},
-  {t:"둘 다예요.",s:"AI는 내가 누른 것을 배우고, 나는 AI가 보여 준 것만 봤으니까요.",f:"AI와 나는 서로를 따라 하며 원을 돌았어요. 허영쟁이가 칭찬만 듣다가 다른 말은 들을 수 없게 된 것처럼요."}]};
-function render3(){const I=info(R1),P=[];
-  P.push(`<h2>내 화면은 어떻게 바뀌었을까요?</h2><p class="note">어제 저녁 내 화면에 나온 영상을 순서대로 늘어놓았어요.</p>${strip(R1.views)}${legend(R1.views)}
-    <p class="big3">처음 다섯 영상은 ${I.f5}가지 주제 → 마지막 다섯 영상은 ${I.l5}가지 주제</p>
-    <h3>추천 AI가 생각한 나</h3><div class="bars">${[...TK].sort((a,b)=>R1.w[b]-R1.w[a]).slice(0,4).map(k=>{const mx=R1.w[I.top];return `<div class="bar"><span>${T[k].n}</span><div class="tr"><i style="width:${R1.w[k]/mx*100}%;background:${T[k].c}"></i></div><span></span></div>`;}).join("")}</div>
-    <p class="why">추천 AI는 나를 <b>“${jo(T[I.top].n,"을","를")} 좋아하는 사람”</b>으로 알고 있어요. 내가 끝까지 본 영상과 ♥를 누른 영상을 배워서, 비슷한 영상을 점점 더 많이 보여 줬어요.</p>`);
-  const o=other(side),S=SIDE[side],O=SIDE[o];
-  P.push(`<h2>다음 날 아침, 체험학습 투표</h2>
-    <p class="big3">어제 내 화면에 나온 체험학습 이야기 영상은 ${I.ops}개. 모두 “${S.n}”${jo(S.n,"이","가").slice(S.n.length)} 좋다는 이야기였어요.</p>
-    <ul class="cmts" style="max-width:360px">${OPN[side].slice(0,3).map(x=>`<li style="background:var(--bg)">${x.c[0]}</li>`).join("")}</ul>
-    <div class="vote"><span class="lb">내 화면 속 의견</span><div class="tr"><span style="width:100%;background:${S.c}">${S.e} ${S.n} ${I.ops}개</span></div></div>
-    <div class="vote"><span class="lb">우리 반 투표 결과 (25명)</span><div class="tr"><span style="width:36%;background:${S.c}">${S.e} ${S.n} 9</span><span style="width:64%;background:${O.c}">${O.e} ${O.n} 16</span></div></div>
-    <p class="big3">그런데 투표에서는 ${jo(O.n,"이","가")} 이겼어요!</p>
-    <p class="why">내 화면에는 왜 다른 의견이 하나도 없었을까요? 같은 반 하늘이의 화면을 볼까요?</p>`);
-  const H=sky(),HT=T[H.hk];
-  P.push(`<h2>하늘이의 화면</h2><p class="note">하늘이도 어제 저녁 7시에 추천 별 앱을 켰어요. 투표 영상에서는 ‘${O.n}’을 골랐지요.</p>
-    <h3>나</h3>${strip(R1.views)}<h3>하늘</h3>${strip(H.vs)}${legend([...R1.views,...H.vs],false)}
-    <table class="tbl"><thead><tr><th></th><th>나</th><th>하늘</th></tr></thead><tbody>
-    <tr><th>가장 많이 본 주제</th><td>${T[I.top].n}</td><td>${HT.n}</td></tr>
-    <tr><th>화면 속 체험학습 이야기</th><td>모두 ${S.n}</td><td>모두 ${O.n}</td></tr>
-    <tr><th>앱을 끈 시각</th><td>${R1.offAt==null?"끄지 않았어요":fmt(R1.offAt)}</td><td>끄지 못했어요</td></tr>
-    <tr><th>‘이것만 보고’·알림으로 다시 본 횟수</th><td>${I.loops}번</td><td>5번</td></tr>
-    <tr><th>숙제</th><td>${hwText(R1)}</td><td>못 다 했어요 (10/40분)</td></tr></tbody></table>
-    <p class="big3">같은 앱, 같은 저녁인데 둘은 전혀 다른 화면을 봤어요. 하늘이는 “다들 ${jo(O.n,"이래!","래!")}” 하고 믿고 있었지요.</p>`);
-  let loop;
-  if(I.loops>0)loop=`<p class="note">어제 저녁 나는 이렇게 돌았어요.</p>${loopSvg([["앱을 끄려고 했어요",`(${fmt(R1.tried)})`],R1.onemore>0?["다음 영상이","곧 시작된대요"]:["숙제하는데","알림이 왔어요"],["‘이것만 보고…’","다시 봤어요"],["숙제가","자꾸 밀려요"]],`${I.loops}번 돌았어요`)}`;
-  else if(R1.tried!=null)loop=`<p class="big3">나는 ${fmt(R1.tried)}에 앱을 끄고 원을 끊었어요! 하늘이는 이렇게 돌았대요.</p>${loopSvg([["앱을 끄려고 했어요"],["다음 영상이","곧 시작된대요"],["‘이것만 보고…’","다시 봤어요"],["알림이 와서","또 열었어요"]],"하늘이는 5번 돌았어요")}<p class="note">나는 어떻게 원을 끊을 수 있었나요? 진짜 저녁에도 그럴 수 있을까요?</p>`;
-  else loop=`<p class="note">나는 한 번도 앱을 끄려고 하지 않았어요.</p>${loopSvg([["재밌어서 봐요"],["다음 영상이","저절로 나와요"],["또 재밌어요"],["시간이","흘러가요"]],"10시까지 계속")}`;
-  P.push(`<h2>돌고 도는 원</h2>${loop}<p class="why">술꾼은 부끄러운 것을 잊으려고 마시고, 마시는 게 부끄러워서 또 마셨지요. 워크북 [활동 2]에서 술 대신 ‘AI’를 넣어 원을 이어 봐요.</p>`);
+function cnt(vs,s){return vs.filter(v=>v.f===s).length;}
+function sky(){ // 하늘이: 나와 반대쪽으로 기운 화면
+  const me=pred(R1)||R1.vote,o=other(me);const ids=["a1","b1","b5","a5"];
+  const favO=CARDS.filter(c=>c.f===o&&!ids.includes(c.id)).map(c=>c.id);
+  const seq=[...ids,...favO.filter(id=>!byId(id).news).slice(0,4),favO.find(id=>byId(id).news),...favO.filter(id=>!byId(id).news).slice(4)].filter(Boolean).slice(0,12);
+  while(seq.length<12)seq.push(seq[seq.length-1]);
+  return {o,vs:seq.map((id,i)=>({...byId(id),act:i<4&&byId(id).f!==o?"skip":"full"}))};}
+const Q3={q:"‘다들 나처럼 생각할 거야’라고 느끼게 된 까닭은 무엇일까요?",o:[
+  {t:"추천 AI 때문이에요.",s:"내 편 영상과 칭찬 댓글만 골라 보여 줬으니까요.",f:"맞아요. 그런데 추천 AI는 무엇을 보고 ‘내 편’을 알아챘을까요? 내가 끝까지 본 영상과 ♥를 누른 영상이었어요."},
+  {t:"내 탓이에요.",s:"내가 좋아하는 것만 눌렀으니까요.",f:"내 선택이 추천 AI를 가르친 건 맞아요. 하지만 좋아하는 영상을 보는 건 누구나 하는 일이에요. 듣기 싫은 소식을 화면에서 뺀 건 내가 아니라 추천 AI였지요."},
+  {t:"둘 다예요.",s:"추천 AI는 내가 누른 것을 배우고, 나는 추천 AI가 보여 준 것만 봤으니까요.",f:"추천 AI와 나는 서로를 따라 하며 한쪽으로 기울었어요. 허영쟁이가 칭찬만 듣다가 다른 말은 들을 수 없게 된 것처럼요."}]};
+function render3(){const P=[],vs=R1.views,X=R1.vote,Y=other(X),SX=SIDE[X],SY=SIDE[Y],b=pred(R1);
+  const f4=vs.slice(0,4),l4=vs.slice(-4),pr=vs.filter(v=>v.praise).length;
+  const guessMsg=`어젯밤 나는 우리 반에서 ${jo(SX.n,"을","를")} 고를 친구가 <b>${["거의 다","절반 넘게","절반쯤","절반보다 적게"][R1.guess]}</b>일 거라고 짐작했어요.`;
+  P.push(`<h2>다음 날 아침, 투표 결과</h2><p class="note">${guessMsg}</p>
+    <div class="vote"><span class="lb">우리 반 투표 결과 (25명)</span><div class="tr"><span style="width:48%;background:${SX.c}">${SX.e} ${SX.n} 12</span><span style="width:52%;background:${SY.c}">${SY.e} ${SY.n} 13</span></div></div>
+    <p class="big3">${R1.guess<=1?`실제로는 거의 반반이었어요. 나와 생각이 다른 친구가 13명이나 있었어요!`:R1.guess===2?`정말 거의 반반이었어요. 내 짐작이 맞았네요!`:`생각보다 많은 친구가 나와 같은 곳을 골랐어요.`}</p>
+    <h3>어젯밤 내 화면</h3>${strip(vs)}${LEGEND}
+    <div class="bars"><div class="bar"><span>처음 네 영상</span><div class="tr" style="display:flex"><i style="width:${cnt(f4,"A")*25}%;background:${SIDE.A.c}"></i><i style="width:${cnt(f4,"B")*25}%;background:${SIDE.B.c}"></i></div><span></span></div>
+      <div class="bar"><span>마지막 네 영상</span><div class="tr" style="display:flex"><i style="width:${cnt(l4,"A")*25}%;background:${SIDE.A.c}"></i><i style="width:${cnt(l4,"B")*25}%;background:${SIDE.B.c}"></i></div><span></span></div></div>
+    <p class="why">${b?`처음에는 두 곳 영상이 골고루 나왔는데, 갈수록 <b>${jo(SIDE[b].n,"이","가")} 좋아 보이는 영상</b>만 나왔어요. 댓글에도 “👏 네 생각이 정답!” 같은 칭찬이 ${pr}번 달렸어요.`:"내 화면은 끝까지 두 곳 영상이 골고루 나왔어요. 내가 두 곳 영상을 고르게 봐서, 추천 AI가 내 마음을 짐작하지 못했거든요."}</p>`);
+  const H=sky(),HO=SIDE[H.o];
+  P.push(`<h2>하늘이의 화면</h2><p class="note">같은 반 하늘이도 어젯밤 추천 별 앱으로 알아봤어요. 하늘이는 ${HO.e} ${jo(HO.n,"을","를")} 골랐어요.</p>
+    <h3>나</h3>${strip(vs)}<h3>하늘</h3>${strip(H.vs)}${LEGEND}
+    <ul class="cmts" style="max-width:360px">${PRAISE(H.o).slice(0,3).map(x=>`<li style="background:var(--bg)">하늘이 화면의 댓글: ${x}</li>`).join("")}</ul>
+    <p class="big3">하늘이도 “우리 반 거의 다 ${jo(HO.n,"을","를")} 고를 거야”라고 생각했대요.</p>
+    <p class="why">같은 앱으로 같은 저녁에 알아봤는데, 둘은 서로 다른 화면을 봤어요. 그리고 둘 다 ‘다들 내 생각과 같아’라고 믿었지요.</p>`);
+  const miss=CARDS.filter(c=>!R1.shown.includes(c.id)),hot=b?miss.find(c=>c.news===b):null,seenN=b?vs.find(v=>v.news&&v.news!==b):null;
+  P.push(`<h2>내 화면에서 빠진 영상</h2><p class="note">추천 별에는 영상이 ${CARDS.length}개 있었어요. 그중 ${miss.length}개는 내 화면에 한 번도 나오지 않았어요.</p>
+    ${(()=>{const ls=[...(hot?[hot]:[]),...miss.filter(c=>c!==hot&&(!b||c.f!==b)).slice(0,4)];return `<ul class="vlist">${ls.map(c=>`<li class="${c===hot?"hot":""}">${tile(c)}<span>${c.news?"<b>📢 소식</b> ":""}${c.t}</span></li>`).join("")}</ul>${miss.length>ls.length?`<p class="note">그 밖에 ${miss.length-ls.length}개가 더 있어요.</p>`:""}`;})()}
+    ${hot?`<p class="why"><b>“${hot.t}”</b>는 ${jo(SIDE[b].n,"을","를")} 좋아하는 나에게는 듣기 싫은 소식이에요. 추천 AI는 이 소식을 한 번도 보여 주지 않았어요.${seenN?` 그런데 반대로 <b>“${seenN.t}”</b>는 보여 줬지요.`:""}</p>`
+      :`<p class="why">두 장소의 소식은 모두 내 화면에 나오지 않았어요. 추천 AI는 소식이 나에게 반가울지 싫을지 몰라서 보여 주지 않았어요.</p>`}
+    <p class="note">허영쟁이가 칭찬하는 말만 들으려 한 것처럼, 추천 AI는 내가 듣고 싶어 할 말만 골라 들려줬어요.</p>`);
   P.push(`<h2>생각해 봐요</h2><p class="big3">${Q3.q}</p><div class="opts">${Q3.o.map((x,i)=>`<button class="opt" data-q="${i}" aria-pressed="${ans3===i}">${x.t}<small>${x.s}</small></button>`).join("")}</div>
-    ${ans3==null?"":`<p class="why">${Q3.o[ans3].f}</p><p class="note">이 원은 어디에서 끊을 수 있을까요? 추천 별의 설정을 바꿔서 같은 저녁을 다시 보내 봐요.</p><div class="row"><button class="btn primary" id="go4">▶ 더 해 보기: 설정 바꾸기</button></div>`}`);
+    ${ans3==null?"":`<p class="why">${Q3.o[ans3].f}</p><p class="note">추천 별의 설정을 바꾸면 내 화면이 달라질까요?</p><div class="row"><button class="btn primary" id="go4">▶ 더 해 보기: 설정 바꾸기</button></div>`}`);
   $("r3").innerHTML=P[p3];$("dots3").textContent=`${p3+1} / ${P.length}`;$("prev3").disabled=p3===0;$("next3").hidden=p3===P.length-1;
-  $("r3").querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>{ans3=+b.dataset.q;render3();});
+  $("r3").querySelectorAll("[data-q]").forEach(x=>x.onclick=()=>{ans3=+x.dataset.q;render3();});
   if($("go4"))$("go4").onclick=()=>{done.add(3);R2=null;show(4);};}
 $("prev3").onclick=()=>{if(p3>0){p3--;render3();scrollTop();}};
 $("next3").onclick=()=>{p3++;render3();scrollTop();};
 
 /* ---------- 4단계: 설정 바꾸기 ---------- */
-const SET=[{k:"mix",t:"🔀 다른 주제·다른 의견도 섞어 보여 주기",s:"내가 잘 안 보던 주제와 반대 의견도 가끔 보여 줘요."},
-  {k:"noAuto",t:"⏯ 자동 재생 끄기",s:"가만히 있어도 다음 영상이 저절로 나오지 않아요."},
-  {k:"noPing",t:"🔕 숙제할 때 알림 끄기",s:"앱을 끄면 알림이 오지 않아요."},
-  {k:"brk",t:"⏰ 30분마다 쉬자고 알려 주기",s:"30분마다 ‘잠깐 쉴까요?’ 하고 물어요."}];
-function render4(){const cmp=!!(R2&&R2.end);$("set4").hidden=cmp;$("cmp4").hidden=!cmp;
+const SET=[{k:"mix",t:"🔀 다른 의견도 섞어 보여 주기",s:"내가 좋아하지 않을 것 같은 쪽 영상도 번갈아 보여 줘요."},
+  {k:"news",t:"📢 듣기 싫어도 중요한 소식은 꼭 보여 주기",s:"내가 좋아하는 쪽에 불리한 소식이라도 빼지 않아요."}];
+const REV=["그대로 골랐어요","바꾸기로 했어요","더 알아보기로 했어요"];
+function render4(){const cmp=!!(R2&&R2.mode==="end");$("set4").hidden=cmp;$("cmp4").hidden=!cmp;
   if(!cmp){$("setOpts").innerHTML=SET.map(o=>`<button class="opt" data-k="${o.k}" aria-pressed="${settings[o.k]}">${o.t}<small>${o.s}</small></button>`).join("");
     $("setOpts").querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{settings[b.dataset.k]=!settings[b.dataset.k];b.setAttribute("aria-pressed",String(settings[b.dataset.k]));});return;}
-  const A=info(R1),B=info(R2),S=SIDE[side],O=SIDE[other(side)];
-  const opTxt=Rx=>{const ops=Rx.views.filter(v=>v.kind==="op"),s=ops.filter(v=>v.side===side).length;return `${S.n} ${s}개 · ${O.n} ${ops.length-s}개`;};
-  const on=SET.filter(o=>R2.set[o.k]).map(o=>o.t.split(" ")[0]).join(" ")||"없음";
+  const b=pred(R1)||R1.vote,o=other(b),S=SIDE[b],O=SIDE[o];
+  const row=Rx=>{const v=Rx.views,bad=v.some(x=>x.news===b);return [cnt(v,b),cnt(v,o),v.filter(x=>x.praise).length,bad?"봤어요":"못 봤어요"];};
+  const A=row(R1),B=row(R2),on=SET.filter(x=>R2.set[x.k]).map(x=>x.t.split(" ")[0]).join(" ")||"없음";
   const notes=[];
-  if(R2.set.mix)notes.push(`섞어 보기를 켜니 ${O.n} 이야기도 ${R2.views.filter(v=>v.kind==="op"&&v.side!==side).length}개 보였어요.`);
-  if(R2.set.noAuto)notes.push("자동 재생을 끄니 가만히 있어도 영상이 저절로 넘어가지 않았어요.");
-  if(R2.set.noPing)notes.push("알림을 끄니 숙제하는 동안 부르는 소리가 없었어요.");
-  if(R2.set.brk)notes.push("30분마다 쉬자는 알림이 시간을 알려 줬어요.");
-  if(!notes.length)notes.push("아무 설정도 켜지 않았어요. 설정을 바꿔서 한 번 더 해 볼까요?");
-  $("cmp4").innerHTML=`<h2>두 저녁 비교하기</h2><h3>첫 번째 저녁</h3>${strip(R1.views)}<h3>두 번째 저녁 <span class="note">(켠 설정: ${on})</span></h3>${strip(R2.views)}${legend([...R1.views,...R2.views])}
-   <table class="tbl"><thead><tr><th></th><th>첫 번째</th><th>두 번째</th></tr></thead><tbody>
-   <tr><th>마지막 다섯 영상의 주제</th><td>${A.l5}가지</td><td>${B.l5}가지</td></tr>
-   <tr><th>화면 속 체험학습 이야기</th><td>${opTxt(R1)}</td><td>${opTxt(R2)}</td></tr>
-   <tr><th>앱을 끈 시각</th><td>${R1.offAt==null?"끄지 않았어요":fmt(R1.offAt)}</td><td>${R2.offAt==null?"끄지 않았어요":fmt(R2.offAt)}</td></tr>
-   <tr><th>‘이것만 보고’·알림으로 다시 본 횟수</th><td>${A.loops}번</td><td>${B.loops}번</td></tr>
-   <tr><th>숙제</th><td>${hwText(R1)}</td><td>${hwText(R2)}</td></tr></tbody></table>
-   <p class="why">${notes.join(" ")}</p>
-   <p class="closing">추천 AI는 내가 누른 것을 배워요.<br>무엇을 볼지, 언제 끌지는 내가 정해요.</p>
-   <p class="note">워크북 [활동 3] 우리 반 AI 사용 약속과 [활동 4] ‘우리 반 AI의 입마개는 (    )이다.’로 이어 가요.</p>
+  if(R2.set.mix)notes.push(`섞어 보기를 켜니 ${jo(O.n,"이","가")} 좋아 보이는 영상도 ${B[1]}개 나왔어요.`);
+  if(R2.set.news)notes.push(B[3]==="봤어요"?`중요한 소식을 켜니 ${S.n}에 불리한 소식도 나왔어요.`:"중요한 소식을 켰지만, 남은 소식이 없었어요.");
+  if(!notes.length)notes.push(`아무 설정도 켜지 않으니 추천 AI는 여전히 ${jo(S.n,"이","가")} 좋아 보이는 영상을 주로 골라 줬어요.`);
+  $("cmp4").innerHTML=`<h2>두 화면 비교하기</h2><h3>어젯밤</h3>${strip(R1.views)}<h3>설정을 바꾼 뒤 <span class="note">(켠 설정: ${on})</span></h3>${strip(R2.views)}${LEGEND}
+   <table class="tbl"><thead><tr><th></th><th>어젯밤 (12개)</th><th>설정 뒤 (8개)</th></tr></thead><tbody>
+   <tr><th>${jo(S.n,"이","가")} 좋아 보이는 영상</th><td>${A[0]}개</td><td>${B[0]}개</td></tr>
+   <tr><th>${jo(O.n,"이","가")} 좋아 보이는 영상</th><td>${A[1]}개</td><td>${B[1]}개</td></tr>
+   <tr><th>칭찬 댓글이 달린 영상</th><td>${A[2]}개</td><td>${B[2]}개</td></tr>
+   <tr><th>${S.n}에 불리한 소식</th><td>${A[3]}</td><td>${B[3]}</td></tr></tbody></table>
+   <p class="why">${notes.join(" ")} 다시 투표한다면? 나는 <b>${REV[R2.revote]}</b>.</p>
+   <p class="closing">추천 AI는 내가 누른 것을 배워요.<br>듣기 싫어도 필요한 말은 내가 찾아서 들어요.</p>
+   <p class="note">워크북 [활동 1]의 ‘칭찬만 원하는 허영쟁이’ 줄에서, 나와 다른 사람에게 생길 문제를 적어 봐요.</p>
    <div class="row"><button class="btn" id="again4">설정 바꿔서 다시 해 보기</button></div>`;
   $("again4").onclick=()=>{R2=null;render4();scrollTop();};}
 $("startEve2").onclick=()=>{done.add(4);startIntro(2);};
 
 /* ---------- 공통 ---------- */
 function scrollTop(){if(!instant)window.scrollTo({top:0,behavior:reduce?"auto":"smooth"});}
-function show(n){cur=n;clearT();
+function show(n){cur=n;
   for(const i of [1,2,3,4]){$("step"+i).hidden=i!==n;const t=$("tab"+i);if(i===n)t.setAttribute("aria-current","step");else t.removeAttribute("aria-current");t.classList.toggle("done",i!==n&&done.has(i));}
   if(n===1)drawComic();if(n===3)render3();if(n===4)render4();scrollTop();}
-function resetAll(){clearT();side=null;R=R1=R2=null;done=new Set();p1=0;p3=0;ans3=null;settings={mix:false,noAuto:false,noPing:false,brk:false};show(1);}
+function resetAll(){R=R1=R2=null;done=new Set();p1=0;p3=0;ans3=null;settings={mix:false,news:false};show(1);}
 $("reset").onclick=resetAll;
 
 /* 선생님 바로가기: 학생용 주소(github.io)에서는 ?teacher 를 붙였을 때만 보여요 */
 if(!/github\.io$/.test(location.hostname)||/teacher/.test(location.search))$("tbar").hidden=false;
-function simEve(){instant=true;R1=R=newRound(1,{mix:false,noAuto:false,noPing:false,brk:false});side=null;let off=0,since=0,g=0;
-  while(R.mode!=="end"&&g++<800){
-    if(R.mode==="feed"){if(!R.cur)R.cur=makeCard();const c=R.cur;
-      if(R.t>=30&&(off===0||since>=3)){off++;since=0;tryOff();continue;}
-      if(c.kind==="vote")act("vote","A");
-      else if(c.kind==="op")act("full");
-      else if(c.topic==="soccer"){c.like=true;act("full");}
-      else if(c.topic==="animal"&&R.views.length<3)act("full");
-      else act(R.views.length%5===0?"auto":"skip");
-      since++;checkTime();}
-    else if(R.mode==="onemore"){if(R.onemore<2)oneMore(false);else goHw();}
-    else if(R.mode==="hw")hwTick();
-    else if(R.mode==="ping"){if(R.returns===0)lookPing();else R.mode="hw";}
-    else R.mode="feed";}
-  instant=false;}
-document.querySelectorAll("#tbar [data-j]").forEach(b=>b.onclick=()=>{const j=b.dataset.j;clearT();
+function simEve(){instant=true;R1=R=newRound(1,{mix:false,news:false});
+  while(R.mode==="feed"){deal();const c=R.cur;if(c.f==="A"){c.like=R.views.length<6;act("full");}else act("skip");}
+  R.vote="A";R.guess=0;R.mode="end";instant=false;}
+document.querySelectorAll("#tbar [data-j]").forEach(b=>b.onclick=()=>{const j=b.dataset.j;
   if(j==="1"){resetAll();return;}
   if(j==="2"){done.add(1);startIntro(1);return;}
   if(j==="3"){simEve();done.add(1);done.add(2);p3=0;ans3=null;show(3);return;}
-  if(j==="4"){if(!R1||!R1.end)simEve();done.add(1);done.add(2);done.add(3);R2=null;show(4);}});
-document.addEventListener("visibilitychange",()=>{if(document.hidden)clearT();else if(cur===2&&R&&!$("play2").hidden)renderPlay();});
+  if(j==="4"){if(!R1||R1.mode!=="end")simEve();done.add(1);done.add(2);done.add(3);R2=null;show(4);}});
 show(1);
 
 </script>
