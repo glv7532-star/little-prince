@@ -404,6 +404,8 @@ function baobabArt(st){
    +[[-52,-118,42,24,G1],[50,-120,42,24,G2],[0,-146,50,28,G1],[-20,-108,26,14,G2],[24,-104,24,13,G1]].map(([x,y,rx,ry,c])=>`<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="${c}"/>`).join("");
 }
 
+/* 우리 반 교실 위치: 교실을 옮기면 여기만 고치면 돼요. wrong은 초대장에 잘못 적힌 층이에요. */
+const ROOM={cls:"6학년 2반",bldg:"본관",floor:4,wrong:3};
 /* 화산 (원점: 땅) st 0 깨끗함, 1 연기 조금, 2 짙은 연기, 3 폭발 */
 function volcanoArt(st){
   let s="";
@@ -443,9 +445,9 @@ function presScene(fx){
 function inviteArt(fx){
   return `<rect x="4" y="4" width="312" height="172" rx="14" fill="#FFF3D1" stroke="#E9A92C" stroke-width="3"/>
   ${[[30,28],[290,30],[28,150],[292,152]].map(([x,y])=>`<path d="M${x} ${y-8} l2.4 5.6 5.6 2.4 -5.6 2.4 -2.4 5.6 -2.4 -5.6 -5.6 -2.4 5.6 -2.4Z" fill="#E9A92C"/>`).join("")}
-  <text x="160" y="44" text-anchor="middle" font-size="17" font-weight="700" fill="#C8463F" font-family="Gaegu, Gowun Dodum, sans-serif">6학년 2반 나눔 장터에 놀러 오세요!</text>
+  <text x="160" y="44" text-anchor="middle" font-size="17" font-weight="700" fill="#C8463F" font-family="Gaegu, Gowun Dodum, sans-serif">${ROOM.cls} 나눔 장터에 놀러 오세요!</text>
   <text x="36" y="88" font-size="14" fill="#2f3a2c" font-family="Gowun Dodum, sans-serif">📅 11월 ${fx.date?"12일 목요일":"13일 금요일"} 점심시간</text>
-  <text x="36" y="116" font-size="14" fill="#2f3a2c" font-family="Gowun Dodum, sans-serif">📍 본관 ${fx.floor?"3층":"4층"} 6학년 2반 교실</text>
+  <text x="36" y="116" font-size="14" fill="#2f3a2c" font-family="Gowun Dodum, sans-serif">📍 ${ROOM.bldg} ${fx.floor?ROOM.floor:ROOM.wrong}층 ${ROOM.cls} 교실</text>
   <text x="36" y="144" font-size="14" fill="#2f3a2c" font-family="Gowun Dodum, sans-serif">🎁 안 쓰는 물건을 서로 나눠요</text>
   <g transform="translate(276 142) scale(.7)"><rect x="-22" y="-16" width="44" height="34" rx="4" fill="#E07A34"/><rect x="-24" y="-22" width="48" height="10" rx="3" fill="#C8463F"/><rect x="-3" y="-22" width="6" height="40" fill="#F6CB5E"/></g>`;}
 function frontKid(x,y,i,s=1){return `<g transform="translate(${x} ${y}) scale(${s})"><rect x="-11" y="-30" width="22" height="30" rx="9" fill="${SHIRT[i%6]}"/><rect x="-8" y="-4" width="6" height="14" rx="2" fill="#3B3355"/><rect x="2" y="-4" width="6" height="14" rx="2" fill="#3B3355"/><circle cx="0" cy="-42" r="12" fill="#F3D2B3"/><path d="M-12 -44 Q-12 -56 0 -56 Q12 -56 12 -44 Q4 -50 -12 -44Z" fill="${HAIR[i%6]}"/><circle cx="-4" cy="-41" r="1.6" fill="#3A2A22"/><circle cx="4" cy="-41" r="1.6" fill="#3A2A22"/></g>`;}
@@ -565,7 +567,7 @@ const SCN={
   inv:{name:"학급 나눔 장터 초대장",e:"💌",sub:"다른 반 친구들을 초대해요",day:"장터 날",
     intro:"곧 우리 반 나눔 장터가 열려요. 다른 반에 보낼 초대장을 만들어서 반 대화방에 올리고 물어봤어요. “어때?”",
     praise:["초대장 귀엽다!","글씨체 예쁘다","꼭 갈게 🎉","그림 최고!"],
-    need:[{id:"date",who:"지우",t:"장터는 목요일인데 금요일이라고 적혀 있어",fix:"날짜를 11월 12일 목요일로 고치기"},{id:"floor",who:"하준",t:"우리 반은 3층인데 4층이라고 적혀 있어",fix:"장소를 3층으로 고치기"}]}};
+    need:[{id:"date",who:"지우",t:"장터는 목요일인데 금요일이라고 적혀 있어",fix:"날짜를 11월 12일 목요일로 고치기"},{id:"floor",who:"하준",t:`우리 반은 ${ROOM.floor}층인데 ${ROOM.wrong}층이라고 적혀 있어`,fix:`장소를 ${ROOM.floor}층으로 고치기`}]}};
 const PW=["하늘","도윤","수아","예준"];
 let S3={},sc=null;
 function aiShows(){return Math.min(2,G?G.need:0);}
@@ -580,31 +582,41 @@ function render3(){const C=SCN[sc],st=S3[sc],cm=cmtsOf(sc),P=$("play3");$("pick3
   const shownNeeds=cm.filter(c=>c.need&&c.shown);
   if(st.st==="intro"){P.innerHTML=`<h2>${C.e} ${C.name}</h2><p style="margin:0;word-break:keep-all">${C.intro}</p>${preview(sc,{})}<div class="row"><button class="btn primary" id="b3">💬 댓글 확인하기</button></div>`;
     $("b3").onclick=()=>{st.st="cm";render3();};return;}
-  if(st.st==="cm"){P.innerHTML=`<h2>친구들의 댓글</h2><div class="chat"><div class="top"><b>${sc==="pres"?"우리 모둠 대화방":"6학년 2반 대화방"}</b><span>추천 AI가 고른 댓글</span></div>${cm.filter(c=>c.shown).map(c=>`<div class="bub"><small>${c.who}</small>${c.t}</div>`).join("")}</div>
+  if(st.st==="cm"){P.innerHTML=`<h2>친구들의 댓글</h2><div class="chat"><div class="top"><b>${sc==="pres"?"우리 모둠 대화방":`${ROOM.cls} 대화방`}</b><span>추천 AI가 고른 댓글</span></div>${cm.filter(c=>c.shown).map(c=>`<div class="bub"><small>${c.who}</small>${c.t}</div>`).join("")}</div>
       <div class="row"><button class="btn primary" id="b3">다음 ▶</button></div>`;
     $("b3").onclick=()=>{st.st="fix";render3();};return;}
   if(st.st==="fix"){P.innerHTML=`<h2>${C.day} 전에 고칠 곳이 있을까요?</h2>${shownNeeds.length?`<p class="note">댓글을 보고 고칠 곳을 골라요.</p><div class="fixes">${shownNeeds.map(c=>`<button class="opt" data-f="${c.id}" aria-pressed="${!!st.fx[c.id]}">${c.fix}<small>${c.who}: “${c.t}”</small></button>`).join("")}</div>`:`<p class="why">댓글이 모두 칭찬이에요. 고칠 곳은 없어 보여요!</p>`}
       <div class="row"><button class="btn primary" id="b3">${C.day}로 ▶</button></div>`;
     P.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{st.fx[b.dataset.f]=!st.fx[b.dataset.f];b.setAttribute("aria-pressed",String(st.fx[b.dataset.f]));});
     $("b3").onclick=()=>{st.st="result";render3();scrollTop();};return;}
-  if(st.st==="result"){const fx=st.fx;let sv,lines=[];
+  if(st.st==="result"){const fx=st.fx,probs=C.need.filter(n=>!fx[n.id]).length;let sv,lines=[];
     if(sc==="pres"){let s=presScene(fx);
       if(!fx.text)s+=sbub(222,150,150,["글씨가 안 보여요!"],334,184,"#C8463F",15,"right");
+      else if(!fx.photo)s+=sbub(236,150,140,["글씨 잘 보인다!"],334,184,"#2f7a3d",15,"right");
       if(!fx.photo)s+=sbub(14,146,168,["어? 사진이 안 나와요"],62,182,"#C8463F",15,"left")+`<text x="200" y="172" text-anchor="middle" font-size="16" font-weight="700" fill="#C8463F" font-family="Gaegu, sans-serif">ㅋㅋㅋ</text>`;
-      if(fx.text&&fx.photo)s+=sbub(110,150,176,["와, 잘 보인다! 👏"],198,206,"#2f7a3d",15);
-      sv=s;if(!fx.text)lines.push("뒷자리 친구들이 “글씨가 안 보여요!” 하고 외쳤어요.");if(!fx.photo)lines.push("마지막 쪽에서 사진 대신 빈 상자가 나와서 다들 웃음이 터졌어요.");if(!lines.length)lines.push("발표가 술술 끝났어요. 모두 박수를 쳤어요!");}
+      else if(!fx.text)s+=sbub(14,146,140,["사진 예쁘다!"],62,182,"#2f7a3d",15,"left");
+      if(!probs)s+=sbub(110,150,176,["와, 잘 보인다! 👏"],198,206,"#2f7a3d",15);
+      sv=s;
+      if(probs===1)lines.push(fx.text?"글씨는 뒷자리까지 잘 보였어요. 그런데 마지막 쪽에서 사진 대신 빈 상자가 나와서 웃음이 터졌어요.":"사진은 잘 나왔어요. 그런데 뒷자리 친구들이 “글씨가 안 보여요!” 하고 외쳤어요.");
+      else if(probs===2)lines.push("뒷자리 친구들이 “글씨가 안 보여요!” 하고 외쳤어요. 마지막 쪽에서는 사진 대신 빈 상자가 나와서 다들 웃음이 터졌어요.");
+      else lines.push("발표가 술술 끝났어요. 모두 박수를 쳤어요!");}
     else{const n=!fx.date?1:!fx.floor?3:6;let s=marketScene(n);
       s+=sbub(208,60,180,[n>=6?"손님이 북적북적!":n>=3?"생각보다 조용하네…":"왜 아무도 안 오지…?"],214,112,n>=6?"#2f7a3d":"#C8463F",16,"left");
-      sv=s;if(!fx.date)lines.push("목요일 장터에는 손님이 거의 오지 않았어요. 금요일에 온 친구들은 빈 교실 앞에서 돌아갔대요.");if(!fx.floor)lines.push("4층에서 우리 반을 찾아 헤맨 친구들도 많았대요.");if(!lines.length)lines.push("장터가 손님으로 북적였어요!");}
-    P.innerHTML=`<h2>${C.day}</h2><svg class="scene" viewBox="0 0 396 250" role="img" aria-label="${C.day} 모습">${frame(sv,250,false)}</svg><p class="big3">${lines.join(" ")}</p>
-      <div class="row"><button class="btn primary" id="b3">${shownNeeds.length===2&&Object.values(fx).filter(Boolean).length===2?"댓글 다시 보기 ▶":"왜 이렇게 됐을까? ▶"}</button></div>`;
+      if(fx.date&&!fx.floor)s+=sbub(8,128,150,[`${ROOM.wrong}층에서 한참 찾았어!`],52,178,"#C8463F",14,"left");
+      sv=s;
+      if(probs===1)lines.push(fx.date?`날짜는 맞아서 손님이 오긴 왔어요. 그런데 ${ROOM.wrong}층에서 우리 반을 찾아 헤매다 돌아간 친구들이 많았대요.`:"장소는 맞았지만, 목요일 장터에는 손님이 거의 오지 않았어요. 금요일에 온 친구들은 빈 교실 앞에서 돌아갔대요.");
+      else if(probs===2)lines.push(`목요일 장터에는 손님이 거의 오지 않았어요. 금요일에 온 친구들은 빈 교실 앞에서 돌아갔고, ${ROOM.wrong}층에서 헤맨 친구들도 많았대요.`);
+      else lines.push("장터가 손님으로 북적였어요!");}
+    const tt=probs===0?"대성공!":probs===1?"반쯤 성공":"아쉬운 하루";
+    P.innerHTML=`<h2>${C.day} · ${tt}</h2><svg class="scene" viewBox="0 0 396 250" role="img" aria-label="${C.day} 모습">${frame(sv,250,false)}</svg><p class="big3">${lines.join(" ")}</p>
+      <div class="row"><button class="btn primary" id="b3">${probs?"왜 이렇게 됐을까? ▶":"댓글 다시 보기 ▶"}</button></div>`;
     $("b3").onclick=()=>{st.st="reveal";done.add(3);render3();scrollTop();};return;}
   if(st.st==="reveal"){const ns=aiShows(),hid=cm.filter(c=>!c.shown);
     const how=ns===0?"칭찬만 골라 보여 주기":ns===1?"꼭 필요한 말은 한 번만 보여 주기":"듣기 싫어도 꼭 필요한 말은 보여 주기";
     const other=Object.keys(SCN).find(k=>k!==sc&&!(S3[k]&&S3[k].st==="reveal"));
     P.innerHTML=`<h2>추천 AI가 숨긴 댓글</h2><div class="chat"><div class="top"><b>모든 댓글</b><span>숨긴 댓글 ${hid.length}개</span></div>${cm.map(c=>`<div class="bub ${c.shown?(c.need?"need":""):"hidden"}"><small>${c.who}${c.shown?"":" · 숨김"}</small>${c.t}</div>`).join("")}</div>
       <p class="why">이 휴대폰의 추천 AI는 <b>오늘 낮에 여러분이 허영쟁이에게 한 방식</b>을 그대로 배웠어요. 바로 <b>“${how}”</b>예요.</p>
-      <p class="big3">${hid.length?"내가 허영쟁이에게 한 일이 나에게 그대로 돌아왔어요.":"허영쟁이에게 꼭 필요한 말을 보여 준 덕분에, 내 추천 AI도 그렇게 배웠어요."}</p>
+      <p class="big3">${ns===0?"내가 허영쟁이에게 한 일이 나에게 그대로 돌아왔어요.":ns===1?"허영쟁이에게 꼭 필요한 말을 한 번만 보여 준 만큼, 내 추천 AI도 하나만 보여 주고 하나는 숨겼어요. 반만 들으니 반만 고칠 수 있었어요.":"허영쟁이에게 꼭 필요한 말을 보여 준 덕분에, 내 추천 AI도 그렇게 배웠어요."}</p>
       <div class="row">${other?`<button class="btn" id="bOther">${SCN[other].e} ${SCN[other].name}도 해 보기</button>`:""}<button class="btn primary" id="b4">생각해 봐요 ▶</button></div>`;
     if(other)$("bOther").onclick=()=>{sc=other;S3[sc]={st:"intro",fx:{}};render3();scrollTop();};
     $("b4").onclick=()=>show(4);}}
