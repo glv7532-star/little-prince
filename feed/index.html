@@ -178,6 +178,7 @@ html,body{overscroll-behavior-y:contain}
 .qtag{align-self:flex-start;font-size:.82rem;padding:2px 10px;border-radius:99px;background:var(--accent-bg);color:var(--accent);font-weight:700}
 .qbig{margin:0;font-family:var(--display);font-size:1.7rem;line-height:1.3;word-break:keep-all}
 @media (max-width:480px){.qbig{font-size:1.4rem}}
+.steps2{margin:0;padding-left:1.4em;display:flex;flex-direction:column;gap:6px;word-break:keep-all;font-size:1.02rem}
 </style>
 </head>
 <body>
@@ -709,7 +710,9 @@ function render4(){const N=5,dots=`<div class="qdots" aria-label="질문 ${p4+1}
   if(p4===0)h=`${tag(1)}<p class="qbig">듣기 좋은 말만 보여 주는 추천 AI,<br>누구에게 좋은 걸까요?</p>
     <div class="opts">${Q4.o.map((x,i)=>`<button class="opt" data-q="${i}" aria-pressed="${ans4===i}">${x.t}<small>${x.s}</small></button>`).join("")}</div>
     ${ans4==null?`<p class="note">하나를 골라 보세요.</p>`:`<p class="why">${Q4.o[ans4].f}</p>`}${nav(ans4!=null,"활동지에 까닭을 쓰고 다음 ▶")}`;
-  if(p4===1)h=`${tag(2)}<p class="qbig">내 휴대폰 속 추천 AI도<br>내가 좋아요를 누를 만한 것을 골라 보여 줘요.<br>내 화면에서는 어떤 말이 빠져 있을까요?</p>
+  if(p4===1)h=`${tag(2)}<p class="qbig">짝의 화면에는 있는데,<br>내 화면에는 없는 것은?</p>
+    <ol class="steps2"><li>내 휴대폰이나 태블릿 화면에 자주 뜨는 영상이나 글을 세 가지 적어요.</li><li>짝과 바꿔 봐요.</li><li>짝의 화면에는 자주 뜨는데 내 화면에는 잘 안 뜨는 것을 찾아요. 그게 내 추천 AI가 나에게 잘 보여 주지 않는 것일 수 있어요.</li></ol>
+    <p class="note">휴대폰이 없다면 집에서 보는 TV나 컴퓨터를 떠올려도 돼요.</p>${nav(true)}`;
     <p class="note">유튜브, 쇼츠, 게임, 쇼핑… 내가 자주 쓰는 앱을 떠올려 봐요.</p>${nav(true)}`;
   if(p4===2)h=`${tag(3)}<p class="qbig">이 프로그램도 누군가 설계했어요.<br>추천 별 회사와 선생님의 설계는<br>무엇이 다를까요?</p>
     <p style="margin:0;word-break:keep-all">사실 이 프로그램은 선생님이 만들었어요. 경고를 숨기면 화산이 터지도록, 내 휴대폰 AI가 내 방식을 따라 하도록 일부러 정해 두었지요.</p>
