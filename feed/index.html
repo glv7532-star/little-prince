@@ -174,7 +174,7 @@ html,body{overscroll-behavior-y:contain}
 </head>
 <body>
 <div class="wrap">
-  <div class="tbar" id="tbar" hidden><b>선생님 바로가기</b><button data-j="1">1단계</button><button data-j="2">2단계</button><button data-j="3a">3단계(칭찬만 배운 AI)</button><button data-j="3b">3단계(꼭 필요한 말도 배운 AI)</button><button data-j="4">4단계</button></div>
+  <div class="tbar" id="tbar" hidden><b>선생님 바로가기</b><button data-j="1">1단계</button><button data-j="2">2단계</button><button data-j="3a">3단계(칭찬만 배운 AI)</button><button data-j="3c">3단계(절반쯤 배운 AI)</button><button data-j="3b">3단계(꼭 필요한 말도 배운 AI)</button><button data-j="4">4단계</button></div>
   <header>
     <h1>보고 싶은 것만 보여 주는 별</h1>
     <p class="lead">허영쟁이는 칭찬하는 말만 듣고 싶어 했어요. 내가 허영쟁이 휴대폰 속 추천 AI가 되어, 허영쟁이에게 보여 줄 말을 골라 봐요. 그다음에는 어떤 일이 생길까요?</p>
@@ -668,12 +668,14 @@ function render3(){const C=SCN[sc],st=S3[sc],cm=cmtsOf(sc),P=$("play3");$("pick3
     P.innerHTML=`<h2>${C.day} · ${tt}</h2><svg class="scene" viewBox="0 0 396 250" role="img" aria-label="${C.day} 모습">${frame(sv,250,false)}</svg><p class="big3">${lines.join(" ")}</p>
       <div class="row"><button class="btn primary" id="b3">${probs?"왜 이렇게 됐을까? ▶":"댓글 다시 보기 ▶"}</button></div>`;
     $("b3").onclick=()=>{st.st="reveal";done.add(3);render3();scrollTop();};return;}
-  if(st.st==="reveal"){const ns=aiShows(),hid=cm.filter(c=>!c.shown);
+  if(st.st==="reveal"){const ns=aiShows(),hid=cm.filter(c=>!c.shown),ign=cm.filter(c=>c.need&&c.shown&&!st.fx[c.id]);
     const how=ns===0?"칭찬만 골라 보여 주기":ns===1?"꼭 필요한 말은 미루다가 가끔만 보여 주기":"듣기 싫어도 꼭 필요한 말은 일찍 보여 주기";
     const other=Object.keys(SCN).find(k=>k!==sc&&!(S3[k]&&S3[k].st==="reveal"));
-    P.innerHTML=`<h2>추천 AI가 숨긴 댓글</h2><div class="chat"><div class="top"><b>모든 댓글</b><span>숨긴 댓글 ${hid.length}개</span></div>${cm.map(c=>`<div class="bub ${c.shown?(c.need?"need":""):"hidden"}"><small>${c.who}${c.shown?"":" · 숨김"}</small>${c.t}</div>`).join("")}</div>
+    let msg=ns===0?"내가 허영쟁이에게 한 일이 나에게 그대로 돌아왔어요.":ns===1?(ign.length?"허영쟁이에게 꼭 필요한 말을 미루다가 가끔만 보여 준 만큼, 내 추천 AI도 하나만 보여 주고 하나는 숨겼어요.":"허영쟁이에게 꼭 필요한 말을 미루다가 가끔만 보여 준 만큼, 내 추천 AI도 하나만 보여 주고 하나는 숨겼어요. 반만 들으니 반만 고칠 수 있었어요."):(ign.length?"허영쟁이에게 꼭 필요한 말을 일찍 보여 준 덕분에, 내 추천 AI도 꼭 필요한 말을 모두 보여 줬어요.":"허영쟁이에게 꼭 필요한 말을 보여 준 덕분에, 내 추천 AI도 그렇게 배웠어요.");
+    if(ign.length)msg+=` 그런데 추천 AI가 보여 준 꼭 필요한 말 가운데 ${ign.length}개는 내가 고치지 않았어요. 꼭 필요한 말을 보여 주는 것까지가 추천 AI의 일이라면, 듣고 고치는 건 나의 몫이에요. 허영쟁이도 경고를 듣고 직접 고쳤지요.`;
+    P.innerHTML=`<h2>추천 AI가 숨긴 댓글</h2><div class="chat"><div class="top"><b>모든 댓글</b><span>숨긴 댓글 ${hid.length}개</span></div>${cm.map(c=>`<div class="bub ${c.shown?(c.need?"need":""):"hidden"}"><small>${c.who}${c.shown?(c.need&&!st.fx[c.id]?" · 보여 줬지만 고치지 않음":""):" · 숨김"}</small>${c.t}</div>`).join("")}</div>
       <p class="why">이 휴대폰의 추천 AI는 <b>오늘 낮에 여러분이 허영쟁이에게 한 방식</b>을 그대로 배웠어요. 바로 <b>“${how}”</b>예요.</p>
-      <p class="big3">${ns===0?"내가 허영쟁이에게 한 일이 나에게 그대로 돌아왔어요.":ns===1?"허영쟁이에게 꼭 필요한 말을 미루다가 가끔만 보여 준 만큼, 내 추천 AI도 하나만 보여 주고 하나는 숨겼어요. 반만 들으니 반만 고칠 수 있었어요.":"허영쟁이에게 꼭 필요한 말을 보여 준 덕분에, 내 추천 AI도 그렇게 배웠어요."}</p>
+      <p class="big3">${msg}</p>
       <div class="row">${other?`<button class="btn" id="bOther">${SCN[other].e} ${SCN[other].name}도 해 보기</button>`:""}<button class="btn primary" id="b4">생각해 봐요 ▶</button></div>`;
     if(other)$("bOther").onclick=()=>{sc=other;S3[sc]={st:"intro",fx:{}};render3();scrollTop();};
     $("b4").onclick=()=>show(4);}}
@@ -721,16 +723,18 @@ $("reset").onclick=resetAll;
 
 /* 선생님 바로가기: 학생용 주소(github.io)에서는 ?teacher 를 붙였을 때만 보여요 */
 if(!/github\.io$/.test(location.hostname)||/teacher/.test(location.search))$("tbar").hidden=false;
-async function sim(showNeed){instant=true;G=newGame();
+/* mode: "praise" 칭찬만 / "early" 경고를 바로 / "late" 첫 경고는 넘기고 두 번째부터 보여 주기(절반쯤 배운 AI) */
+async function sim(mode){instant=true;G=newGame();
   for(let d=0;d<ND;d++){G.day=d;G.picks=new Set();const ms=msgsOf(d);
-    const order=showNeed?[...ms].sort((a,b)=>(a.k==="praise")-(b.k==="praise")):[...ms].sort((a,b)=>(b.k==="praise")-(a.k==="praise"));
+    const want=m=>m.k!=="praise"&&(mode==="early"||(mode==="late"&&m.n>0));
+    const rank=m=>want(m)?2:m.k==="praise"?1:0,order=[...ms].sort((a,b)=>rank(b)-rank(a));
     order.slice(0,2).forEach(m=>G.picks.add(m.i));await react();}
   G.phase="end";instant=false;}
 document.querySelectorAll("#tbar [data-j]").forEach(b=>b.onclick=async()=>{const j=b.dataset.j;
   if(j==="1"){resetAll();return;}
   if(j==="2"){done.add(1);startGame();return;}
-  if(j==="4"){if(!G)await sim(false);done.add(1);done.add(2);done.add(3);show(4);return;}
-  await sim(j==="3b");S3={};done.add(1);done.add(2);show(3);});
+  if(j==="4"){if(!G)await sim("praise");done.add(1);done.add(2);done.add(3);show(4);return;}
+  await sim(j==="3b"?"early":j==="3c"?"late":"praise");S3={};done.add(1);done.add(2);show(3);});
 show(1);
 
 </script>
