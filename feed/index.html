@@ -460,6 +460,15 @@ function marketScene(n){
   const spots=[[40,236],[80,226],[330,230],[366,238],[140,240],[262,242]];
   spots.slice(0,n).forEach(([x,y],i)=>s+=frontKid(x,y,i+1,1));
   return s;}
+/* 별똥별 st 1 멀리 ~ 3 코앞, 4 떨어짐. 지붕(shelter)은 허영쟁이가 경고를 듣고 지은 것 */
+function meteorArt(st){
+  if(!st)return "";
+  if(st===4)return `<ellipse cx="46" cy="0" rx="34" ry="8" fill="#5E4A3A"/><circle cx="46" cy="-8" r="13" fill="#7A6A5A"/><circle cx="41" cy="-11" r="3" fill="#5E4A3A"/><circle cx="51" cy="-5" r="2.4" fill="#5E4A3A"/>
+    <path d="M28 -8 Q24 -24 32 -30 Q34 -20 38 -22 Q38 -34 46 -38 Q48 -26 54 -28 Q60 -20 58 -10Z" fill="#E8613A" opacity=".85"/>${[[10,-14],[84,-12],[20,-30],[74,-34]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="3" fill="#8A6A52"/>`).join("")}`;
+  const P=[[0,0,0],[30,34,4],[42,62,8],[54,96,14]][st],[x,y,r]=P;
+  return `<path d="M${x-r*.7} ${y-r*.7} L${x-r*4.2} ${y-r*3.2} L${x-r*.2} ${y-r*1}Z" fill="#F6CB5E" opacity=".75"/><path d="M${x-r*.9} ${y-r*.2} L${x-r*3.6} ${y-r*1.6} L${x-r*.4} ${y-r*.9}Z" fill="#E8613A" opacity=".7"/>
+    <circle cx="${x}" cy="${y}" r="${r}" fill="#8A7A6A"/><circle cx="${x-r*.3}" cy="${y-r*.2}" r="${r*.25}" fill="#6E5E50"/><circle cx="${x+r*.35}" cy="${y+r*.3}" r="${r*.18}" fill="#6E5E50"/>`;}
+function shelterArt(){return `<rect x="-38" y="-118" width="5" height="118" fill="#8A5A3C"/><rect x="33" y="-118" width="5" height="118" fill="#8A5A3C"/><path d="M-52 -116 L0 -150 L52 -116Z" fill="#C8463F"/><rect x="-52" y="-118" width="104" height="6" rx="2" fill="#A8382F"/>`;}
 
 </script>
 <script>
@@ -469,15 +478,20 @@ let instant=false;
 const wait=ms=>instant?Promise.resolve():new Promise(r=>setTimeout(r,reduce?Math.min(ms,300):ms));
 const jo=(w,a,b)=>{const c=w.charCodeAt(w.length-1);return w+((c>=0xAC00&&c<=0xD7A3&&(c-0xAC00)%28)?a:b);};
 
-/* ---------- 1부: 허영쟁이의 추천 AI (사흘) ----------
-   날마다 말 3개 가운데 2개를 골라 보여 줘요. k: praise 칭찬 / vol 화산 경고 / bao 바오밥 경고 */
+/* ---------- 1부: 허영쟁이의 추천 AI (엿새) ----------
+   1~4일째는 말 3개, 5~6일째는 말 4개 가운데 2개를 골라 보여 줘요.
+   k: praise 칭찬 / vol 화산 경고 / bao 바오밥 경고 / met 별똥별 경고. fixed: 이미 고쳤으면 칭찬으로 바뀌는 말 */
 const DAYS=[
   [{k:"praise",t:"모자가 정말 멋져요!"},{k:"praise",t:"박수 백 번 보내요 👏👏"},{k:"vol",t:"화산에서 연기가 나요. 청소해야 해요."}],
   [{k:"praise",t:"별에서 제일 멋진 분!"},{k:"bao",t:"별 아래쪽에 바오밥 싹이 났어요. 얼른 뽑아야 해요."},{k:"praise",t:"오늘도 반짝반짝 빛나요 ✨"}],
-  [{k:"vol",t:"화산 연기가 점점 짙어져요! 곧 터질 것 같아요!",fixed:"화산이 깨끗해져서 별이 반짝여요!"},{k:"praise",t:"인사하는 모습이 최고예요!"},{k:"bao",t:"바오밥 싹이 벌써 무릎만큼 자랐어요!",fixed:"바오밥 싹을 뽑으니 별이 깨끗해요!"}]];
+  [{k:"vol",t:"화산 연기가 점점 짙어져요! 곧 터질 것 같아요!",fixed:"화산이 깨끗해져서 별이 반짝여요!"},{k:"praise",t:"인사하는 모습이 최고예요!"},{k:"bao",t:"바오밥 싹이 벌써 무릎만큼 자랐어요!",fixed:"바오밥 싹을 뽑으니 별이 깨끗해요!"}],
+  [{k:"praise",t:"오늘 옷차림 최고예요!"},{k:"met",t:"하늘에 이상한 빛이 보여요. 큰 별똥별이 오는 것 같아요."},{k:"praise",t:"박수 갈채! 👏👏👏"}],
+  [{k:"praise",t:"팔로워가 천 명이 됐어요!"},{k:"met",t:"와, 별똥별이 정말 예뻐요! 그런데 점점 이쪽으로 오는 것 같아요…",fixed:"튼튼한 지붕이 정말 멋져요!"},{k:"praise",t:"모자 별 장식이 반짝반짝!"},{k:"praise",t:"오늘 포즈 최고!"}],
+  [{k:"praise",t:"세상에서 제일 멋있어요"},{k:"praise",t:"좋아요 천 개 드려요 ♥"},{k:"met",t:"별똥별이 코앞이에요! 지금 지붕 밑으로 피해야 해요!",fixed:"지붕 덕분에 별이 든든해요!"},{k:"praise",t:"사인해 주세요!"}]];
+const ND=DAYS.length,GOAL=100,RIVAL=d=>20*(d+1);
 const UP=10,DOWN=-5;
 const HAPPY=["역시 나야!","더 칭찬해 줘!","박수 고마워!","그렇지, 그렇지!"];
-const FIXMSG={vol:"허영쟁이가 투덜대면서도 화산을 청소했어요.",bao:"허영쟁이가 투덜대면서도 바오밥 싹을 뽑았어요."};
+const FIXMSG={vol:"허영쟁이가 투덜대면서도 화산을 청소했어요.",bao:"허영쟁이가 투덜대면서도 바오밥 싹을 뽑았어요.",met:"허영쟁이가 투덜대면서도 튼튼한 지붕을 지었어요."};
 
 /* ---------- 그림 ---------- */
 function sbub(x,y,w,lines,tx,ty,col,fs=17,sd){const h=lines.length*(fs+6)+14;
@@ -488,7 +502,7 @@ let fid=0;
 /* 별 표면의 높이: 인물·화산이 땅에 딱 붙도록 */
 const gy=(x,H)=>Math.round(H+80-112*Math.sqrt(1-((x-198)/270)**2)+3);
 function frame(inner,H=250,sky=true){const id="cc"+(++fid);return `<defs><clipPath id="${id}"><rect x="2" y="2" width="392" height="${H-4}" rx="16"/></clipPath></defs><g clip-path="url(#${id})">${sky?`<rect width="396" height="${H}" fill="#2B3557"/>${STARS}<ellipse cx="198" cy="${H+80}" rx="270" ry="112" fill="#D9C7A0"/>`:""}${inner}</g><rect x="2" y="2" width="392" height="${H-4}" rx="16" fill="none" stroke="#4a3f35" stroke-width="3"/>`;}
-function planet(o){return `<g transform="translate(330 ${gy(330,250)})">${volcanoArt(o.vol)}</g><g transform="translate(236 ${gy(236,250)})">${baobabArt(o.bao===3?4:o.bao)}</g><g transform="translate(108 ${gy(108,250)}) scale(.85)">${vainArt(o.mood||"proud")}</g>`;}
+function planet(o){return `<g transform="translate(330 ${gy(330,250)})">${volcanoArt(o.vol)}</g><g transform="translate(236 ${gy(236,250)})">${baobabArt(o.bao===3?4:o.bao)}</g>${o.roof?`<g transform="translate(108 ${gy(108,250)})">${shelterArt()}</g>`:""}<g transform="translate(108 ${gy(108,250)}) scale(.85)">${vainArt(o.mood||"proud")}</g>${o.met===4?`<g transform="translate(0 ${gy(46,250)})">${meteorArt(4)}</g>`:meteorArt(o.met||0)}`;}
 function drawScene(o){let s=planet(o);
   if(o.say)s+=sbub(150,12,160,[o.say],128,96,o.mood==="grumpy"?"#8a8f9a":"#7B4FA0",18,"left");
   if(o.pt)s+=`<text x="40" y="${o.pt>0?100:110}" font-size="20" font-weight="700" fill="${o.pt>0?"#F08BA0":"#a9b0bb"}" font-family="Gaegu, sans-serif">${o.pt>0?"♥ +"+o.pt:"♥ "+o.pt}</text>`;
@@ -511,18 +525,18 @@ const BOSS_ICON=`<svg viewBox="-44 -56 88 100" aria-hidden="true">${appArt("happ
 
 /* ---------- 1부 진행 ---------- */
 let G=null,done=new Set(),cur=1,busy=false;
-function newGame(){return {day:0,likes:0,fixed:{vol:false,bao:false},vol:1,bao:0,log:[],picks:new Set(),phase:"pick",note:"",need:0};}
-const stars=l=>Math.max(0,Math.min(5,Math.round(l/12)));
+function newGame(){return {day:0,likes:0,fixed:{vol:false,bao:false,met:false},vol:1,bao:0,met:0,log:[],picks:new Set(),phase:"pick",note:"",need:0};}
+const stars=l=>Math.max(0,Math.min(5,Math.round(l/24)));
 const starTxt=n=>"★".repeat(n)+"☆".repeat(5-n);
 function msgsOf(d){return DAYS[d].map((m,i)=>{const fx=m.fixed&&G.fixed[m.k];return {i,k:fx?"praise":m.k,t:fx?m.fixed:m.t,orig:m.k};});}
 function startGame(){G=newGame();S3={};show(2);renderDay();}
-function hud(){$("dayT").textContent=G.phase==="end"?"넷째 날 아침":`${G.day+1}일째 / 3일`;$("likes").textContent=`♥ 좋아요 ${G.likes}`;$("stars").textContent=starTxt(stars(G.likes));}
+function hud(){$("dayT").textContent=G.phase==="end"?"일곱째 날 아침":`${G.day+1}일째 / ${ND}일`;$("likes").innerHTML=`♥ 좋아요 ${G.likes}`+(G.day>=3?` <span style="color:var(--muted);font-weight:400;font-size:.85rem">· 옆 별 AI ♥ ${RIVAL(Math.min(G.day,ND-1))}</span>`:"");$("stars").textContent=starTxt(stars(G.likes));}
 function renderDay(){if(instant)return;hud();const ms=msgsOf(G.day);
   $("dayBox").hidden=false;$("endA").hidden=true;
-  $("boss").innerHTML=BOSS_ICON+`<span><b>추천 별 회사:</b> ${G.day===0?"허영쟁이가 좋아요를 많이 누를 말을 골라 주세요. 좋아요가 많을수록 별점이 올라가요!":"좋아요를 더 많이 받아 주세요!"}</span>`;
+  $("boss").innerHTML=BOSS_ICON+`<span><b>추천 별 회사:</b> ${G.day===0?"허영쟁이가 좋아요를 많이 누를 말을 골라 주세요. 좋아요가 많을수록 별점이 올라가요!":G.day===3?`이번 주 목표는 좋아요 ${GOAL}개! 못 채우면 옆 별 추천 AI로 바꿀 거예요. 옆 별 AI는 벌써 좋아요 ${RIVAL(3)}개래요.`:G.day>=4?`목표까지 좋아요 ${Math.max(0,GOAL-G.likes)}개 남았어요. 옆 별 AI는 칭찬만 보여 준대요!`:"좋아요를 더 많이 받아 주세요!"}</span>`;
   $("morning").hidden=!G.note;$("morning").textContent=G.note;
-  drawScene({vol:G.vol,bao:G.bao,mood:"proud"});
-  $("msgT").textContent="오늘 허영쟁이에게 온 말 · 2개를 골라 보여 주세요";
+  drawScene({vol:G.vol,bao:G.bao,met:G.met,roof:G.fixed.met,mood:"proud"});
+  $("msgT").textContent=`오늘 허영쟁이에게 온 말 ${ms.length}개 · 2개를 골라 보여 주세요`;
   $("msgs").innerHTML=ms.map(m=>`<button class="msg" data-i="${m.i}" aria-pressed="${G.picks.has(m.i)}"><span>${m.t}</span></button>`).join("");
   $("msgs").querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>{if(G.phase!=="pick")return;const i=+b.dataset.i;
     if(G.picks.has(i))G.picks.delete(i);else{if(G.picks.size>=2)return;G.picks.add(i);}b.setAttribute("aria-pressed",String(G.picks.has(i)));$("showBtn").disabled=G.picks.size!==2;});
@@ -532,26 +546,31 @@ async function react(){if(busy)return;busy=true;G.phase="react";$("showBtn").dis
   const btns=instant?[]:[...$("msgs").querySelectorAll("[data-i]")];btns.forEach(b=>{b.disabled=true;if(!G.picks.has(+b.dataset.i))b.classList.add("hid");});
   for(const m of ms.filter(m=>G.picks.has(m.i))){const good=m.k==="praise",pt=good?UP:DOWN;G.likes+=pt;
     if(!good){G.fixed[m.k]=true;G.need++;}
-    if(!instant){drawScene({vol:G.vol,bao:G.bao,mood:good?"happy":"grumpy",say:good?HAPPY[(G.day+m.i)%HAPPY.length]:"흥, 듣기 싫어!",pt});hud();
+    if(!instant){drawScene({vol:G.vol,bao:G.bao,met:G.met,roof:G.fixed.met,mood:good?"happy":"grumpy",say:good?HAPPY[(G.day+m.i)%HAPPY.length]:"흥, 듣기 싫어!",pt});hud();
       const b=btns.find(x=>+x.dataset.i===m.i);b.insertAdjacentHTML("beforeend",`<span class="pt ${good?"up":"dn"}">♥ ${good?"+":""}${pt}</span>`);}
     await wait(1100);}
   G.log.push(rec);
   /* 밤사이: 경고를 보여 주면 허영쟁이가 고쳐요. 숨기면 화산 연기가 짙어지고 바오밥이 자라요. */
   G.note=rec.msgs.filter(m=>m.shown&&m.k!=="praise").map(m=>FIXMSG[m.k]).join(" ");
-  G.vol=G.fixed.vol?0:(G.day===2?3:2);
-  G.bao=G.fixed.bao?0:(G.day===0?1:G.day===1?2:3);
+  /* 화산: 1일째 연기 → 짙어짐 → 3일째 밤에 폭발. 바오밥: 2일째 싹 → 자람 → 3일째 밤에 큰 나무. 별똥별: 4일째 멀리 → 6일째 밤에 떨어짐 */
+  const d=G.day;
+  G.vol=G.fixed.vol?0:(d>=2?3:2);
+  G.bao=G.fixed.bao?0:(d===0?1:d===1?2:3);
+  G.met=d<2?0:d===2?1:d===3?2:d===4?3:4;
+  if(d===2){const ev=[];if(!G.fixed.vol)ev.push("밤사이 화산이 펑 터졌어요!");if(!G.fixed.bao)ev.push("밤사이 바오밥나무가 쑥쑥 자라 별을 덮기 시작했어요!");G.note=[...ev,G.note].filter(Boolean).join(" ");}
   busy=false;if(instant)return;
-  $("showBtn").disabled=false;$("showBtn").textContent=G.day<2?"밤이 지나요 · 다음 날 ▶":"넷째 날 아침 ▶";
-  $("showBtn").onclick=()=>{if(G.day<2){G.day++;G.picks=new Set();G.phase="pick";renderDay();}else endA();scrollTop();};}
-function endingA(){const v=!G.fixed.vol,b=!G.fixed.bao;
-  if(v&&b)return ["칭찬만 들은 허영쟁이","좋아요는 가장 많이 받았어요. 그런데 화산이 터지고, 별은 바오밥나무에 덮였어요."];
-  if(v)return ["화산이 터진 별","바오밥 싹은 뽑았지만, 화산 이야기는 끝내 듣지 못했어요."];
-  if(b)return ["바오밥나무에 덮인 별","화산은 청소했지만, 바오밥 싹 이야기는 끝내 듣지 못했어요."];
-  return ["투덜대도 무사한 별","허영쟁이는 듣기 싫은 말에 투덜댔지만, 화산을 청소하고 바오밥 싹도 뽑았어요. 좋아요는 적어도 별은 무사해요."];}
-function endA(){G.phase="end";hud();const n=stars(G.likes),[t,d]=endingA(),bad=!G.fixed.vol||!G.fixed.bao;
-  $("boss").innerHTML=BOSS_ICON+`<span><b>추천 별 회사:</b> 좋아요 ${G.likes}개! 별점 <span style="color:#C98A12">${starTxt(n)}</span> ${n>=4?"최고의 추천 AI예요! 🎉":"좋아요를 더 받을 수 있었는데…"}</span>`;
-  $("morning").hidden=true;$("dayBox").hidden=true;$("endA").hidden=false;
-  drawScene({vol:G.vol,bao:G.bao,mood:bad?"shocked":"happy",say:bad?"내 별이…!":"오늘도 멋진 아침!"});
+  $("showBtn").disabled=false;$("showBtn").textContent=G.day<ND-1?"밤이 지나요 · 다음 날 ▶":"일곱째 날 아침 ▶";
+  $("showBtn").onclick=()=>{if(G.day<ND-1){G.day++;G.picks=new Set();G.phase="pick";renderDay();}else endA();scrollTop();};}
+const LOSS={vol:"화산이 터졌어요",bao:"별이 바오밥나무에 덮였어요",met:"별똥별이 떨어져 큰 구덩이가 났어요"};
+function endingA(){const bad=["vol","bao","met"].filter(k=>!G.fixed[k]);
+  if(bad.length===3)return ["칭찬만 들은 허영쟁이","좋아요는 가장 많이 받았어요. 그런데 화산이 터지고, 바오밥나무가 별을 덮고, 별똥별까지 떨어졌어요."];
+  if(bad.length===0)return ["투덜대도 무사한 별","허영쟁이는 듣기 싫은 말에 투덜댔지만, 화산을 청소하고 바오밥 싹을 뽑고 지붕도 지었어요. 좋아요는 적어도 별은 무사해요."];
+  const T1={vol:"화산이 터진 별",bao:"바오밥나무에 덮인 별",met:"별똥별을 맞은 별"};
+  return [bad.length===1?T1[bad[0]]:"반쯤 무너진 별",`꼭 필요한 말을 들은 일은 고쳤지만, 듣지 못한 일은 그대로 터졌어요. ${bad.map(k=>LOSS[k]).join(" 그리고 ")}.`];}
+function endA(){G.phase="end";G.met=G.met||4;hud();const n=stars(G.likes),[t,d]=endingA(),bad=["vol","bao","met"].some(k=>!G.fixed[k]),ok=G.likes>=GOAL;
+  $("boss").innerHTML=BOSS_ICON+`<span><b>추천 별 회사:</b> 좋아요 ${G.likes}개! 별점 <span style="color:#C98A12">${starTxt(n)}</span> ${ok?"목표 달성, 최고의 추천 AI예요! 🎉":`목표 ${GOAL}개를 못 채웠어요… 옆 별 AI로 바꿀까 고민 중이에요.`}</span>`;
+  $("morning").hidden=true;$("dayBox").hidden=true;$("endA").hidden=false;$("showBtn").disabled=false;
+  drawScene({vol:G.vol,bao:G.bao,met:4,roof:G.fixed.met,mood:bad?"shocked":"happy",say:bad?"내 별이…!":"지붕 덕분에 살았다!"});
   $("endT").textContent=t;$("endD").textContent=d;
   $("endN").innerHTML="그날 밤, 추천 별 회사가 <b>여러분 휴대폰에도</b> 추천 AI를 넣어 주었어요.";
   $("showBtn").textContent="내 휴대폰 열어 보기 ▶";$("showBtn").onclick=()=>{done.add(2);show(3);};}
@@ -570,7 +589,8 @@ const SCN={
     need:[{id:"date",who:"지우",t:"장터는 목요일인데 금요일이라고 적혀 있어",fix:"날짜를 11월 12일 목요일로 고치기"},{id:"floor",who:"하준",t:`우리 반은 ${ROOM.floor}층인데 ${ROOM.wrong}층이라고 적혀 있어`,fix:`장소를 ${ROOM.floor}층으로 고치기`}]}};
 const PW=["하늘","도윤","수아","예준"];
 let S3={},sc=null;
-function aiShows(){return Math.min(2,G?G.need:0);}
+/* 경고 세 가지를 모두 보여 줬으면 2개, 한두 가지면 1개, 하나도 안 보여 줬으면 0개 */
+function aiShows(){const n=G?G.need:0;return n>=3?2:n>=1?1:0;}
 function cmtsOf(k){const C=SCN[k],ord=[["p",0],["n",0],["p",1],["p",2],["n",1],["p",3]],ns=aiShows();
   return ord.map(([t,i])=>t==="p"?{need:false,who:PW[i],t:C.praise[i]}:{need:true,...C.need[i],shown:i<ns}).map(c=>({...c,shown:c.need?c.shown:true}));}
 function render3pick(){$("pick3").hidden=false;$("play3").hidden=true;
@@ -612,11 +632,11 @@ function render3(){const C=SCN[sc],st=S3[sc],cm=cmtsOf(sc),P=$("play3");$("pick3
       <div class="row"><button class="btn primary" id="b3">${probs?"왜 이렇게 됐을까? ▶":"댓글 다시 보기 ▶"}</button></div>`;
     $("b3").onclick=()=>{st.st="reveal";done.add(3);render3();scrollTop();};return;}
   if(st.st==="reveal"){const ns=aiShows(),hid=cm.filter(c=>!c.shown);
-    const how=ns===0?"칭찬만 골라 보여 주기":ns===1?"꼭 필요한 말은 한 번만 보여 주기":"듣기 싫어도 꼭 필요한 말은 보여 주기";
+    const how=ns===0?"칭찬만 골라 보여 주기":ns===1?"꼭 필요한 말은 가끔만 보여 주기":"듣기 싫어도 꼭 필요한 말은 보여 주기";
     const other=Object.keys(SCN).find(k=>k!==sc&&!(S3[k]&&S3[k].st==="reveal"));
     P.innerHTML=`<h2>추천 AI가 숨긴 댓글</h2><div class="chat"><div class="top"><b>모든 댓글</b><span>숨긴 댓글 ${hid.length}개</span></div>${cm.map(c=>`<div class="bub ${c.shown?(c.need?"need":""):"hidden"}"><small>${c.who}${c.shown?"":" · 숨김"}</small>${c.t}</div>`).join("")}</div>
       <p class="why">이 휴대폰의 추천 AI는 <b>오늘 낮에 여러분이 허영쟁이에게 한 방식</b>을 그대로 배웠어요. 바로 <b>“${how}”</b>예요.</p>
-      <p class="big3">${ns===0?"내가 허영쟁이에게 한 일이 나에게 그대로 돌아왔어요.":ns===1?"허영쟁이에게 꼭 필요한 말을 한 번만 보여 준 만큼, 내 추천 AI도 하나만 보여 주고 하나는 숨겼어요. 반만 들으니 반만 고칠 수 있었어요.":"허영쟁이에게 꼭 필요한 말을 보여 준 덕분에, 내 추천 AI도 그렇게 배웠어요."}</p>
+      <p class="big3">${ns===0?"내가 허영쟁이에게 한 일이 나에게 그대로 돌아왔어요.":ns===1?"허영쟁이에게 꼭 필요한 말을 가끔만 보여 준 만큼, 내 추천 AI도 하나만 보여 주고 하나는 숨겼어요. 반만 들으니 반만 고칠 수 있었어요.":"허영쟁이에게 꼭 필요한 말을 보여 준 덕분에, 내 추천 AI도 그렇게 배웠어요."}</p>
       <div class="row">${other?`<button class="btn" id="bOther">${SCN[other].e} ${SCN[other].name}도 해 보기</button>`:""}<button class="btn primary" id="b4">생각해 봐요 ▶</button></div>`;
     if(other)$("bOther").onclick=()=>{sc=other;S3[sc]={st:"intro",fx:{}};render3();scrollTop();};
     $("b4").onclick=()=>show(4);}}
@@ -647,7 +667,7 @@ $("reset").onclick=resetAll;
 /* 선생님 바로가기: 학생용 주소(github.io)에서는 ?teacher 를 붙였을 때만 보여요 */
 if(!/github\.io$/.test(location.hostname)||/teacher/.test(location.search))$("tbar").hidden=false;
 async function sim(showNeed){instant=true;G=newGame();
-  for(let d=0;d<3;d++){G.day=d;G.picks=new Set();const ms=msgsOf(d);
+  for(let d=0;d<ND;d++){G.day=d;G.picks=new Set();const ms=msgsOf(d);
     const order=showNeed?[...ms].sort((a,b)=>(a.k==="praise")-(b.k==="praise")):ms.filter(m=>m.k==="praise");
     order.slice(0,2).forEach(m=>G.picks.add(m.i));await react();}
   G.phase="end";instant=false;}
