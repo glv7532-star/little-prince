@@ -736,7 +736,12 @@ function show(n){cur=n;
   for(const i of [1,2,3,4]){$("step"+i).hidden=i!==n;const t=$("tab"+i);if(i===n)t.setAttribute("aria-current","step");else t.removeAttribute("aria-current");t.classList.toggle("done",i!==n&&done.has(i));}
   if(n===1)drawComic();if(n===3)render3pick();if(n===4){p4=0;render4();}scrollTop();}
 function resetAll(){G=null;S3={};done=new Set();p1=0;ans4=null;p4=0;busy=false;show(1);}
-$("reset").onclick=resetAll;
+/* 처음부터: 한 번 더 눌러야 지워져요 (다른 프로그램과 같게) */
+let resetArm=0;
+$("reset").onclick=()=>{
+  if(Date.now()-resetArm>4000){resetArm=Date.now();$("reset").textContent="정말 처음부터 할까요? 한 번 더 누르세요";setTimeout(()=>{$("reset").textContent="처음부터 다시";},4000);return;}
+  resetArm=0;$("reset").textContent="처음부터 다시";resetAll();
+};
 
 /* 선생님 바로가기: 학생용 주소(github.io)에서는 ?teacher 를 붙였을 때만 보여요 */
 if(!/github\.io$/.test(location.hostname)||/teacher/.test(location.search))$("tbar").hidden=false;
@@ -753,6 +758,9 @@ document.querySelectorAll("#tbar [data-j]").forEach(b=>b.onclick=async()=>{const
   if(j==="4"){if(!G)await sim("praise");done.add(1);done.add(2);done.add(3);show(4);return;}
   await sim(j==="3b"?"early":j==="3c"?"late":"praise");S3={};done.add(1);done.add(2);show(3);});
 show(1);
+/* 수업 중 실수로 새로 고침하거나 나가지 않도록 */
+let touched=false;document.addEventListener("pointerdown",()=>{touched=true;},{once:true,capture:true});
+window.addEventListener("beforeunload",e=>{if(touched){e.preventDefault();e.returnValue="";}});
 
 </script>
 </body>
