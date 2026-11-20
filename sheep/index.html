@@ -611,6 +611,8 @@ function afterDay(s){const t=$("toast"),h=harmText(s);
     t.textContent=(h?`${h}${josaR(h)} 지키지 못했어요. `:"소중한 것은 모두 지켰어요. ")+dangerText(s);
     if(runs2.size>=2){$("talk2").hidden=false;$("real2").hidden=false;$("next2").disabled=false;$("hint2").textContent="";done.add(2);}else $("hint2").textContent="규칙을 바꿔 하루를 한 번 더 보내 보세요.";return;}
   if(cur===3){t.className="toast "+(h||s.left?"bad":"ok");
+    /* 물어보기를 켰는데 한 번도 불려 오지 않았으면(예: '초록색은 먹지 마라'로 싹을 아예 안 먹음) 질문을 띄우지 않아요 */
+    if(set.ask&&!s.asks){t.textContent=(set.muz.has("green")?"오늘은 한 번도 불려 오지 않았어요. '초록색은 먹지 마라' 때문에 양 로봇이 싹을 아예 먹지 않았거든요. 입마개를 바꿔 다시 해 보세요.":"오늘은 한 번도 불려 오지 않았어요. 양 로봇이 싹을 아예 먹지 않았거든요. 규칙을 바꿔 다시 해 보세요.")+" "+dangerText(s);return;}
     t.textContent=(set.ask?`어린 왕자가 오늘 ${s.asks}번 불려 와서 싹을 확인해 줬어요. `:"이번에는 어린 왕자에게 묻지 않았어요. ")+(h?`${h}${josaR(h)} 지키지 못했어요. `:"소중한 것은 모두 지켰어요. ")+dangerText(s);
     if(set.ask){asked3=true;$("q3Q").textContent=`어린 왕자가 오늘 ${s.asks}번이나 불려 와서 화산 청소를 못 했어요. 여러분이 어린 왕자라면 어떻게 하겠어요?`;$("q3Box").hidden=false;$("hint3").textContent=q3done?"":"질문에 답하면 다음으로 갈 수 있어요.";}}}
 $("run").onclick=()=>runDay();

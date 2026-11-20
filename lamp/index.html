@@ -311,7 +311,8 @@ function newWorld(n){return {n,t:0,ph:0,day:DAY0,cloudX:null,cloudDay:false,clou
   g3:{P:DAY0,anchor:0,lastSunrise:0,changedAt:-1,learning:false},on1:false,lag1:0,fat:0,lastPh:0,running:n!==1,fasted:false,clouded:false,fastDays:0};}
 function startWorld(n){cancelAnimationFrame(raf);if(n===4){return;}if(n===3)$("fast3").disabled=false;
   const labels=n===1?["내 자동 가로등"]:n===2?["1세대","2세대"]:["1세대","2세대","3세대"];
-  W=newWorld(n);W.S=buildScene($("sc"+n),labels);frame(performance.now(),true);
+  W=newWorld(n);if(n===3){W.day=DAY0/3;W.g3.P=DAY0/3;} /* 3단계는 2단계에서 세 배 빨라진 별 그대로 시작해요 */
+  W.S=buildScene($("sc"+n),labels);frame(performance.now(),true);
   if(n===1){$("m1Day").textContent="0 / 3";$("m1Score").textContent="-";$("m1Score").className="";}
 }
 let last=0;
@@ -328,9 +329,9 @@ function step(dt){
   if(W.cloudX!=null){W.cloudX+=dt*230;if(W.cloudX>760)W.cloudX=null;}
   const covering=W.cloudX!=null&&W.cloudX>-40&&W.cloudX<620,eNow=Math.sin(2*Math.PI*ph);
   const cloudK=covering?1:0;
-  if(covering&&!W.cloudMsg){W.cloudMsg=true;const t=$("toast3");t.className="toast";
-    if(eNow>0.1){W.cloudDay=true;W.clouded=true;t.textContent="낮에 구름이 하늘을 덮었어요. 2세대는 어두워졌다고 생각해서 켜지지만, 3세대는 아직 낮인 걸 알고 꺼진 채로 있어요.";}
-    else t.textContent="밤에는 구름이 껴도 이미 어두워서 가로등은 그대로예요. 낮에 구름이 끼면 어떻게 될까요?";}
+  /* 별이 빨라서 구름이 지나가는 동안 밤과 낮이 바뀔 수 있어요. 낮에 덮는 순간이 오면 그때 낮 메시지를 보여 줘요 */
+  if(covering&&eNow>0.1&&!W.cloudDay){W.cloudDay=true;W.clouded=true;W.cloudMsg=true;const t=$("toast3");t.className="toast";t.textContent="낮에 구름이 하늘을 덮었어요. 2세대는 어두워졌다고 생각해서 켜지지만, 3세대는 아직 낮인 걸 알고 꺼진 채로 있어요.";}
+  else if(covering&&!W.cloudMsg){W.cloudMsg=true;const t=$("toast3");t.className="toast";t.textContent="밤에는 구름이 껴도 이미 어두워서 가로등은 그대로예요. 낮에 구름이 끼면 어떻게 될까요?";}
   const obs=cloudK?light*.12:light;
   const need=light<NEED;
   /* 해 뜨는 순간 (3세대가 하루 길이를 잼) */
@@ -375,7 +376,7 @@ function draw(){
 let scores3=null;
 
 /* 1단계 */
-const SENS={light:["빛 센서 값 (밝기)","밝기가 <b id=\"thrOut\"></b>보다 어두우면 켜요."],sound:["소리 센서 값 (소리 크기)","소리가 <b id=\"thrOut\"></b>보다 작으면 켜요."],temp:["온도 센서 값 (따뜻한 정도)","온도가 <b id=\"thrOut\"></b>보다 낮으면 켜요."]};
+const SENS={light:["빛 센서 값 (밝기)","밝기가 <b id=\"thrOut\"></b>보다 낮으면 켜요."],sound:["소리 센서 값 (소리 크기)","소리가 <b id=\"thrOut\"></b>보다 작으면 켜요."],temp:["온도 센서 값 (따뜻한 정도)","온도가 <b id=\"thrOut\"></b>보다 낮으면 켜요."]};
 function setRule(){if(sensor){$("ruleText").innerHTML=SENS[sensor][1];$("m1Label").textContent=SENS[sensor][0];}$("thrOut").textContent=thr;}
 $("sensors").onclick=e=>{const b=e.target.closest(".opt");if(!b||(W&&W.running))return;sensor=b.dataset.s;$("sensors").querySelectorAll(".opt").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));setRule();$("toast1").textContent="";};
 $("thr").oninput=()=>{thr=+$("thr").value;setRule();};
@@ -400,8 +401,8 @@ $("fast2").onclick=()=>{if(W.fasted)return;W.fasted=true;W.day=DAY0/3;W.fastDays
 $("next2").onclick=()=>show(3);
 
 /* 3단계 */
-$("cloud3").onclick=()=>{if(W.cloudX!=null)return;W.cloudX=-160;W.cloudMsg=false;};
-$("fast3").onclick=()=>{W.fastCount=(W.fastCount||0)+1;if(W.fastCount>2)return;if(W.fastCount===2)$("fast3").disabled=true;const newDay=W.day>DAY0/2?DAY0/3:DAY0/5;W.day=newDay;W.fasted=true;W.g3.learning=true;W.g3.changedAt=W.t;$("toast3").className="toast";$("toast3").textContent="별이 더 빨라졌어요. 3세대는 하루 길이를 다시 재는 동안 빛 센서로 판단하다가, 새 길이를 배우면 스스로 일정을 바꿔요.";};
+$("cloud3").onclick=()=>{if(W.cloudX!=null)return;W.cloudX=-160;W.cloudMsg=false;W.cloudDay=false;};
+$("fast3").onclick=()=>{W.fastCount=(W.fastCount||0)+1;if(W.fastCount>2)return;if(W.fastCount===2)$("fast3").disabled=true;const newDay=W.fastCount===1?DAY0/5:DAY0/7;W.day=newDay;W.fasted=true;W.g3.learning=true;W.g3.changedAt=W.t;$("toast3").className="toast";$("toast3").textContent="별이 더 빨라졌어요. 3세대는 하루 길이를 다시 재는 동안 빛 센서로 판단하다가, 새 길이를 배우면 스스로 일정을 바꿔요.";};
 $("next3").onclick=()=>{goFinal();};
 function goFinal(){done.add(3);const s=scores3||["-","-","-"];$("f1").textContent=s[0];$("f2").textContent=s[1];$("f3").textContent=s[2];show(4);done.add(4);}
 
