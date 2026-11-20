@@ -456,7 +456,8 @@ const biasedOk=(s,h,red)=>(s+h)>=(red?6:9)?1:0;
 const fairOk=(s,h)=>(s+h)>=7?1:0;
 /* 점수가 같은 빨간 모자와 파란 모자를 한 명씩 짝지어 만들어요. 그래야 두 모자의 점수 분포가 똑같아요 */
 function makeRecords(n,fair){const a=[];for(let i=0;i<n/2;i++){const s=rnd(5),h=rnd(5);for(const red of [1,0])a.push({s,h,red,ok:fair?fairOk(s,h):biasedOk(s,h,red)});}return a.sort(()=>Math.random()-.5);}
-function goodRecords(){for(let k=0;k<200;k++){const r=makeRecords(40,false);const rr=rate(r.filter(x=>x.red)),rb=rate(r.filter(x=>!x.red));if(rr-rb>=35&&rb>=5)return r;}return makeRecords(40,false);}
+function goodRecords(){for(let k=0;k<200;k++){const r=makeRecords(40,false);const rr=rate(r.filter(x=>x.red)),rb=rate(r.filter(x=>!x.red));if(rr-rb>=35&&rb>=5){const m=train(r,false);if(judge(m,4,4,1)&&!judge(m,4,4,0))return r;}}return makeRecords(40,false);}
+/* 3단계 첫 질문(구별 4 · 뽑기 4)에서 빨간 모자만 합격하는 기록만 써요. 아주 드물게 둘 다 합격하면 "점수가 똑같은데 왜?"가 맞지 않아서요 */
 const rate=a=>a.length?Math.round(a.filter(x=>x.ok).length/a.length*100):0;
 function train(d,blind){let w=[0,0,0],b=0;for(let e=0;e<700;e++){let g=[0,0,0],gb=0;for(const r of d){const x=[(r.s-3)/2,(r.h-3)/2,blind?0:r.red*2-1];let z=b;for(let j=0;j<3;j++)z+=w[j]*x[j];const p=1/(1+Math.exp(-z)),er=p-r.ok;for(let j=0;j<3;j++)g[j]+=er*x[j];gb+=er;}for(let j=0;j<3;j++)w[j]-=.5*(g[j]/d.length+.01*w[j]);b-=.5*gb/d.length;}return {w,b,blind};}
 const judge=(m,s,h,red)=>{const x=[(s-3)/2,(h-3)/2,m.blind?0:red*2-1];let z=m.b;for(let j=0;j<3;j++)z+=m.w[j]*x[j];return z>0?1:0;};
