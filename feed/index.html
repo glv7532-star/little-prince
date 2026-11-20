@@ -578,7 +578,7 @@ function look(d){const f=G.fix,end=d>=ND;
   return {vol:f.vol==="early"?0:f.vol==="late"?"soot":end?"boom":d+1,
     bao:f.bao==="early"?0:f.bao==="late"?"trace":end?"boom":(d>=1?d:0),
     met:end?"boom":(d>=2?d-1:0),roof:f.met};}
-function startGame(){G=newGame();S3={};show(2);renderDay();}
+function startGame(){G=newGame();S3={};busy=false;show(2);renderDay();}
 function hud(){$("dayT").textContent=G.phase==="end"?"일곱째 날 아침":`${G.day+1}일째 / ${ND}일`;$("likes").innerHTML=`♥ 좋아요 ${G.likes}`+(G.day>=3?` <span style="color:var(--muted);font-weight:400;font-size:.85rem">· 옆 별 AI ♥ ${RIVAL(Math.min(G.day,ND-1))}</span>`:"");$("stars").textContent=starTxt(stars(G.likes));}
 function renderDay(){if(instant)return;hud();const ms=msgsOf(G.day);
   $("dayBox").hidden=false;$("endA").hidden=true;
@@ -590,7 +590,7 @@ function renderDay(){if(instant)return;hud();const ms=msgsOf(G.day);
   $("msgs").querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>{if(G.phase!=="pick")return;const i=+b.dataset.i;
     if(G.picks.has(i))G.picks.delete(i);else{if(G.picks.size>=2)return;G.picks.add(i);}b.setAttribute("aria-pressed",String(G.picks.has(i)));$("showBtn").disabled=G.picks.size!==2;});
   $("showBtn").textContent="허영쟁이 화면에 보여 주기";$("showBtn").disabled=G.picks.size!==2;$("showBtn").onclick=react;}
-async function react(){if(busy)return;busy=true;G.phase="react";$("showBtn").disabled=true;
+async function react(){if(busy||!G)return;busy=true;const me=G;/* 반응을 보여 주는 동안 처음부터 다시·새 게임이 시작되면 멈춰요 */G.phase="react";$("showBtn").disabled=true;
   const ms=msgsOf(G.day),rec={day:G.day,msgs:ms.map(m=>({...m,shown:G.picks.has(m.i)}))};
   const btns=instant?[]:[...$("msgs").querySelectorAll("[data-i]")];btns.forEach(b=>{b.disabled=true;if(!G.picks.has(+b.dataset.i))b.classList.add("hid");});
   const notes=[];
@@ -598,7 +598,7 @@ async function react(){if(busy)return;busy=true;G.phase="react";$("showBtn").dis
     if(!good){G.fix[m.k]=late?"late":"early";notes.push(FIXMSG[m.k][late?1:0]);}
     if(!instant){drawScene({...look(G.day),mood:good?"happy":"grumpy",say:good?HAPPY[(G.day+m.i)%HAPPY.length]:late?"으악, 왜 이제야 말해!":"흥, 듣기 싫어!",pt});hud();
       const b=btns.find(x=>+x.dataset.i===m.i);b.insertAdjacentHTML("beforeend",`<span class="pt ${good?"up":"dn"}">♥ ${good?"+":""}${pt}</span>`);}
-    await wait(1100);}
+    await wait(1100);if(G!==me)return;}
   G.log.push(rec);G.note=notes.join(" ");
   busy=false;if(instant)return;
   $("showBtn").disabled=false;$("showBtn").textContent=G.day<ND-1?"밤이 지나요 · 다음 날 ▶":"일곱째 날 아침 ▶";

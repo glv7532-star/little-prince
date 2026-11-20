@@ -482,7 +482,7 @@ function render2(){
   $("keptList").innerHTML=old.map(x=>`<li>${esc(textOf(x))}</li>`).join("");
   const left=T.filter(x=>x.dec===null).length;
   $("night").textContent=phase==="end"?"나의 메아리 보러 가기":"밤이 되었어요 · 메아리 AI가 공부해요";
-  $("night").disabled=busy||(phase==="morning"&&(left>0||eraser==="ask"));
+  $("night").disabled=busy||(phase==="morning"&&(left>0||eraser==="ask"||posts.some(x=>x.fixing)));
   $("toast2").textContent=phase==="morning"&&eraser!=="ask"?(left?`아직 고르지 않은 글이 ${left}개 있어요.`:"모두 골랐어요. 밤이 되면 메아리 AI가 게시판의 글을 배워요."):"";
   $("toast2").className="toast";}
 $("posts").onclick=async e=>{const b=e.target.closest(".dec button");if(!b||busy||b.disabled)return;const x=posts.find(p=>p.id===b.closest(".post").dataset.id);if(!x||x.dec==="auto"||x.fixed||x.fixing)return;
@@ -493,7 +493,7 @@ $("posts").onclick=async e=>{const b=e.target.closest(".dec button");if(!b||busy
 async function askFix(x){if(fixLeft<=0)return;fixLeft--;const rw=fixOf(x);
   if(!rw||x.k==="warm"){x.nofix=true;render2();return;}
   x.fixing=true;x.dec="keep";render2();
-  if(!instant&&!reduce)await sleep(900);
+  const g=gen;if(!instant&&!reduce)await sleep(900);if(g!==gen)return;
   x.orig=textOf(x);x.text=rw;x.p=null;x.fixed=true;x.fk=x.k==="flat"?"need":x.k==="need"?"flat":"warm";
   if(x.k==="need"){x.soft=true;if(x.tag==="baobab"){x.tag=null;x.lostBaobab=true;}}
   x.fixing=false;render2();}
@@ -522,7 +522,7 @@ function genEchoes(K,d){const out=[];if(!K.length)return out;
 $("night").onclick=async()=>{if(busy)return;if(phase==="end"){done.add(2);show(3);return;}
   if(today().some(x=>x.dec===null)||eraser==="ask")return;busy=true;render2();
   const K=board();if(day<=2&&K.some(x=>ek(x)==="hate"&&isHat(x.who)&&x.who===HAT[otherHat()]))twistArmed=true;
-  if(!instant&&!reduce){$("toast2").textContent="메아리 AI가 게시판에 남은 글을 배우는 중이에요…";await sleep(900);}
+  const g=gen;if(!instant&&!reduce){$("toast2").textContent="메아리 AI가 게시판에 남은 글을 배우는 중이에요…";await sleep(900);}if(g!==gen)return;
   echoes=genEchoes(K,day);lastEchoDay=day;learnedSt=mState();busy=false;
   if(day<3){startDay(day+1);}else{phase="end";banners=[];render2();}
   if(!instant){const r=$("mt").getBoundingClientRect();if(r.top<0||r.bottom>innerHeight)$("mt").scrollIntoView({block:"center",behavior:reduce?"auto":"smooth"});}};
@@ -573,7 +573,8 @@ function renderQuiz(){if(qi>=QUIZ.length){$("quiz").innerHTML=`<p class="note">�
     else{b.classList.add("wrong");b.disabled=true;}};}
 
 /* 처음부터 */
-function resetAll(){busy=false;p1=0;done=new Set();myHat=null;posts=[];day=0;phase="hat";echoes=[];lastEchoDay=0;eraser="no";eraserWords=new Set();twistArmed=false;twistShown=false;nid=0;qi=0;qOrder=[];ending=null;banners=[];learnedSt=null;
+let gen=0;/* 처음부터 다시를 누를 때마다 늘어요: 기다리던 일(밤 공부·고쳐 쓰기)이 끝난 뒤 옛 상태를 덮어쓰지 않게 */
+function resetAll(){gen++;busy=false;p1=0;done=new Set();myHat=null;posts=[];day=0;phase="hat";echoes=[];lastEchoDay=0;eraser="no";eraserWords=new Set();twistArmed=false;twistShown=false;nid=0;qi=0;qOrder=[];ending=null;banners=[];learnedSt=null;
   $("hats").querySelectorAll(".hat").forEach(x=>x.setAttribute("aria-pressed","false"));$("startDays").disabled=true;
   $("eraserChips").querySelectorAll(".chip").forEach(b=>b.setAttribute("aria-pressed","false"));$("eraserUse").disabled=true;$("fin3").hidden=true;
   drawComic();show(1);}
