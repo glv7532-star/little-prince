@@ -55,6 +55,7 @@ h1{font-family:var(--display);font-weight:700;font-size:2.1rem;line-height:1.1;m
 .ask{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px}
 .tbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 10px;border:1.5px dashed var(--accent);border-radius:10px;font-size:.85rem;color:var(--muted)}
 .tbar button{font:inherit;font-size:.85rem;padding:5px 10px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.tbar .tbar-home{margin-left:auto;font:inherit;font-size:.85rem;padding:5px 12px;border-radius:8px;border:1.5px solid var(--accent);background:var(--accent);color:var(--paper);text-decoration:none;white-space:nowrap}
 .card h3{font-family:var(--display);font-size:1.3rem;margin:4px 0 0;line-height:1.2}
 .link{background:none;border:none;color:var(--muted);text-decoration:underline;font:inherit;font-size:.88rem;cursor:pointer;padding:0;align-self:flex-start}
 .part{border:1.5px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;background:var(--bg)}
@@ -223,11 +224,12 @@ th{color:var(--muted);font-weight:400;white-space:nowrap}
 .closing{margin:0;padding:14px 16px;border-radius:12px;background:var(--accent-bg);font-family:var(--display);font-size:1.4rem;line-height:1.4;text-align:center;word-break:keep-all}
 html,body{overscroll-behavior-y:contain}
 </style>
+<script src="../teacher-lock.js"></script>
 </head>
 <body>
 
 <div class="wrap">
-  <div class="tbar" id="tbar" hidden><b>선생님 바로가기</b><button data-j="1">1단계</button><button data-j="2">2단계</button><button data-j="3">3단계</button><button data-j="4">4단계</button><button data-j="5">마무리</button><button data-j="6">더 해 보기</button></div>
+  <div class="tbar" id="tbar" hidden><b>선생님 바로가기</b><button data-j="1">1단계</button><button data-j="2">2단계</button><button data-j="3">3단계</button><button data-j="4">4단계</button><button data-j="5">마무리</button><button data-j="6">더 해 보기</button><a class="tbar-home" href="https://glv7532-star.github.io/little-prince/?teacher">차시 목록으로</a></div>
   <header>
     <h1>편견을 배우는 AI 면접관</h1>
     <p class="lead">메아리는 내가 한 말을 그대로 따라 해요. AI도 메아리를 닮았을까요? B612에서 바오밥 싹을 뽑을 '별 정원사'를 뽑는 AI 면접관을 만들어 봐요.</p>
@@ -682,7 +684,8 @@ function resetAll(){runTok++;st6=null;learnTok++;done.clear();thoughts={};curM="
   $("methods").querySelectorAll(".method").forEach(x=>{x.setAttribute("aria-pressed","false");x.classList.remove("tried");});$("next4").disabled=true;$("hint4").textContent="세 가지 방법을 모두 해 보면 마무리할 수 있어요.";init1();show(1);}
 
 /* 선생님 바로가기: 학생용 주소(github.io)에서는 ?teacher 를 붙였을 때만 보여요 */
-if(!/github\.io$/.test(location.hostname)||/teacher/.test(location.search))$("tbar").hidden=false;
+/* 선생님 화면: github.io에서는 ?teacher 와 비밀번호(teacher-lock.js)가 있어야 보여요. 잠금 파일이 없는 사본에서는 github.io가 아니면 보여요. */
+if(window.LP_TEACHER!==undefined?window.LP_TEACHER:!/github\.io$/.test(location.hostname))$("tbar").hidden=false;
 $("tbar").onclick=async e=>{const b=e.target.closest("button");if(!b)return;const j=b.dataset.j;
   resetAll();if(j==="1")return;instant=true;
   try{$("guess").querySelector('[data-g="c"]').setAttribute("aria-pressed","true");$("sort1").click();revealHat(false);show(2);

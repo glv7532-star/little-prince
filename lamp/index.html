@@ -55,6 +55,7 @@ h1{font-family:var(--display);font-weight:700;font-size:2.1rem;line-height:1.1;m
 .ask{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px}
 .tbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 10px;border:1.5px dashed var(--accent);border-radius:10px;font-size:.85rem;color:var(--muted)}
 .tbar button{font:inherit;font-size:.85rem;padding:5px 10px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.tbar .tbar-home{margin-left:auto;font:inherit;font-size:.85rem;padding:5px 12px;border-radius:8px;border:1.5px solid var(--accent);background:var(--accent);color:var(--paper);text-decoration:none;white-space:nowrap}
 .card h3{font-family:var(--display);font-size:1.3rem;margin:4px 0 0;line-height:1.2}
 .link{background:none;border:none;color:var(--muted);text-decoration:underline;font:inherit;font-size:.88rem;cursor:pointer;padding:0;align-self:flex-start}
 .scwrap{position:relative}
@@ -98,11 +99,12 @@ td:first-child,th:first-child{white-space:nowrap}
 .quote{margin:0;padding:12px 14px;border-left:4px solid var(--accent);background:var(--bg);border-radius:0;font-size:.98rem}
 html,body{overscroll-behavior-y:contain}
 </style>
+<script src="../teacher-lock.js"></script>
 </head>
 <body>
 
 <div class="wrap">
-  <div class="tbar" id="tbar" hidden><b>선생님 바로가기</b><button data-j="1">1단계</button><button data-j="2">2단계</button><button data-j="3">3단계</button><button data-j="4">마무리</button></div>
+  <div class="tbar" id="tbar" hidden><b>선생님 바로가기</b><button data-j="1">1단계</button><button data-j="2">2단계</button><button data-j="3">3단계</button><button data-j="4">마무리</button><a class="tbar-home" href="https://glv7532-star.github.io/little-prince/?teacher">차시 목록으로</a></div>
   <header>
     <h1>저절로 켜지는 가로등</h1>
     <p class="lead">가로등 켜는 사람은 "명령이야"라며 1분마다 불을 켜고 꺼요. 별이 점점 빨리 도는데 명령은 그대로라서 쉴 틈이 없지요. 이 일을 대신할 가로등을 만들어 볼까요?</p>
@@ -413,7 +415,8 @@ function resetAll(){done.clear();sensor="";thr=70;$("thr").value=70;$("sensors")
   $("run1").textContent="작동해 보기";$("run1").disabled=false;$("thr").disabled=false;$("fast1").disabled=true;$("next1").disabled=true;$("next2").disabled=true;$("next3").disabled=true;$("fast2").disabled=false;["toast1","toast2","toast3"].forEach(i=>{$(i).textContent="";$(i).className="toast";});scores3=null;show(1);}
 
 /* 선생님 바로가기: 학생용 주소(github.io)에서는 ?teacher 를 붙였을 때만 보여요 */
-if(!/github\.io$/.test(location.hostname)||/teacher/.test(location.search))$("tbar").hidden=false;
+/* 선생님 화면: github.io에서는 ?teacher 와 비밀번호(teacher-lock.js)가 있어야 보여요. 잠금 파일이 없는 사본에서는 github.io가 아니면 보여요. */
+if(window.LP_TEACHER!==undefined?window.LP_TEACHER:!/github\.io$/.test(location.hostname))$("tbar").hidden=false;
 $("tbar").onclick=e=>{const b=e.target.closest("button");if(!b)return;const j=b.dataset.j;resetAll();
   sensor="light";thr=25;$("thr").value=25;$("sensors").querySelector('[data-s="light"]').setAttribute("aria-pressed","true");setRule();
   if(j==="1")return;done.add(1);$("next1").disabled=false;

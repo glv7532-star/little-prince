@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>어린 왕자와 일곱 번째 별</title>
+<script src="teacher-lock.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gowun+Dodum&display=swap">
 <style>
@@ -18,12 +19,18 @@ a.card{display:flex;flex-direction:column;gap:2px;background:var(--paper);border
 a.card:hover,a.card:focus-visible{border-color:var(--accent);outline:none}
 a.card b{font-family:"Gaegu","Gowun Dodum",cursive;font-size:1.5rem;line-height:1.2}
 a.card span{font-size:.9rem;color:var(--muted)}
+#list{display:flex;flex-direction:column;gap:14px}
+#list[hidden]{display:none}
+.badge{display:inline-block;margin-left:10px;padding:2px 10px;border-radius:999px;font-size:.85rem;vertical-align:middle;background:var(--accent);color:var(--paper);font-family:"Gowun Dodum",sans-serif}
+.lock{align-self:flex-start;font:inherit;font-size:.85rem;padding:6px 12px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.note{padding:16px;border-radius:14px;border:1px solid var(--line);background:var(--paper);color:var(--ink)}
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>어린 왕자와 일곱 번째 별</h1>
-  <p>선생님이 알려 준 활동을 눌러 들어가세요.</p>
+  <p id="intro">선생님이 알려 준 QR 코드로 오늘 차시에 들어오세요.</p>
+  <nav id="list" hidden aria-label="차시 목록">
   <a class="card" href="pixel/"><span>4차시</span><b>숫자로 그리는 그림</b></a>
   <a class="card" href="baobab/"><span>5~6차시</span><b>바오밥 싹 감별 AI</b></a>
   <a class="card" href="sheep/"><span>7~8차시</span><b>입마개를 그려 줘</b></a>
@@ -31,6 +38,18 @@ a.card span{font-size:.9rem;color:var(--muted)}
   <a class="card" href="lamp/"><span>10~11차시</span><b>저절로 켜지는 가로등</b></a>
   <a class="card" href="hire/"><span>20차시</span><b>편견을 배우는 AI 면접관</b></a>
   <a class="card" href="echo/"><span>22~23차시</span><b>AI의 메아리 바꾸기</b></a>
+  </nav>
 </div>
+<script>
+/* 차시 목록은 선생님 화면(?teacher + 비밀번호)에서만 보여요. 학생은 차시별 QR로 들어와요. */
+if(window.LP_TEACHER){
+  const list=document.getElementById("list");list.hidden=false;
+  list.querySelectorAll("a.card").forEach(a=>{a.href=a.getAttribute("href")+"?teacher";});
+  document.getElementById("intro").textContent="차시를 누르면 선생님 화면으로 들어가요. 화면 위의 선생님 바로가기로 단계를 옮길 수 있어요.";
+  const m=document.createElement("span");m.className="badge";m.textContent="선생님 모드";document.querySelector("h1").appendChild(m);
+  const b=document.createElement("button");b.type="button";b.className="lock";b.textContent="이 기기 선생님 모드 잠그기";list.after(b);
+  let armed=0;b.onclick=()=>{if(Date.now()-armed<4000){window.LP_TEACHER_LOCK&&window.LP_TEACHER_LOCK();return;}armed=Date.now();b.textContent="한 번 더 누르면 이 기기에서 잠가요";setTimeout(()=>{b.textContent="이 기기 선생님 모드 잠그기";},4000);};
+}else{document.getElementById("intro").className="note";}
+</script>
 </body>
 </html>
