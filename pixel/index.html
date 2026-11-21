@@ -51,7 +51,8 @@ h1{font-family:var(--display);font-weight:700;font-size:2.1rem;line-height:1.1;m
 .split{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:start}
 @media (max-width:620px){.split{grid-template-columns:1fr}.split.s8{grid-template-columns:minmax(0,1fr) auto;gap:10px}.split.s8 .code.big{font-size:15px;letter-spacing:.06em}.split.s8 .codebox{padding:8px}}
 .grid{display:grid;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;width:100%;aspect-ratio:1;touch-action:none;user-select:none;-webkit-user-select:none}
-.grid.g8{max-width:360px}.grid.g16{max-width:440px}
+.grid.g8{max-width:360px}.grid.g16{max-width:440px}.grid.gw{max-width:640px;aspect-ratio:21/13}
+.code.mid{font-size:14px;letter-spacing:.1em}
 .grid i{display:block;background:var(--cell)}
 .grid i.v1{background:var(--on)}
 .grid.color i.v1{background:var(--c1)}.grid i.v2{background:var(--c2)}.grid i.v3{background:var(--c3)}.grid i.v4{background:var(--c4)}
@@ -122,7 +123,7 @@ html,body{overscroll-behavior-y:contain}
 <body>
 
 <div class="wrap">
-  <div class="tbar" id="tbar" hidden><b>선생님 바로가기</b><button data-j="1">1단계</button><button data-j="2">2단계</button><button data-j="3">3단계</button><button data-j="4">4단계</button><button data-j="5">마무리</button><a class="tbar-home" href="https://glv7532-star.github.io/little-prince/?teacher">차시 목록으로</a></div>
+  <div class="tbar" id="tbar" hidden><b>선생님 바로가기</b><button data-j="1">1단계</button><button data-j="2">2단계</button><button data-j="3">3단계</button><button data-j="4">4단계</button><button data-j="w">숨은 낱말</button><button data-j="5">마무리</button><a class="tbar-home" href="https://glv7532-star.github.io/little-prince/?teacher">차시 목록으로</a></div>
   <header>
     <h1>숫자로 그리는 그림</h1>
     <p class="lead">어른들에게 그림을 보여 주면 모자라고 해요. 하지만 숫자로 말하면 금방 알아듣지요. 컴퓨터도 그래요. 우리 그림을 숫자로 바꿔 볼까요?</p>
@@ -242,6 +243,22 @@ html,body{overscroll-behavior-y:contain}
     <button class="link" id="skip4">건너뛰고 마치기</button>
   </section>
 
+  <!-- 마지막 숨은 낱말: 칠하면 오늘 배운 두 낱말(복제, 공유)이 나타나요 -->
+  <section class="card" id="step6" hidden>
+    <h2>마지막 숨은 낱말 <span id="wNo">(1/2)</span></h2>
+    <p class="note">오늘 배운 것을 숫자 속에 숨겨 두었어요. 1은 칠하고 0은 비워 두어요. 손가락으로 끌면서 칠해도 돼요. 어떤 낱말이 나타날까요?</p>
+    <div class="grid gw" id="gw" style="grid-template-columns:repeat(21,1fr)"></div>
+    <div class="codebox"><p>숨은 낱말의 숫자 (한 줄에 21개, 모두 13줄)</p><pre class="code mid" id="codeW"></pre></div>
+    <div class="row">
+      <button class="btn" id="clearW">모두 지우기</button>
+      <button class="btn primary" id="checkW">다 칠했어요</button>
+    </div>
+    <p class="toast" id="toastW" role="status"></p>
+    <div class="capbox" id="capW" hidden></div>
+    <div class="row" id="nextWRow" hidden><button class="btn primary" id="nextW">다음 낱말 칠하기</button></div>
+    <div class="row" id="finWRow" hidden><button class="btn primary" id="finW">마무리로</button></div>
+  </section>
+
   <!-- 마무리 -->
   <section class="card" id="step5" hidden>
     <div class="final">
@@ -271,13 +288,13 @@ const josa=w=>{const c=w.charCodeAt(w.length-1)-0xAC00;return c>=0&&c%28?"이었
 const COLORS=[["0","지우개","var(--cell)"],["1","노랑","var(--c1)"],["2","갈색","var(--c2)"],["3","초록","var(--c3)"],["4","빨강","var(--c4)"]];
 const done=new Set();
 function show(n){
-  for(const i of [1,2,3,4,5])$("step"+i).hidden=i!==n;
+  for(const i of [1,2,3,4,5,6])$("step"+i).hidden=i!==n;
   for(const i of [1,2,3,4]){const t=$("tab"+i);if(i===n)t.setAttribute("aria-current","step");else t.removeAttribute("aria-current");t.classList.toggle("done",i!==n&&done.has(i));}
   window.scrollTo({top:0,behavior:"smooth"});
 }
 /* 칸 그리드: 누르거나 끌어서 칠하기 */
-function makeGrid(el,n,cells,getColor,onChange,can=()=>true){
-  el.innerHTML="";for(let i=0;i<n*n;i++){const c=document.createElement("i");c.dataset.i=i;el.appendChild(c);}
+function makeGrid(el,n,cells,getColor,onChange,can=()=>true,rows=n){
+  el.innerHTML="";for(let i=0;i<n*rows;i++){const c=document.createElement("i");c.dataset.i=i;el.appendChild(c);}
   let painting=false,val=null;
   const paint=t=>{if(!t||t.parentNode!==el)return;const i=+t.dataset.i;if(cells[i]!==val){cells[i]=val;onChange(i);}};
   el.addEventListener("pointerdown",e=>{const t=e.target;if(t.parentNode!==el||!can())return;e.preventDefault();painting=true;const i=+t.dataset.i;const want=getColor();val=(want===1&&!el.classList.contains("color"))?(cells[i]?0:1):want;paint(t);});
@@ -286,7 +303,7 @@ function makeGrid(el,n,cells,getColor,onChange,can=()=>true){
   window.addEventListener("pointercancel",()=>{painting=false;});
 }
 function render(el,cells){[...el.children].forEach((c,i)=>{c.className=cells[i]?"v"+cells[i]:"";});}
-function codeHTML(cells,n,colored){let s="";for(let r=0;r<n;r++){s+=cells.slice(r*n,r*n+n).map(v=>`<span class="${v?(colored?"k"+v:"d1"):""}">${v}</span>`).join("")+(r<n-1?"\n":"");}return s;}
+function codeHTML(cells,n,colored,rows=n){let s="";for(let r=0;r<rows;r++){s+=cells.slice(r*n,r*n+n).map(v=>`<span class="${v?(colored?"k"+v:"d1"):""}">${v}</span>`).join("")+(r<rows-1?"\n":"");}return s;}
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
 let animating=false;
@@ -347,9 +364,9 @@ $("done2").onclick=()=>{
 $("back3").onclick=()=>show(2);
 $("code2tog").onclick=()=>{const o=$("code2box").classList.toggle("open");$("code2tog").textContent=o?"숫자 접기":"숫자 256개 모두 보기";};
 function goFinal(from4){$("back5").textContent=from4?"4단계로 돌아가기":"4단계 하기 (선택)";$("finTopic").textContent="주제: "+topic;$("finTitle").textContent=$("title2").value.trim();drawCanvas($("cvFin"),s2,16);show(5);};
-$("finish3").onclick=()=>{done.add(3);goFinal();};
-$("finish4").onclick=()=>{if(animating)return;goFinal(true);};
-$("skip4").onclick=()=>{if(animating)return;goFinal(true);};
+$("finish3").onclick=()=>{done.add(3);goWord();};
+$("finish4").onclick=()=>{if(animating)return;goWord(true);};
+$("skip4").onclick=()=>{if(animating)return;goWord(true);};
 $("go4").onclick=()=>{done.add(3);show(4);};
 $("back5").onclick=()=>show(4);
 /* 내 그림을 이미지 파일로 저장 (화면이 어두운 모드여도 밝은 색으로 저장) */
@@ -424,6 +441,29 @@ function setRole(r){
 }
 $("roleS").onclick=()=>setRole("S");$("roleR").onclick=()=>setRole("R");
 
+/* 마지막 숨은 낱말 */
+const WORDS=[["복제",["000000000000000000000", "001000001000000001010", "001000001001111001010", "001111111000010001010", "001000001000010001010", "001111111000101011010", "000001000000101001010", "011111111101000101010", "000000000001000101010", "001111111000000001010", "000000001000000001010", "000000001000000000010", "000000000000000000000"]],["공유",["000000000000000000000", "011111110000011111000", "000000010000100000100", "000000010000100000100", "000001000000100000100", "011111111100011111000", "000000000000000000000", "000111110001111111110", "001000001000010001000", "001000001000010001000", "001000001000010001000", "000111110000010001000", "000000000000000000000"]]];
+const WMEAN={"복제":"똑같이 하나 더 만드는 것","공유":"여러 사람이 함께 나누어 갖는 것"};
+let sw=new Array(21*13).fill(0),wIdx=0,wAns=null,wFrom4=false,wDone=false;
+function setWord(k){wIdx=k;wAns=WORDS[k][1].join("").split("").map(Number);sw.fill(0);render($("gw"),sw);[...$("gw").children].forEach(c=>c.classList.remove("wrong"));$("codeW").textContent=WORDS[k][1].join("\n"); /* 1을 굵게 하면 숫자만 보고도 낱말이 보여서, 숨은 낱말은 모두 같은 굵기로 보여 줘요 */$("wNo").textContent=`(${k+1}/2)`;$("toastW").textContent="";$("toastW").className="toast";$("checkW").disabled=false;$("nextWRow").hidden=true;}
+makeGrid($("gw"),21,sw,()=>1,()=>{render($("gw"),sw);[...$("gw").children].forEach(c=>c.classList.remove("wrong"));},()=>!$("checkW").disabled,13);
+$("clearW").onclick=()=>{if($("checkW").disabled)return;sw.fill(0);render($("gw"),sw);[...$("gw").children].forEach(c=>c.classList.remove("wrong"));$("toastW").textContent="";};
+$("checkW").onclick=()=>{
+  /* 빈칸을 모두 빨간 테두리로 보여 주면 낱말이 그대로 드러나서, 잘못 칠한 칸만 표시하고 빠진 칸은 5개 이하일 때만 표시해요 */
+  const extra=[],miss=[];for(let i=0;i<sw.length;i++){if(sw[i]&&!wAns[i])extra.push(i);else if(!sw[i]&&wAns[i])miss.push(i);}
+  const mark=miss.length<=5?extra.concat(miss):extra;
+  [...$("gw").children].forEach((c,i)=>c.classList.toggle("wrong",mark.includes(i)));
+  const t=$("toastW");
+  if(extra.length||miss.length){t.className="toast bad";
+    t.textContent=(extra.length?`0인데 칠한 칸이 ${extra.length}개 있어요(빨간 테두리). `:"")+(miss.length?(miss.length<=5?`빠진 칸 ${miss.length}개도 빨간 테두리로 표시했어요.`:`아직 칠하지 않은 1이 ${miss.length}개 남았어요. 숫자를 한 줄씩 다시 비교해 보세요.`):"");return;}
+  const w=WORDS[wIdx][0];$("checkW").disabled=true;t.className="toast ok";t.textContent=`'${w}'가 나타났어요! ${w}는 ${WMEAN[w]}이에요.`;
+  if(wIdx===0)$("nextWRow").hidden=false;
+  else{wDone=true;$("capW").innerHTML=`<b>복제</b>와 <b>공유</b>, 오늘 배운 두 낱말이에요.<br>숫자만 있으면 그림을 한 칸도 틀리지 않고 똑같이 되살릴 수 있어요. 그것이 <b>복제</b>예요.<br>숫자만 보내면 멀리 있는 친구와도 같은 그림을 함께 나눌 수 있어요. 그것이 <b>공유</b>예요.<br>그래서 디지털 데이터는 복제와 공유가 쉬워요.`;$("capW").hidden=false;$("finWRow").hidden=false;}
+};
+$("nextW").onclick=()=>setWord(1);
+function goWord(from4){wFrom4=!!from4;if(wDone){goFinal(wFrom4);return;}if(!wAns)setWord(0);show(6);}
+$("finW").onclick=()=>goFinal(wFrom4);
+
 /* 처음부터 */
 let resetArm=0;
 $("reset").onclick=()=>{
@@ -434,6 +474,7 @@ function resetAll(){
   done.clear();p1=0;gName="";gUsed=[];$("gRecs").innerHTML="";$("gRecBox").hidden=true;
   s2.fill(0);render($("g2"),s2);$("code2").innerHTML=codeHTML(s2,16,true);topic="";$("title2").value="";$("err2").textContent="";$("drawArea").hidden=true;$("topics").querySelectorAll(".topic").forEach(x=>x.setAttribute("aria-pressed","false"));
   $("toast5").textContent="";role="";$("area4").hidden=true;$("fin4Row").hidden=true;$("skip4").hidden=false;$("row2").textContent="칸을 칠하면 그 줄의 숫자가 여기에 나와요.";$("roleS").setAttribute("aria-pressed","false");$("roleR").setAttribute("aria-pressed","false");
+  wDone=false;wAns=null;$("capW").hidden=true;$("finWRow").hidden=true;
   newShape();show(1);
 }
 /* 선생님 바로가기: 학생용 주소(github.io)에서는 ?teacher 를 붙였을 때만 보여요 */
@@ -453,6 +494,7 @@ $("tbar").onclick=e=>{
   if(j==="2"){show(2);}
   else{$("done2").click();
     if(j==="4"){done.add(3);show(4);}
+    else if(j==="w"){done.add(3);goWord();}
     else if(j==="5"){done.add(3);goFinal();}}
   window.scrollTo(0,0);
 };
