@@ -443,11 +443,18 @@ function gTag(x,y,t,col){const w=t.length*11+10;return `<g transform="translate(
 function gX(x,y){return `<g transform="translate(${x} ${y})"><circle r="15" fill="none" stroke="#b23a48" stroke-width="2.5"/><path d="M-9 -9 L9 9 M9 -9 L-9 9" stroke="#b23a48" stroke-width="3"/></g>`;}
 function wrapK(t,n){const out=[];let line="";for(const w of t.split(" ")){if((line+" "+w).trim().length>n&&line){out.push(line);line=w;}else line=(line+" "+w).trim();}if(line)out.push(line);return out;}
 /* 양 로봇의 생각 구름 */
-function gCloud(x,y,lines){const L=lines.flatMap(l=>wrapK(l,15)),w=Math.max(...L.map(l=>l.length))*12.5+24,h=L.length*17+14,bx=Math.max(4,Math.min(392-w,x-w/2));let by=Math.max(4,y-48-h);
-  const hit=P.x+14>bx&&P.x-14<bx+w&&P.y+20>by&&P.y-26<by+h;if(hit&&y+30+h<392)by=y+30;
-  return `<g class="popin"><circle cx="${x+6}" cy="${by>y?y+16:y-24}" r="3" fill="#fffdf6" stroke="#2d5d7b" stroke-width="1.5"/><circle cx="${x+12}" cy="${by>y?y+24:y-36}" r="4.5" fill="#fffdf6" stroke="#2d5d7b" stroke-width="1.5"/>
+/* 구름과 말풍선이 소행성 밖으로 나가지 않게: 네 모서리가 원 안에 들어오는 자리를 골라요 */
+function outC(bx,by,w,h){let o=0;for(const [a,b] of [[bx,by],[bx+w,by],[bx,by+h],[bx+w,by+h]]){const d=Math.hypot(a-C0,b-C0)-184;if(d>0)o+=d;}return o;}
+function fitBox(x,y,w,h,cands){let best=null;for(const [bx0,by0] of cands){const bx=Math.max(8,Math.min(388-w,bx0)),by=Math.max(8,Math.min(388-h,by0));
+    const hitP=P.x+14>bx&&P.x-14<bx+w&&P.y+20>by&&P.y-26<by+h,hitS=x+22>bx&&x-22<bx+w&&y+20>by&&y-22<by+h,sc=outC(bx,by,w,h)*3+(hitP?60:0)+(hitS?80:0)+Math.abs(bx+w/2-x)*.05;if(!best||sc<best.sc)best={bx,by,sc};}return best;}
+function gCloud(x,y,lines){const L=lines.flatMap(l=>wrapK(l,17)),w=Math.max(...L.map(l=>l.length))*12.5+24,h=L.length*17+14;
+  const {bx,by}=fitBox(x,y,w,h,[[x-w/2,y-48-h],[x-w/2,y+30],[x-w-20,y-h/2],[x+24,y-h/2],[x-w+30,y-48-h],[x-30,y-48-h],[x-w+30,y+30],[x-30,y+30],[x-w-20,y-h-10],[x+24,y-h-10],[x-w-20,y+10],[x+24,y+10]]);
+  /* 작은 동그라미 두 개로 양에서 구름까지 이어요 */
+  const ex=Math.max(bx+10,Math.min(bx+w-10,x)),ey=by>y?by:by+h,ey2=by>y||by+h<y?ey:y,ex2=by>y||by+h<y?ex:(bx>x?bx:bx+w);
+  const p1=[x+(ex2-x)*.35,(y-6)+(ey2-(y-6))*.35],p2=[x+(ex2-x)*.68,(y-6)+(ey2-(y-6))*.68];
+  return `<g class="popin"><circle cx="${p1[0]}" cy="${p1[1]}" r="3" fill="#fffdf6" stroke="#2d5d7b" stroke-width="1.5"/><circle cx="${p2[0]}" cy="${p2[1]}" r="4.5" fill="#fffdf6" stroke="#2d5d7b" stroke-width="1.5"/>
   <rect x="${bx}" y="${by}" width="${w}" height="${h}" rx="16" fill="#fffdf6" stroke="#2d5d7b" stroke-width="2"/>${L.map((l,i)=>`<text x="${bx+w/2}" y="${by+21+i*17}" text-anchor="middle" font-size="13" fill="${l.startsWith("→")?(l.includes("안 먹")||l.includes("못")?"#b23a48":"#2f7a3d"):"#2f3a2c"}" font-weight="${l.startsWith("→")?700:400}">${l}</text>`).join("")}</g>`;}
-function gSay(x,y,t,col){const L=wrapK(t,14),w=Math.max(...L.map(l=>l.length))*13+20,h=L.length*17+12,bx=Math.max(4,Math.min(392-w,x-w/2)),by=Math.max(4,y-40-h);
+function gSay(x,y,t,col){const L=wrapK(t,14),w=Math.max(...L.map(l=>l.length))*13+20,h=L.length*17+12;let {bx,by}=fitBox(x,y,w,h,[[x-w/2,y-40-h],[x-w+24,y-40-h],[x-24,y-40-h]]);
   return `<g class="popin"><path d="${bubblePath(bx,by,w,h,x,Math.max(by+h+8,y-22),10,x<198?"left":"right")}" fill="#fffdf6" stroke="${col}" stroke-width="2" stroke-linejoin="round"/>${L.map((l,i)=>`<text x="${bx+w/2}" y="${by+20+i*17}" text-anchor="middle" font-size="13.5" fill="#2f3a2c">${l}</text>`).join("")}</g>`;}
 const muzOn=()=>set.muz.size>0||set.abs;
 function draw(){const night=phase==="night";let s=`<circle cx="${C0}" cy="${C0}" r="190" fill="#ead9b0" stroke="#c8b080" stroke-width="3"/><circle cx="120" cy="300" r="10" fill="#dcc89c"/><circle cx="300" cy="80" r="7" fill="#dcc89c"/><circle cx="260" cy="320" r="5" fill="#dcc89c"/>`;
@@ -482,11 +489,14 @@ function bubblePath(x,y,w,h,tx,ty,r=16,side){const b=y+h,tw=Math.min(24,w/4),dy=
   else{R=Math.min(x+w-r-2,Math.max(x+r+2+tw,tx));L=R-tw;
     right=`Q${(R+tx)/2} ${b+dy/2} ${tx} ${ty}`;leftEdge=`Q${L+(tx-L)*.55} ${b+dy*.25} ${L} ${b}`;}
   return `M${x+r} ${y} H${x+w-r} Q${x+w} ${y} ${x+w} ${y+r} V${b-r} Q${x+w} ${b} ${x+w-r} ${b} H${R} ${right} ${leftEdge} H${x+r} Q${x} ${b} ${x} ${b-r} V${y+r} Q${x} ${y} ${x+r} ${y}Z`;}
-function comicBubble(who,text){const L=wrapK(text,13),w=Math.min(372,Math.max(...L.map(l=>l.length))*18+34),h=L.length*25+18,
-  tx=who==="prince"?118:240,ty=who==="prince"?152:196,bx=who==="prince"?14:382-w,by=Math.max(14,(who==="prince"?40:96));
-  const col=who==="prince"?"#b8860b":"#2d5d7b",ax=Math.max(bx+24,Math.min(bx+w-24,tx));
-  return `<g class="popin"><path d="${bubblePath(bx,by,w,h,tx+(who==="prince"?6:-6),Math.min(ty-6,by+h+34),18,who==="prince"?"left":"right")}" fill="#fffdf6" stroke="${col}" stroke-width="2.5" stroke-linejoin="round"/>
-  ${L.map((l,i)=>`<text x="${bx+w/2}" y="${by+31+i*25}" text-anchor="middle" font-size="19" fill="#2f3a2c" font-family="Gaegu, Gowun Dodum, sans-serif" font-weight="700">${l}</text>`).join("")}</g>`;}
+function comicBubble(who,text){const pr=who==="prince",maxH=132,sents=text.match(/[^.!?]+[.!?]*/g).map(t=>t.trim()).filter(Boolean);
+  /* 글이 길면 글자를 조금씩 줄여서 말풍선이 머리를 가리지 않게 해요. 문장마다 줄을 바꿔요. */
+  let f=19,L,lh;for(;f>=12;f--){const n=Math.floor(336/(f*.8));L=sents.flatMap(t=>wrapK(t,n));lh=Math.round(f*1.32);if(L.length*lh+18<=maxH)break;}f=Math.max(f,12);
+  const w=Math.min(372,Math.max(...L.map(l=>l.length))*f*.8+40),h=L.length*lh+18,
+  tx=pr?118:240,ty=pr?152:196,bx=pr?14:382-w,by0=Math.max(14,Math.min(pr?40:96,ty-28-h)),by=bx<170?Math.max(14,Math.min(by0,146-h)):by0;
+  const col=pr?"#b8860b":"#2d5d7b";
+  return `<g class="popin"><path d="${bubblePath(bx,by,w,h,tx+(pr?6:-6),Math.min(ty-6,by+h+34),18,pr?"left":"right")}" fill="#fffdf6" stroke="${col}" stroke-width="2.5" stroke-linejoin="round"/>
+  ${L.map((l,i)=>`<text x="${bx+w/2}" y="${by+9+f+i*lh}" text-anchor="middle" font-size="${f}" fill="#2f3a2c" font-family="Gaegu, Gowun Dodum, sans-serif" font-weight="700">${l}</text>`).join("")}</g>`;}
 let cState={night:false,pm:"normal",sm:"normal",who:null,text:"",solo:false};
 function drawComic(){const n=cState.night;
   $("comic").innerHTML=`<defs><linearGradient id="csky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${n?"#26365a":"#f4ead4"}"/><stop offset="1" stop-color="${n?"#a97f6c":"#dcebf0"}"/></linearGradient></defs>
@@ -683,9 +693,9 @@ window.addEventListener("pointermove",e=>{if(!drag||e.pointerId!==drag.id)return
   e.preventDefault();drag.g.style.left=(e.clientX-drag.dx)+"px";drag.g.style.top=(e.clientY-drag.dy)+"px";
   const t=dropTarget(e.clientX,e.clientY);document.querySelectorAll("#prin .pbox").forEach(b=>b.classList.toggle("over",b===t));},{passive:false});
 function endDrag(e){if(!drag||e.pointerId!==drag.id)return;const d=drag;drag=null;if(!d.on)return;
-  const t=dropTarget(e.clientX,e.clientY);d.g.remove();document.querySelectorAll(".over").forEach(b=>b.classList.remove("over"));
+  const t=dropTarget(e.clientX,e.clientY);d.g.remove();document.querySelectorAll(".pbox.over").forEach(b=>b.classList.remove("over"));
   justDragged=true;setTimeout(()=>{justDragged=false;},50);if(t)putCur(t.dataset.k);else renderCards();}
-window.addEventListener("pointerup",endDrag);window.addEventListener("pointercancel",e=>{if(drag&&drag.on){drag.g.remove();document.querySelectorAll(".over").forEach(b=>b.classList.remove("over"));renderCards();}drag=null;});
+window.addEventListener("pointerup",endDrag);window.addEventListener("pointercancel",e=>{if(drag&&drag.on){drag.g.remove();document.querySelectorAll(".pbox.over").forEach(b=>b.classList.remove("over"));renderCards();}drag=null;});
 $("prin").addEventListener("click",e=>{if(justDragged)return;const ch=e.target.closest(".chip .x");if(ch){const k=ch.dataset.r;delete place[k];queue.unshift(k);renderCards();return;}
   const bx=e.target.closest(".pbox");if(bx)putCur(bx.dataset.k);});
 const SAMPLE={cmd:"p",sprout:"t",bloom:"h",thorn:"h",fence:"h",ask:"t"},PNAME={h:"인간 존엄성",p:"사회의 공공선",t:"기술의 합목적성"},PWHY={h:"소중한 생명을 해치지 않으려고",p:"별 전체를 지키려고",t:"목적에 맞게, 사람이 살피며 쓰려고"};
