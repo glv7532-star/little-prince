@@ -238,7 +238,7 @@ html,body{overscroll-behavior-y:contain}
     <p class="note">양 로봇에게 그려 준 입마개와 울타리는 진짜 AI에게도 필요해요. 카드마다 그 규칙이 지켜 준 장면과, 진짜 AI의 비슷한 규칙이 적혀 있어요. 카드를 한 장씩 알맞은 원칙 칸으로 끌어다 놓거나, 칸을 누르세요. 칸에 넣은 이름표의 ✕를 누르면 다시 꺼낼 수 있어요.</p>
     <div class="deck"><span class="cnt" id="deckCnt"></span><div id="curCard"></div></div>
     <div class="prin" id="prin">
-      <div class="pbox" data-k="h" role="button" tabindex="0"><h4 class="pc-h">인간 존엄성</h4><p>사람과 생명, 소중한 것을 해치지 않아요.</p><div class="chips"></div><span class="add">여기에 넣기</span></div>
+      <div class="pbox" data-k="h" role="button" tabindex="0"><h4 class="pc-h">인간의 존엄성</h4><p>사람과 생명, 소중한 것을 해치지 않아요.</p><div class="chips"></div><span class="add">여기에 넣기</span></div>
       <div class="pbox" data-k="p" role="button" tabindex="0"><h4 class="pc-p">사회의 공공선</h4><p>모두에게, 별 전체에 이로워야 해요.</p><div class="chips"></div><span class="add">여기에 넣기</span></div>
       <div class="pbox" data-k="t" role="button" tabindex="0"><h4 class="pc-t">기술의 합목적성</h4><p>목적에 맞게, 사람이 살피며 써야 해요.</p><div class="chips"></div><span class="add">여기에 넣기</span></div>
     </div>
@@ -698,9 +698,9 @@ function endDrag(e){if(!drag||e.pointerId!==drag.id)return;const d=drag;drag=nul
 window.addEventListener("pointerup",endDrag);window.addEventListener("pointercancel",e=>{if(drag&&drag.on){drag.g.remove();document.querySelectorAll(".pbox.over").forEach(b=>b.classList.remove("over"));renderCards();}drag=null;});
 $("prin").addEventListener("click",e=>{if(justDragged)return;const ch=e.target.closest(".chip .x");if(ch){const k=ch.dataset.r;delete place[k];queue.unshift(k);renderCards();return;}
   const bx=e.target.closest(".pbox");if(bx)putCur(bx.dataset.k);});
-const SAMPLE={cmd:"p",sprout:"t",bloom:"h",thorn:"h",fence:"h",ask:"t"},PNAME={h:"인간 존엄성",p:"사회의 공공선",t:"기술의 합목적성"},PWHY={h:"소중한 생명을 해치지 않으려고",p:"별 전체를 지키려고",t:"목적에 맞게, 사람이 살피며 쓰려고"};
+const SAMPLE={cmd:"p",sprout:"t",bloom:"h",thorn:"h",fence:"h",ask:"t"},PNAME={h:"인간의 존엄성",p:"사회의 공공선",t:"기술의 합목적성"},PWHY={h:"소중한 생명을 해치지 않으려고",p:"별 전체를 지키려고",t:"목적에 맞게, 사람이 살피며 쓰려고"};
 function renderSample(){const col=k=>`<div class="col"><h5 class="pc-${k}">${PNAME[k]}</h5><ul>${RC.filter(([r])=>SAMPLE[r]===k).map(([r,t])=>`<li>${t}${place[r]===k?'<span class="mk ok">✓ 같아요</span>':place[r]?`<span class="mk pc-${place[r]}">→ ${PNAME[place[r]]}</span>`:""}</li>`).join("")}</ul><p class="why"><b>까닭</b> ${PWHY[k]}</p></div>`;
-  $("sample4Text").innerHTML=`<div class="cols">${["h","p","t"].map(col).join("")}</div><p class="note">'헷갈리면 나에게 물어봐'는 장미 싹을 지키는 일이라 인간 존엄성에도 걸쳐요. 정답이 하나만 있는 건 아니에요.</p>`;}
+  $("sample4Text").innerHTML=`<div class="cols">${["h","p","t"].map(col).join("")}</div><p class="note">'헷갈리면 나에게 물어봐'는 장미 싹을 지키는 일이라 인간의 존엄성에도 걸쳐요. 정답이 하나만 있는 건 아니에요.</p>`;}
 $("sample4").onclick=()=>{const h=$("sample4Text").hidden;if(h)renderSample();$("sample4Text").hidden=!h;$("sample4").textContent=h?"선생님이 생각한 분류 접기":"선생님이 생각한 분류 보기";};
 
 /* 더 해 보기: 잘못된 명령 */
