@@ -704,10 +704,10 @@ function myWarn(){if(!G)return "";
   const LT={vol:"경고를 늦게 보여 줬더니 화산에 그을음이 남았어요.",bao:"경고를 늦게 보여 줬더니 별에 금이 갔어요.",met:"경고를 늦게 보여 줬더니 지붕이 찌그러졌어요."};
   const b=KINDS.find(x=>stOf(x)==="boom"),l=KINDS.find(x=>stOf(x)==="late");
   return b?HID[b]:l?LT[l]:"경고를 일찍 보여 줬더니 허영쟁이가 화산을 청소하고, 바오밥 싹을 뽑고, 지붕을 지어서 별이 무사했어요.";}
-/* 4단계: 질문 카드 다섯 장. 한 장에 질문 하나, 활동지 [생각 n]에 쓰고 넘어가요. */
+/* 4단계: 질문 카드 다섯 장. 한 장에 질문 하나, 한글판 활동지 [활동 4]에 쓰고 넘어가요. */
 function render4(){const N=5,dots=`<div class="qdots" aria-label="질문 ${p4+1} / ${N}">${Array.from({length:N},(_,k)=>`<i class="${k===p4?"on":k<p4?"done":""}"></i>`).join("")}</div>`;
   const nav=(next,label="활동지에 쓰고 짝과 이야기했어요 ▶")=>`<div class="row">${p4>0?`<button class="btn" id="back4">◀ 앞</button>`:""}${next?`<button class="btn primary" id="go4n">${label}</button>`:""}</div>`;
-  const tag=n=>`<span class="qtag">활동지 [생각 ${n}]</span>`;
+  const tag=n=>`<span class="qtag">활동지 [활동 4]</span>`;
   let h="";
   if(p4===0)h=`${tag(1)}<p class="qbig">듣기 좋은 말만 보여 주는 추천 AI,<br>누구에게 좋은 걸까요?</p>
     <div class="opts">${Q4.o.map((x,i)=>`<button class="opt" data-q="${i}" aria-pressed="${ans4===i}">${x.t}<small>${x.s}</small></button>`).join("")}</div>
@@ -722,9 +722,13 @@ function render4(){const N=5,dots=`<div class="qdots" aria-label="질문 ${p4+1}
     <tr><th>설계한 것을 숨기나요, 알려 주나요?</th><td>숨겨요</td><td class="note">?</td></tr>
     <tr><th>내가 다르게 생각해도 되나요?</th><td>다른 말을 볼 기회가 없어요</td><td class="note">?</td></tr></tbody></table>${nav(true)}`;
   if(p4===3)h=`${tag(4)}<p class="qbig">이 프로그램이<br>진짜 세상과 다른 점은 무엇일까요?</p>
-    <p class="why">${myWarn()} 이 프로그램에서는 경고가 언제나 맞았지요. 하지만 진짜 세상에서는 “곧 터질 것 같아요!”라는 경고가 틀려서 아무 일도 일어나지 않을 때도 있어요. 칭찬이 꼭 필요한 말일 때도 있고요.</p>${nav(true)}`;
+    <p class="note" style="margin:0">프로그램에서 내가 겪은 일: ${myWarn()}</p>
+    <table class="tbl"><thead><tr><th>프로그램에서는 이랬는데</th><th>진짜 세상에서도 그럴까?</th></tr></thead><tbody>
+    <tr><th>경고했던 일은 실제로 일어났다.</th><td class="note">O / △ / X</td></tr>
+    <tr><th>AI가 왜 그 말을 보여 주는지 알 수 있었다.</th><td class="note">O / △ / X</td></tr>
+    <tr><th>내 선택의 결과가 나중에 한꺼번에 드러났다.</th><td class="note">O / △ / X</td></tr></tbody></table>${nav(true)}`;
   if(p4===4)h=`<p class="closing">다음 시간에 이어 가요.<br>“기술은 누구에게 도움이 될 때 좋은 걸까?”</p>
-    <p class="note" style="text-align:center">워크북 [활동 1] 표의 ‘칭찬만 원하는 허영쟁이’ 줄도 채워 봐요.</p>
+    <p class="note" style="text-align:center">활동지 [활동 5]에 오늘 새롭게 알게 된 점을 써 봐요.</p>
     ${nav(false)}<div class="row"><button class="btn" id="again">처음부터 다시 해 보기 (다른 결말 보기)</button></div>`;
   $("r4").innerHTML=dots+h;
   $("r4").querySelectorAll("[data-q]").forEach(x=>x.onclick=()=>{ans4=+x.dataset.q;done.add(4);render4();});
